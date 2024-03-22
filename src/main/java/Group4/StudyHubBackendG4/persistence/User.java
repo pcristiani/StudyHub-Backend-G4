@@ -12,4 +12,7 @@ public class User {
         @Id
         Integer id;
         String name;
+        String username;
+        String password;
+        String uid;
 }
