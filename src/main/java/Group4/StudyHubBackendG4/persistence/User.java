@@ -5,9 +5,7 @@ import Group4.StudyHubBackendG4.services.PasswordService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.security.Key;
@@ -20,6 +18,7 @@ import java.util.Map;
 @Data
 public class User {
         @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Integer id;
         private String name;
         private String surname;
@@ -27,6 +26,7 @@ public class User {
         private String birthdate;
         private String username;
         private String password;
+        @Column(columnDefinition = "VARCHAR(MAX)")
         private String jwtToken;
 
         public User() {
@@ -50,27 +50,5 @@ public class User {
 
         public void decryptPassword(){
                 this.password = PasswordService.getInstance().hashPassword(this.password);
-        }
-
-        public void setRandomJwt() {
-                Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-                Map<String, Object> claims = new HashMap<>();
-                claims.put("username", this.username);
-                claims.put("userId", this.id);
-                claims.put("email", this.email);
-                claims.put("name", this.name);
-                claims.put("surname", this.surname);
-                claims.put("birthdate", this.birthdate);
-
-                long expirationTime = 1000 * 60 * 60 * 24;
-                Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
-
-                    this.jwtToken = Jwts.builder()
-                                .setClaims(claims)
-                                .setSubject("userDetails")
-                                .setIssuedAt(new Date(System.currentTimeMillis()))
-                                .setExpiration(expirationDate)
-                                .signWith(key)
-                                .compact();
         }
 }
