@@ -27,7 +27,7 @@ public class SimpleUserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getUser/{id}")
     public Optional<User> getUserById(@PathVariable Integer id) {
         return userService.getUserById(id);
     }
@@ -46,13 +46,13 @@ public class SimpleUserController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/updateUser/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUser dtuser) {
         User user = new User(dtuser);
         return userService.updateUser(id, user);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteUser/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
         return userService.deleteUser(id);
     }
