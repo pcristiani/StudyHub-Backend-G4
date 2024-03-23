@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
+import java.util.Random;
+
 @RestController
-public class simpleUserController {
+public class SimpleUserController {
 
     @Autowired
     UserRepo userRepo;
@@ -18,10 +21,17 @@ public class simpleUserController {
     }
 
     @GetMapping("/insertUsers")
-    public String insertUser1(){
+    public String insertUser(){
         User u = new User();
         u.setId(1);
-        u.setName("Pablito");
+        u.setName("Javier");
+        u.setSurname("Rydel");
+        u.setEmail("javierydel98@gmail.com");
+        u.setUsername("colo_102");
+        u.setBirthdate("19980903");
+        u.setPassword("1234");
+        u.encryptPassword();
+        u.setRandomJwt();
         return userRepo.save(u).toString();
     }
 }
