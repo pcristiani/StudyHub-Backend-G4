@@ -2,20 +2,14 @@ package Group4.StudyHubBackendG4.persistence;
 
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.services.PasswordService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "Users")
 @Data
+@NoArgsConstructor
 public class User {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,19 +23,13 @@ public class User {
         @Column(columnDefinition = "VARCHAR(MAX)")
         private String jwtToken;
 
-        public User() {
-
-        }
-
         public User(DtUser dtUser) {
-                this.id = dtUser.getId();
                 this.name = dtUser.getName();
                 this.surname = dtUser.getSurname();
                 this.email = dtUser.getEmail();
                 this.birthdate = dtUser.getBirthdate();
                 this.username = dtUser.getUsername();
                 this.password = dtUser.getPassword();
-                this.jwtToken = dtUser.getJwtToken();
         }
 
         public void encryptPassword(){

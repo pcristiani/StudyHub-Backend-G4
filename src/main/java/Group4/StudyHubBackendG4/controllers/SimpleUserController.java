@@ -1,59 +1,64 @@
 package Group4.StudyHubBackendG4.controllers;
 
+import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
-import Group4.StudyHubBackendG4.repositories.UserRepo;
 import Group4.StudyHubBackendG4.services.JwtService;
+import Group4.StudyHubBackendG4.services.RegistrationService;
+import Group4.StudyHubBackendG4.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
 
+@RequestMapping("/api/users")
 @RestController
 public class SimpleUserController {
 
     @Autowired
-    UserRepo userRepo;
+    private RegistrationService registrationService;
 
-    @GetMapping("/getUsers")
-    public String getAllUsers(){
-        return userRepo.findAll().stream().toList().toString();
+    @Autowired
+    private UserService userService;
+    
+    @GetMapping("/getAllUsers")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 
-    @GetMapping("/insertUsersAuto")
-    public String insertUser(){
-        Random rand = new Random();
-        List<User> users = new ArrayList<>();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+    @GetMapping("/{id}")
+    public Optional<User> getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
 
-        for (int i = 1; i <= 5; i++) {
-            User u = new User();
-            String name = "Nombre" + (rand.nextInt(900) + 100);
-            String surname = "Apellido" + (rand.nextInt(900) + 100);
-            String email = "usuario" + (rand.nextInt(900) + 100) + "@ejemplo.com";
-            String username = "usuario_" + (rand.nextInt(900) + 100);
-
-            int minDay = (int) LocalDate.of(1970, 1, 1).toEpochDay();
-            int maxDay = (int) LocalDate.of(2000, 12, 31).toEpochDay();
-            long randomDay = minDay + rand.nextInt(maxDay - minDay);
-            LocalDate birthdate = LocalDate.ofEpochDay(randomDay);
-            String formattedDate = birthdate.format(dtf);
-
-            u.setName(name);
-            u.setSurname(surname);
-            u.setEmail(email);
-            u.setUsername(username);
-            u.setBirthdate(formattedDate);
-            u.setPassword("1234");
-            u.setJwtToken(JwtService.getInstance().generateJwt(u));
-            u.encryptPassword();
-            users.add(u);
-            userRepo.save(u);
+    @PostMapping("/registerUser")
+    public ResponseEntity<?> createUser(@RequestBody DtUser dtuser) {
+        try {
+            DtUser registeredUser = registrationService.registerUser(dtuser);
+            if (registeredUser != null) {
+                return ResponseEntity.ok().body("Usuario registrado con éxito.");
+            } else {
+                return ResponseEntity.status(400).body("No se pudo registrar al usuario.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return users.toString();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUser dtuser) {
+        User user = new User(dtuser);
+        return userService.updateUser(id, user);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
+        return userService.deleteUser(id);
+    }
+
+    @GetMapping("/populateDBWithUsers")
+    public String populateDBWithUsers(){
+        return userService.populateDBWithUsers();
     }
 }
