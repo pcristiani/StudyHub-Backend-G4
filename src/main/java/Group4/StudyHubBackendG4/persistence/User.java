@@ -1,6 +1,8 @@
 package Group4.StudyHubBackendG4.persistence;
 
+import Group4.StudyHubBackendG4.datatypes.DtNewUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
+import Group4.StudyHubBackendG4.services.JwtService;
 import Group4.StudyHubBackendG4.services.PasswordService;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -31,7 +33,19 @@ public class User {
                 this.username = dtUser.getUsername();
         }
 
-        public DtUser toDtUser() {
+        public User UserFromDtNewUser(DtNewUser dtNewUser) {
+                User user = new User();
+                user.setName(dtNewUser.getName());
+                user.setSurname(dtNewUser.getSurname());
+                user.setEmail(dtNewUser.getEmail());
+                user.setBirthdate(dtNewUser.getBirthdate());
+                user.setUsername(dtNewUser.getUsername());
+                user.setPassword(PasswordService.getInstance().hashPassword(dtNewUser.getPassword()));
+                user.setJwtToken(JwtService.getInstance().generateJwt(user));
+                return user;
+        }
+
+        public DtUser userToDtUser() {
                 DtUser dtUser = new DtUser();
                 dtUser.setId(this.getId());
                 dtUser.setName(this.getName());

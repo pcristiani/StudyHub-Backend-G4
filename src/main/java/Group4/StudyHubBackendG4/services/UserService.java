@@ -1,9 +1,11 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtNewUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,19 +24,29 @@ public class UserService {
     @GetMapping("/getAllUsers")
     public List<DtUser> getAllUsers() {
         return userRepo.findAll().stream()
-                .map(User::toDtUser)
+                .map(User::userToDtUser)
                 .collect(Collectors.toList());
     }
 
     public ResponseEntity<DtUser> getUserById(Integer id) {
         return userRepo.findById(id)
-                .map(User::toDtUser)
+                .map(User::userToDtUser)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }
+    public ResponseEntity<String> createUser(DtNewUser dtNewUser) {
 
-    public User createUser(User user) {
-        return userRepo.save(user);
+        Optional<User> existingUser = Optional.ofNullable(userRepo.findByUsername(dtNewUser.getUsername()));
+        if (existingUser.isPresent()) {
+            return ResponseEntity.badRequest().body("El nombre de usuario ya existe, intente con otro.");
+        }
+
+        User user = existingUser.orElseGet(User::new)
+                .UserFromDtNewUser(dtNewUser);
+
+        userRepo.save(user);
+
+        return ResponseEntity.ok().body("Usuario registrado con éxito.");
     }
 
     public ResponseEntity<?> updateUser(Integer id, User user) {
