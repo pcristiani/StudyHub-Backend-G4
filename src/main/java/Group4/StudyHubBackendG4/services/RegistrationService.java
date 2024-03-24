@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtNewUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
@@ -11,20 +12,20 @@ public class RegistrationService {
     @Autowired
     private UserRepo userRepository;
 
-    public DtUser registerUser(DtUser dtUser) throws Exception {
-        User userAux = userRepository.findByUsername(dtUser.getUsername());
+    public DtUser registerUser(DtNewUser dtNewUser) throws Exception {        //Todo: Mover a userService
+        User userAux = userRepository.findByUsername(dtNewUser.getUsername());
 
         if (userAux != null) {
             throw new Exception("El nombre de usuario ya existe, intente con otro.");
         }
 
         User user = new User();
-        user.setName(dtUser.getName());
-        user.setSurname(dtUser.getSurname());
-        user.setEmail(dtUser.getEmail());
-        user.setBirthdate(dtUser.getBirthdate());
-        user.setUsername(dtUser.getUsername());
-        user.setPassword(PasswordService.getInstance().hashPassword(dtUser.getPassword()));
+        user.setName(dtNewUser.getName());
+        user.setSurname(dtNewUser.getSurname());
+        user.setEmail(dtNewUser.getEmail());
+        user.setBirthdate(dtNewUser.getBirthdate());
+        user.setUsername(dtNewUser.getUsername());
+        user.setPassword(PasswordService.getInstance().hashPassword(dtNewUser.getPassword()));
         user.setJwtToken(JwtService.getInstance().generateJwt(user));
 
         user = userRepository.save(user);

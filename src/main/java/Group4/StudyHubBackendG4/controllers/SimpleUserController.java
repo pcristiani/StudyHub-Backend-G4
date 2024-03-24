@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.controllers;
 
+import Group4.StudyHubBackendG4.datatypes.DtNewUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.services.JwtService;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequestMapping("/api/users")
 @RestController
@@ -21,21 +23,21 @@ public class SimpleUserController {
 
     @Autowired
     private UserService userService;
-    
+
     @GetMapping("/getAllUsers")
-    public List<User> getAllUsers() {
+    public List<DtUser> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/getUser/{id}")
-    public Optional<User> getUserById(@PathVariable Integer id) {
+    public ResponseEntity<DtUser> getUserById(@PathVariable Integer id) {
         return userService.getUserById(id);
     }
 
     @PostMapping("/registerUser")
-    public ResponseEntity<?> createUser(@RequestBody DtUser dtuser) {
+    public ResponseEntity<?> createUser(@RequestBody DtNewUser dtNewUser) {      //TODO: Devolver https desde service
         try {
-            DtUser registeredUser = registrationService.registerUser(dtuser);
+            DtUser registeredUser = registrationService.registerUser(dtNewUser);
             if (registeredUser != null) {
                 return ResponseEntity.ok().body("Usuario registrado con éxito.");
             } else {

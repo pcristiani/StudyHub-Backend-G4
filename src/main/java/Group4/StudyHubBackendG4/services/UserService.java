@@ -1,14 +1,17 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -16,12 +19,18 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
+    @GetMapping("/getAllUsers")
+    public List<DtUser> getAllUsers() {
+        return userRepo.findAll().stream()
+                .map(User::toDtUser)
+                .collect(Collectors.toList());
     }
 
-    public Optional<User> getUserById(Integer id) {
-        return userRepo.findById(id);
+    public ResponseEntity<DtUser> getUserById(Integer id) {
+        return userRepo.findById(id)
+                .map(User::toDtUser)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     public User createUser(User user) {

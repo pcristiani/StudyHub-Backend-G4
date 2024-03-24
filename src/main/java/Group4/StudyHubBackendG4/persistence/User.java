@@ -29,7 +29,17 @@ public class User {
                 this.email = dtUser.getEmail();
                 this.birthdate = dtUser.getBirthdate();
                 this.username = dtUser.getUsername();
-                this.password = dtUser.getPassword();
+        }
+
+        public DtUser toDtUser() {
+                DtUser dtUser = new DtUser();
+                dtUser.setId(this.getId());
+                dtUser.setName(this.getName());
+                dtUser.setSurname(this.getSurname());
+                dtUser.setEmail(this.getEmail());
+                dtUser.setBirthdate(this.getBirthdate());
+                dtUser.setUsername(this.getUsername());
+                return dtUser;
         }
 
         public void encryptPassword(){
