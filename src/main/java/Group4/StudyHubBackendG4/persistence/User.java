@@ -22,7 +22,8 @@ public class User {
         private String birthdate;
         private String username;
         private String password;
-        @Column(columnDefinition = "VARCHAR(MAX)")
+        @Lob
+        @Column
         private String jwtToken;
 
         public User(DtUser dtUser) {
