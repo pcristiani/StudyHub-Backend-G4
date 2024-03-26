@@ -7,7 +7,6 @@ import java.util.Date;
 
 @Data
 public class DtNewUser {
-    private Integer id;
     private String name;
     private String surname;
     private String email;
@@ -18,8 +17,7 @@ public class DtNewUser {
     public DtNewUser() {
     }
 
-    public DtNewUser(Integer id, String name, String surname, String email, String birthdate, String username, String password, String jwtToken) {
-        this.id = id;
+    public DtNewUser(String name, String surname, String email, String birthdate, String username, String password, String jwtToken) {
         this.name = name;
         this.surname = surname;
         this.email = email;
