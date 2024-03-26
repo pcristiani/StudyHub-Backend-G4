@@ -22,8 +22,7 @@ public class User {
         private String birthdate;
         private String username;
         private String password;
-        @Lob
-        @Column
+        @Column(columnDefinition = "TEXT")
         private String jwtToken;
 
         public User(DtUser dtUser) {
