@@ -34,6 +34,10 @@ public class UserService {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }
+
+    public User getUserByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
     public ResponseEntity<String> createUser(DtNewUser dtNewUser) {
 
         Optional<User> existingUser = Optional.ofNullable(userRepo.findByUsername(dtNewUser.getUsername()));
