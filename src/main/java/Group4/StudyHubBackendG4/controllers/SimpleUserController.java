@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.controllers;
 import Group4.StudyHubBackendG4.datatypes.DtNewUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
+import Group4.StudyHubBackendG4.services.EmailService;
 import Group4.StudyHubBackendG4.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,8 @@ public class SimpleUserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/getAllUsers")
     public List<DtUser> getAllUsers() {
@@ -46,5 +49,10 @@ public class SimpleUserController {
     @GetMapping("/populateDBWithUsers")
     public String populateDBWithUsers(){
         return userService.populateDBWithUsers();
+    }
+
+    @GetMapping("/recuperarPassword")
+    public void recuperarPassword(){
+        emailService.recuperarPassword("PedroAldama47@gmail.com","TEST","Test body");
     }
 }
