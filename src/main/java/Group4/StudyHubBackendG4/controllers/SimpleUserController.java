@@ -6,10 +6,12 @@ import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.services.EmailService;
 import Group4.StudyHubBackendG4.services.UserService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -53,8 +55,8 @@ public class SimpleUserController {
     }
 
     @PostMapping("/forgotPassword")
-    public void forgotPassword(@RequestBody String email){
-        emailService.forgotPassword(email);
+    public ResponseEntity<?> forgotPassword(@RequestBody String email) throws MessagingException, IOException {
+        return emailService.forgotPassword(email);
     }
 
     @PostMapping("/recuperarPassword")

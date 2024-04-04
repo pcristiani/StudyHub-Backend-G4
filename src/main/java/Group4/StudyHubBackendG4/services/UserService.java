@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -125,10 +126,16 @@ public class UserService {
     public ResponseEntity<?> recuperarPassword(String token, String newPassword) {
         var passwordToken = tokenRepo.findByToken(token);
         if (passwordToken != null) {
-            User user = userRepo.getReferenceById(passwordToken.getUser().getId());
-            user.setPassword(PasswordService.getInstance().hashPassword(newPassword));
-            userRepo.save(user);
-            return ResponseEntity.ok().body("Contraseña actualizada con exito");
+            LocalDateTime expiration = passwordToken.getExpiryDateTime();
+            LocalDateTime now = LocalDateTime.now();
+            if(expiration.isAfter(now)){
+                User user = userRepo.getReferenceById(passwordToken.getUser().getId());
+                user.setPassword(PasswordService.getInstance().hashPassword(newPassword));
+                userRepo.save(user);
+                return ResponseEntity.ok().body("Contraseña actualizada con exito");
+            } else {
+                return ResponseEntity.badRequest().body("Expired Token.");
+            }
         } else {
             return ResponseEntity.badRequest().body("Invalid token.");
         }
