@@ -42,8 +42,7 @@ public class EmailService {
             byte[] htmlContentBytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
             String htmlContent = new String(htmlContentBytes, StandardCharsets.UTF_8);
 
-            htmlContent = htmlContent.replac
-        e("$username", username);
+            htmlContent = htmlContent.replace("$username", username);
             htmlContent = htmlContent.replace("$resetTokenLink", resetTokenLink);
 
             MimeMessage message = mailSender.createMimeMessage();
