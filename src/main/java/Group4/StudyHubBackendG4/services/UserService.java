@@ -22,8 +22,12 @@ public class UserService {
 
     @Autowired
     private UserRepo userRepo;
+
     @Autowired
     private PasswordResetTokenRepo tokenRepo;
+
+    @Autowired
+    private JwtService jwtService;
 
     @GetMapping("/getAllUsers")
     public List<DtUser> getAllUsers() {
@@ -71,8 +75,9 @@ public class UserService {
                     aux.setEmail(user.getEmail());
                     aux.setBirthdate(user.getBirthdate());
                     aux.setUsername(user.getUsername());
-                    userRepo.save(aux);
-                    return ResponseEntity.ok().body("Usuario actualizado exitosamente.");
+                    aux.setJwtToken(jwtService.generateJwt(aux));
+                userRepo.save(aux);
+                    return ResponseEntity.ok().body(aux.getJwtToken());
             }else{
                message = "Nombre de usuario ya existe.";
             }
