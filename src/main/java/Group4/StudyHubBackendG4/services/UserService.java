@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.datatypes.DtNewUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
+import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,8 @@ public class UserService {
 
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private PasswordResetTokenRepo tokenRepo;
 
     @GetMapping("/getAllUsers")
     public List<DtUser> getAllUsers() {
@@ -37,6 +40,10 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return userRepo.findByUsername(username);
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepo.findByEmail(email);
     }
     public ResponseEntity<String> createUser(DtNewUser dtNewUser) {
 
@@ -114,4 +121,17 @@ public class UserService {
         }
         return users.toString();
     }
+
+    public ResponseEntity<?> recuperarPassword(String token, String newPassword) {
+        var passwordToken = tokenRepo.findByToken(token);
+        if (passwordToken != null) {
+            User user = userRepo.getReferenceById(passwordToken.getUser().getId());
+            user.setPassword(PasswordService.getInstance().hashPassword(newPassword));
+            userRepo.save(user);
+            return ResponseEntity.ok().body("Contraseña actualizada con exito");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid token.");
+        }
+    }
+
 }

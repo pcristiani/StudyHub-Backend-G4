@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.controllers;
 
+import Group4.StudyHubBackendG4.datatypes.DtNewPassword;
 import Group4.StudyHubBackendG4.datatypes.DtNewUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
@@ -51,8 +52,13 @@ public class SimpleUserController {
         return userService.populateDBWithUsers();
     }
 
-    @GetMapping("/recuperarPassword")
-    public void recuperarPassword(){
-        emailService.recuperarPassword("PedroAldama47@gmail.com","TEST","Test body");
+    @PostMapping("/forgotPassword")
+    public void forgotPassword(@RequestBody String email){
+        emailService.forgotPassword(email);
+    }
+
+    @PostMapping("/recuperarPassword")
+    public ResponseEntity<?> recuperarPassword(@RequestBody DtNewPassword dtNewPassword){
+        return userService.recuperarPassword(dtNewPassword.getToken(), dtNewPassword.getNewPassword());
     }
 }
