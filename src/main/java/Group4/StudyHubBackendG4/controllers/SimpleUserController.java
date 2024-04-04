@@ -7,8 +7,10 @@ import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.services.EmailService;
 import Group4.StudyHubBackendG4.services.UserService;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -16,10 +18,12 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
+@Validated
 public class SimpleUserController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private EmailService emailService;
 
@@ -34,7 +38,7 @@ public class SimpleUserController {
     }
 
     @PostMapping("/registerUser")
-    public ResponseEntity<?> createUser(@RequestBody DtNewUser dtNewUser) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody DtNewUser dtNewUser) {
         return userService.createUser(dtNewUser);
     }
 
@@ -55,7 +59,7 @@ public class SimpleUserController {
     }
 
     @PostMapping("/forgotPassword")
-    public ResponseEntity<?> forgotPassword(@RequestBody String email) throws MessagingException, IOException {
+    public ResponseEntity<?> forgotPassword(@RequestBody String email) throws MessagingException, IOException, MessagingException, IOException {
         return emailService.forgotPassword(email);
     }
 
