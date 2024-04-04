@@ -2,6 +2,7 @@ package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtNewPassword;
 import Group4.StudyHubBackendG4.datatypes.DtNewUser;
+import Group4.StudyHubBackendG4.datatypes.DtUpdateUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.services.EmailService;
@@ -43,9 +44,8 @@ public class SimpleUserController {
     }
 
     @PutMapping("/api/users/updateUser/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUser dtuser) {
-        User user = new User(dtuser);
-        return userService.updateUser(id, user);
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUpdateUser dtUpdateUser) {
+        return userService.updateUser(id, dtUpdateUser);
     }
 
     @DeleteMapping("/api/users/deleteUser/{id}")

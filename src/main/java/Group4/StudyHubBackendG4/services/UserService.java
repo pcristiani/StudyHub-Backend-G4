@@ -1,6 +1,7 @@
 package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtNewUser;
+import Group4.StudyHubBackendG4.datatypes.DtUpdateUser;
 import Group4.StudyHubBackendG4.datatypes.DtUser;
 import Group4.StudyHubBackendG4.persistence.User;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
@@ -65,16 +66,16 @@ public class UserService {
         return ResponseEntity.ok().body("Usuario registrado con éxito.");
     }
 
-    public ResponseEntity<?> updateUser(Integer id, User user) {
+    public ResponseEntity<?> updateUser(Integer id, DtUpdateUser dtUpdateUser) {
         String message = "No se encontró usuario.";
         if (userRepo.existsById(id)) {
             User aux = userRepo.getById(id);
-            if (Objects.equals(user.getUsername(), aux.getUsername()) || (!Objects.equals(user.getUsername(), aux.getUsername()) && !userRepo.existsByUsername(user.getUsername()))){
-                    aux.setName(user.getName());
-                    aux.setSurname(user.getSurname());
-                    aux.setEmail(user.getEmail());
-                    aux.setBirthdate(user.getBirthdate());
-                    aux.setUsername(user.getUsername());
+            if (Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) || (!Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) && !userRepo.existsByUsername(dtUpdateUser.getUsername()))){
+                    aux.setName(dtUpdateUser.getName());
+                    aux.setSurname(dtUpdateUser.getSurname());
+                    aux.setEmail(dtUpdateUser.getEmail());
+                    aux.setBirthdate(dtUpdateUser.getBirthdate());
+                    aux.setUsername(dtUpdateUser.getUsername());
                     aux.setJwtToken(jwtService.generateJwt(aux));
                 userRepo.save(aux);
                     return ResponseEntity.ok().body(aux.getJwtToken());
