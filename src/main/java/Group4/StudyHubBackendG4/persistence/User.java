@@ -25,14 +25,6 @@ public class User {
         @Column(columnDefinition = "TEXT")
         private String jwtToken;
 
-        public User(DtUser dtUser) {
-                this.name = dtUser.getName();
-                this.surname = dtUser.getSurname();
-                this.email = dtUser.getEmail();
-                this.birthdate = dtUser.getBirthdate();
-                this.username = dtUser.getUsername();
-        }
-
         public User UserFromDtNewUser(DtNewUser dtNewUser) {
                 User user = new User();
                 user.setName(dtNewUser.getName());

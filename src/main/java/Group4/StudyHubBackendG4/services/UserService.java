@@ -68,23 +68,28 @@ public class UserService {
 
     public ResponseEntity<?> updateUser(Integer id, DtUpdateUser dtUpdateUser) {
         String message = "No se encontró usuario.";
-        if (userRepo.existsById(id)) {
-            User aux = userRepo.getById(id);
-            if (Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) || (!Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) && !userRepo.existsByUsername(dtUpdateUser.getUsername()))){
-                    aux.setName(dtUpdateUser.getName());
-                    aux.setSurname(dtUpdateUser.getSurname());
-                    aux.setEmail(dtUpdateUser.getEmail());
-                    aux.setBirthdate(dtUpdateUser.getBirthdate());
-                    aux.setUsername(dtUpdateUser.getUsername());
-                    aux.setJwtToken(jwtService.generateJwt(aux));
+        Optional<User> userOptional = userRepo.findById(id);
+
+        if (userOptional.isPresent()) {
+            User aux = userOptional.get();
+
+            if (Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) || (!Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) && !userRepo.existsByUsername(dtUpdateUser.getUsername()))) {
+                aux.setName(dtUpdateUser.getName());
+                aux.setSurname(dtUpdateUser.getSurname());
+                aux.setEmail(dtUpdateUser.getEmail());
+                aux.setBirthdate(dtUpdateUser.getBirthdate());
+                aux.setUsername(dtUpdateUser.getUsername());
+                aux.setJwtToken(jwtService.generateJwt(aux));
+
                 userRepo.save(aux);
-                    return ResponseEntity.ok().body(aux.getJwtToken());
-            }else{
-               message = "Nombre de usuario ya existe.";
+                return ResponseEntity.ok().body(aux.getJwtToken());
+            } else {
+                message = "Nombre de usuario ya existe.";
             }
         }
-        return ResponseEntity.status(403).body(message);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
+
 
     public ResponseEntity<?> deleteUser(Integer id) {
         if (userRepo.existsById(id)) {
