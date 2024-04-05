@@ -48,9 +48,6 @@ public class UserService {
         return userRepo.findByUsername(username);
     }
 
-    public User getUserByEmail(String email) {
-        return userRepo.findByEmail(email);
-    }
     public ResponseEntity<String> createUser(DtNewUser dtNewUser) {
 
         Optional<User> existingUser = Optional.ofNullable(userRepo.findByUsername(dtNewUser.getUsername()));
@@ -74,11 +71,11 @@ public class UserService {
             User aux = userOptional.get();
 
             if (Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) || (!Objects.equals(dtUpdateUser.getUsername(), aux.getUsername()) && !userRepo.existsByUsername(dtUpdateUser.getUsername()))) {
-                aux.setName(dtUpdateUser.getName());
-                aux.setSurname(dtUpdateUser.getSurname());
-                aux.setEmail(dtUpdateUser.getEmail());
-                aux.setBirthdate(dtUpdateUser.getBirthdate());
-                aux.setUsername(dtUpdateUser.getUsername());
+                aux.setName(dtUpdateUser.getName() == null || dtUpdateUser.getName().isEmpty() ? aux.getName() : dtUpdateUser.getName());
+                aux.setSurname(dtUpdateUser.getSurname() == null || dtUpdateUser.getSurname().isEmpty() ? aux.getSurname() : dtUpdateUser.getSurname());
+                aux.setEmail(dtUpdateUser.getEmail() == null || dtUpdateUser.getEmail().isEmpty() ? aux.getEmail() : dtUpdateUser.getEmail());
+                aux.setBirthdate(dtUpdateUser.getBirthdate() == null || dtUpdateUser.getBirthdate().isEmpty() ? aux.getBirthdate() : dtUpdateUser.getBirthdate());
+                aux.setUsername(dtUpdateUser.getUsername() == null || dtUpdateUser.getUsername().isEmpty() ? aux.getUsername() : dtUpdateUser.getUsername());
                 aux.setJwtToken(jwtService.generateJwt(aux));
 
                 userRepo.save(aux);
