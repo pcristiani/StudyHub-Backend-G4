@@ -63,16 +63,16 @@ public class EmailService {
     public String generatePasswordResetToken(User user){
         UUID uuid = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime exiration = now.plusMinutes(30L);         //30 minutos de expiracion
+        LocalDateTime expiration = now.plusMinutes(30L);         //30 minutos de expiracion
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setUser(user);
         resetToken.setToken(uuid.toString());
-        resetToken.setExpiryDateTime(exiration);
+        resetToken.setExpiryDateTime(expiration);
         resetToken.setUser(user);
         PasswordResetToken token =  tokenRepo.save(resetToken);
         if(token != null) {
             String endpointUrl = "http://localhost:3000/resetPassword";
-            return endpointUrl + "/" + resetToken.getToken();
+            return endpointUrl + "/?token=" + resetToken.getToken();
         }
         return "";
     }
