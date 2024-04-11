@@ -16,6 +16,7 @@ public class User {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Integer id;
+        private String ci;
         private String name;
         private String surname;
         private String email;
@@ -27,6 +28,7 @@ public class User {
 
         public User UserFromDtNewUser(DtNewUser dtNewUser) {
                 User user = new User();
+                user.setCi(dtNewUser.getCi());
                 user.setName(dtNewUser.getName());
                 user.setSurname(dtNewUser.getSurname());
                 user.setEmail(dtNewUser.getEmail());
@@ -39,6 +41,7 @@ public class User {
 
         public DtUser userToDtUser() {
                 DtUser dtUser = new DtUser();
+                dtUser.setCi(this.getCi());
                 dtUser.setId(this.getId());
                 dtUser.setName(this.getName());
                 dtUser.setSurname(this.getSurname());

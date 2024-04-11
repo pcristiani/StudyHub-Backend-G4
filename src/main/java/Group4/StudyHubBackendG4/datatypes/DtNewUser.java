@@ -32,4 +32,7 @@ public class DtNewUser {
     @NotBlank(message = "Ingrese una contraseña.")
     private String password;
 
+    @NotBlank(message = "Ingrese una cedula.")
+    private String ci;
+
 }

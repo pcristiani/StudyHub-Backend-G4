@@ -36,11 +36,8 @@ public class JwtService {
     public String generateJwt(User user) {
         String jwtToken = "";
         Map<String, Object> claims = new HashMap<>();
-        claims.put("username", user.getUsername());
-        claims.put("email", user.getEmail());
-        claims.put("name", user.getName());
-        claims.put("surname", user.getSurname());
-        claims.put("birthdate", user.getBirthdate());
+        claims.put("id", user.getId());
+        claims.put("ci", user.getCi());
 
         long expirationTime = 1000 * 60 * 60 * 24;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
