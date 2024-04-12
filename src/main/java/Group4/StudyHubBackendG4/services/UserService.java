@@ -76,10 +76,9 @@ public class UserService {
                 aux.setEmail(dtUpdateUser.getEmail() == null || dtUpdateUser.getEmail().isEmpty() ? aux.getEmail() : dtUpdateUser.getEmail());
                 aux.setBirthdate(dtUpdateUser.getBirthdate() == null || dtUpdateUser.getBirthdate().isEmpty() ? aux.getBirthdate() : dtUpdateUser.getBirthdate());
                 aux.setUsername(dtUpdateUser.getUsername() == null || dtUpdateUser.getUsername().isEmpty() ? aux.getUsername() : dtUpdateUser.getUsername());
-                aux.setJwtToken(jwtService.generateJwt(aux));
 
                 userRepo.save(aux);
-                return ResponseEntity.ok().body(aux.getJwtToken());
+                return ResponseEntity.ok().body("Usuario actualizado con exitosamente");
             } else {
                 message = "Nombre de usuario ya existe.";
             }
