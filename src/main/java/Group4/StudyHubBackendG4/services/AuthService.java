@@ -34,15 +34,12 @@ public class AuthService {
         if (user != null && PasswordService.getInstance().checkPasswordHash(candidatePassword, user.getPassword())){
 
             Map<String, Object> claims = new HashMap<>();
-            claims.put("name", user.getName());
-            claims.put("surname", user.getSurname());
-            claims.put("email", user.getEmail());
-            claims.put("username", user.getUsername());
-            claims.put("birthdate", user.getBirthdate());
+            claims.put("id", user.getId());
+            claims.put("ci", user.getCi());
 
             return Jwts.builder()
                     .setClaims(claims)
-                    .setSubject(username)
+                    .setSubject(user.getCi())
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                     .signWith(secretKey, SignatureAlgorithm.HS256)
