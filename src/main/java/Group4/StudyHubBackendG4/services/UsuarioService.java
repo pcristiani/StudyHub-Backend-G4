@@ -2,15 +2,18 @@ package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
+import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +29,8 @@ public class UsuarioService {
 
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
@@ -111,5 +116,42 @@ public class UsuarioService {
             return ResponseEntity.badRequest().body("Token invalido.");
         }
     }
+
+    public ResponseEntity<?> recuperarPasswordEmail(String email) {
+        if (userRepo.existsByEmail(email)) {
+            Usuario usuario = userRepo.findByEmail(email);
+            String nombreCompleto = usuario.getNombre() + ' ' + usuario.getApellido();
+            String resetTokenLink = this.generatePasswordResetToken(usuario);
+
+            try {
+                String htmlContent = emailService.getHtmlContent("forgotMail.html");
+                htmlContent = htmlContent.replace("$username", nombreCompleto);
+                htmlContent = htmlContent.replace("$resetTokenLink", resetTokenLink);
+
+                return emailService.sendEmail(email, "StudyHub - Olvido de contraseña", htmlContent);
+            } catch (IOException | MessagingException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error reading email template.");
+            }
+        }
+        return ResponseEntity.badRequest().body("Invalid email.");
+    }
+    public String generatePasswordResetToken(Usuario usuario) {
+        UUID uuid = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiration = now.plusMinutes(30L);  // 30 minutos de expiracion
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setUsuario(usuario);
+        resetToken.setToken(uuid.toString());
+        resetToken.setExpiryDateTime(expiration);
+        resetToken.setUsuario(usuario);
+        PasswordResetToken token = tokenRepo.save(resetToken);
+        if (token != null) {
+            String endpointUrl = "http://localhost:3000/resetPassword";
+            return endpointUrl + "/?token=" + resetToken.getToken();
+        }
+        return "";
+    }
+
 
 }

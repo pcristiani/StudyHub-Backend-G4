@@ -1,6 +1,4 @@
 package Group4.StudyHubBackendG4.services;
-import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
-import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import jakarta.mail.MessagingException;
@@ -29,49 +27,24 @@ public class EmailService {
     @Autowired
     PasswordResetTokenRepo tokenRepo;
 
-    public ResponseEntity<?> recuperarPassword(String email) throws MessagingException, IOException {
-        if(userRepo.existsByEmail(email)){
-            Usuario usuario = userRepo.findByEmail(email);
-            String cedula = usuario.getCedula();
-            String resetTokenLink = this.generatePasswordResetToken(usuario);
-
-            Resource resource = new ClassPathResource("forgotMail.html");
-            byte[] htmlContentBytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-            String htmlContent = new String(htmlContentBytes, StandardCharsets.UTF_8);
-
-            htmlContent = htmlContent.replace("$cedula", cedula);
-            htmlContent = htmlContent.replace("$resetTokenLink", resetTokenLink);
-
+    public ResponseEntity<?> sendEmail(String to, String subject, String htmlContent) throws MessagingException {
+        if(userRepo.existsByEmail(to)){
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom("studyhubg4@gmail.com");
-            helper.setTo(email);
-            helper.setSubject("StudyHub - Olvido de contraseña");
-
+            helper.setTo(to);
+            helper.setSubject(subject);
             helper.setText(htmlContent, true);
-
             mailSender.send(message);
-
             return ResponseEntity.ok().body("Email enviado.");
         }
         return ResponseEntity.badRequest().body("Invalid email.");
     }
 
-    public String generatePasswordResetToken(Usuario usuario){
-        UUID uuid = UUID.randomUUID();
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expiration = now.plusMinutes(30L);         //30 minutos de expiracion
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setUsuario(usuario);
-        resetToken.setToken(uuid.toString());
-        resetToken.setExpiryDateTime(expiration);
-        resetToken.setUsuario(usuario);
-        PasswordResetToken token =  tokenRepo.save(resetToken);
-        if(token != null) {
-            String endpointUrl = "http://localhost:3000/resetPassword";
-            return endpointUrl + "/?token=" + resetToken.getToken();
-        }
-        return "";
+    public String getHtmlContent(String resourcePath) throws IOException {
+        Resource resource = new ClassPathResource(resourcePath);
+        byte[] htmlContentBytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
+        return new String(htmlContentBytes, StandardCharsets.UTF_8);
     }
 
 }

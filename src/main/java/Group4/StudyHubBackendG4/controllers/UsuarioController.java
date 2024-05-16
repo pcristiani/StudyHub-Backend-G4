@@ -53,7 +53,7 @@ public class UsuarioController {
 
     @PostMapping("/forgotPassword")
     public ResponseEntity<?> forgotPassword(@RequestBody String email) throws MessagingException, IOException, MessagingException, IOException {
-        return emailService.recuperarPassword(email);
+        return usuarioService.recuperarPasswordEmail(email);
     }
 
     @PostMapping("/recuperarPassword")
