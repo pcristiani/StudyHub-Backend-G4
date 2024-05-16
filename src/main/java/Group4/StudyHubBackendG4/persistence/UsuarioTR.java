@@ -4,19 +4,19 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
-@Table(name = "PasswordResetToken")
+@Table(name = "Usuario_TR")
 @Data
 @NoArgsConstructor
-public class PasswordResetToken {
+public class UsuarioTR {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String token;
-    private LocalDateTime expiryDateTime;
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    private Integer idTR;
+    @OneToOne
+    @JoinColumn(name = "idUsuario", nullable = false)
     private Usuario usuario;
+    private String jwt;
+    private String tokenReseteoContrasenia;
 }

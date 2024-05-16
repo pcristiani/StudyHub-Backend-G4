@@ -1,13 +1,12 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.persistence.User;
+import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -30,16 +29,16 @@ public class AuthService {
 
     @Transactional
     public String authenticateUser(String username, String candidatePassword) {
-        User user = userRepository.findByUsername(username);
-        if (user != null && PasswordService.getInstance().checkPasswordHash(candidatePassword, user.getPassword())){
+        Usuario usuario = userRepository.findByCedula(username);
+        if (usuario != null && PasswordService.getInstance().checkPasswordHash(candidatePassword, usuario.getPassword())){
 
             Map<String, Object> claims = new HashMap<>();
-            claims.put("id", user.getId());
-            claims.put("ci", user.getCi());
+            claims.put("id", usuario.getIdUsuario());
+            claims.put("ci", usuario.getCedula());
 
             return Jwts.builder()
                     .setClaims(claims)
-                    .setSubject(user.getCi())
+                    .setSubject(usuario.getCedula())
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                     .signWith(secretKey, SignatureAlgorithm.HS256)

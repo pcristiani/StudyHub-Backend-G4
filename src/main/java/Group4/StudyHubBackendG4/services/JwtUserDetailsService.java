@@ -1,6 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.persistence.User;
+import Group4.StudyHubBackendG4.persistence.Usuario;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,20 +13,20 @@ import java.util.Set;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
-    private UserService userService;
+    private UsuarioService usuarioService;
 
-    public JwtUserDetailsService(UserService userService) {
-        this.userService = userService;
+    public JwtUserDetailsService(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.getUserByUsername(username);
+        Usuario usuario = usuarioService.getUserByUsername(username);
 
-        if (user == null) {
+        if (usuario == null) {
             throw new UsernameNotFoundException("No existe un usuario registrado con el usuario:  " + username);
         }
 
         Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(String.valueOf("AUTH_USER")));
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+        return new org.springframework.security.core.userdetails.User(usuario.getCedula(), usuario.getPassword(), authorities);
     }
 }

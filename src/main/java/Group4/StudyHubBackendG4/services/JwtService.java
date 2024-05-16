@@ -1,6 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.persistence.User;
+import Group4.StudyHubBackendG4.persistence.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -33,11 +33,11 @@ public class JwtService {
         }
         return instance;
     }
-    public String generateJwt(User user) {
+    public String generateJwt(Usuario usuario) {
         String jwtToken = "";
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", user.getId());
-        claims.put("ci", user.getCi());
+        claims.put("id", usuario.getIdUsuario());
+        claims.put("ci", usuario.getCedula());
 
         long expirationTime = 1000 * 60 * 60 * 24;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
@@ -53,17 +53,17 @@ public class JwtService {
         return jwtToken;
     }
 
-    public User validateJwt(String jwtToken) {
-        User user = new User();
+    public Usuario validateJwt(String jwtToken) {
+        Usuario usuario = new Usuario();
         Map<String, Object> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtToken).getBody();
 
-        user.setUsername((String) claims.get("username"));
-        user.setEmail((String) claims.get("email"));
-        user.setName((String) claims.get("name"));
-        user.setSurname((String) claims.get("surname"));
-        user.setBirthdate((String) claims.get("birthdate"));
+        usuario.setCedula((String) claims.get("cedula"));
+        usuario.setEmail((String) claims.get("email"));
+        usuario.setNombre((String) claims.get("nombre"));
+        usuario.setApellido((String) claims.get("apellido"));
+        usuario.setFechaNacimiento((String) claims.get("fechaNacimiento"));
 
-        return user;
+        return usuario;
     }
 
     public String getUsernameFromToken(String token) {

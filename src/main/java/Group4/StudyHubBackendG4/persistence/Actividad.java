@@ -4,19 +4,19 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
-@Table(name = "PasswordResetToken")
+@Table(name = "Actividad")
 @Data
 @NoArgsConstructor
-public class PasswordResetToken {
+public class Actividad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String token;
-    private LocalDateTime expiryDateTime;
+    private Integer idActividad;
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "idUsuario", nullable = false)
     private Usuario usuario;
+    private Date fechaHora;
+    private String accion;
 }

@@ -1,12 +1,10 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtNewPassword;
-import Group4.StudyHubBackendG4.datatypes.DtNewUser;
-import Group4.StudyHubBackendG4.datatypes.DtUpdateUser;
-import Group4.StudyHubBackendG4.datatypes.DtUser;
-import Group4.StudyHubBackendG4.persistence.User;
+import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
+import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.services.EmailService;
-import Group4.StudyHubBackendG4.services.UserService;
+import Group4.StudyHubBackendG4.services.UsuarioService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,51 +18,46 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 @Validated
-public class SimpleUserController {
+public class UsuarioController {
 
     @Autowired
-    private UserService userService;
+    private UsuarioService usuarioService;
 
     @Autowired
     private EmailService emailService;
 
     @GetMapping("/getAllUsers")
-    public List<DtUser> getAllUsers() {
-        return userService.getAllUsers();
+    public List<DtUsuario> getAllUsers() {
+        return usuarioService.getAllUsers();
     }
 
     @GetMapping("/api/users/getUser/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Integer id) {
-        return userService.getUserById(id);
+        return usuarioService.getUserById(id);
     }
 
     @PostMapping("/registerUser")
-    public ResponseEntity<?> createUser(@Valid @RequestBody DtNewUser dtNewUser) {
-        return userService.createUser(dtNewUser);
+    public ResponseEntity<?> createUser(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) {
+        return usuarioService.createUser(dtNuevoUsuario);
     }
 
     @PutMapping("/api/users/updateUser/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUpdateUser dtUpdateUser) {
-        return userService.updateUser(id, dtUpdateUser);
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUsuario dtUsuario) {
+        return usuarioService.modificarUsuario(id, dtUsuario);
     }
 
     @DeleteMapping("/api/users/deleteUser/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
-        return userService.deleteUser(id);
-    }
-
-    @GetMapping("/populateDBWithUsers")
-    public String populateDBWithUsers(){
-        return userService.populateDBWithUsers();
+        return usuarioService.bajaUsuario(id);
     }
 
     @PostMapping("/forgotPassword")
     public ResponseEntity<?> forgotPassword(@RequestBody String email) throws MessagingException, IOException, MessagingException, IOException {
-        return emailService.forgotPassword(email);
+        return emailService.recuperarPassword(email);
     }
 
     @PostMapping("/recuperarPassword")
     public ResponseEntity<?> recuperarPassword(@RequestBody DtNewPassword dtNewPassword){
-        return userService.recuperarPassword(dtNewPassword.getToken(), dtNewPassword.getNewPassword());
+        return usuarioService.recuperarPassword(dtNewPassword.getToken(), dtNewPassword.getNewPassword());
     }
 }
