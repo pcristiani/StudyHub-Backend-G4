@@ -23,6 +23,7 @@ public class Usuario {
         private String password;
         private String cedula;
         private Boolean activo;
+        private Boolean validado;
 
         public Usuario UserFromDtNewUser(DtNuevoUsuario dtNuevoUsuario) {
                 Usuario usuario = new Usuario();
@@ -33,6 +34,7 @@ public class Usuario {
                 usuario.setRol(dtNuevoUsuario.getRol());
                 usuario.setCedula(dtNuevoUsuario.getCedula());
                 usuario.setActivo(true);
+                usuario.setValidado(!dtNuevoUsuario.getRol().equals("E"));
                 usuario.setPassword(PasswordService.getInstance().hashPassword(dtNuevoUsuario.getPassword()));
                 return usuario;
         }
@@ -47,6 +49,7 @@ public class Usuario {
                 dtUsuario.setFechaNacimiento(this.getFechaNacimiento());
                 dtUsuario.setRol(this.getRol());
                 dtUsuario.setActivo(this.getActivo());
+                dtUsuario.setValidado(this.getValidado());
                 return dtUsuario;
         }
 

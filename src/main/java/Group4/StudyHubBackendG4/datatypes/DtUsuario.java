@@ -16,4 +16,5 @@ public class DtUsuario {
     private String rol;
     private String cedula;
     private Boolean activo;
+    private Boolean validado;
 }

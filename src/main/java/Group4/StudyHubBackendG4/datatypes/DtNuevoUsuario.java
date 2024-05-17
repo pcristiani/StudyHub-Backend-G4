@@ -29,6 +29,7 @@ public class DtNuevoUsuario {
     @NotBlank(message = "Ingrese una contraseña.")
     private String password;
 
-    @NotBlank(message = "Ingrese una cedula.")
+    @NotBlank(message = "Ingrese un rol.")
     private String rol;
+
 }
