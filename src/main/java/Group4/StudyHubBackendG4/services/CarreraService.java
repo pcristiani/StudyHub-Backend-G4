@@ -25,7 +25,7 @@ public class CarreraService {
     private CarreraConverter carreraConverter;
 
 
-    public List<DtCarrera> getAllCarreras() {
+    public List<DtCarrera> getCarreras() {
         return carreraRepo.findAll().stream()
                 .map(carreraConverter::convertToDto)
                 .collect(Collectors.toList());

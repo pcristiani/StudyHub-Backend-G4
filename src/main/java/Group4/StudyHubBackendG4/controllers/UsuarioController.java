@@ -21,18 +21,17 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @GetMapping("/api/usuario/getUsuarios")
-    public List<DtUsuario> getAllUsers() {
+    public List<DtUsuario> getUsuarios() {
         return usuarioService.getUsuarios();
     }
 
-
     @GetMapping("/api/usuario/getDocentes")
-    public List<DtDocente> getAllDocentes() {
-        return usuarioService.getDocentes();
+    public ResponseEntity<?> getDocentes() {
+        return ResponseEntity.ok().body(usuarioService.getDocentes());
     }
 
-    @GetMapping("/api/usuario/getUser/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Integer id) {
+    @GetMapping("/api/usuario/getUsuario/{id}")
+    public ResponseEntity<?> getUsuariosById(@PathVariable Integer id) {
         return usuarioService.getUserById(id);
     }
 
@@ -47,18 +46,18 @@ public class UsuarioController {
         return usuarioService.acceptEstudiante(id,aceptado);
     }
 
-    @PostMapping("/registerUser")
-    public ResponseEntity<?> createUser(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) throws MessagingException, IOException {
+    @PostMapping("/registerUsuario")
+    public ResponseEntity<?> createUsuario(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) throws MessagingException, IOException {
         return usuarioService.register(dtNuevoUsuario);
     }
 
-    @PutMapping("/api/usuario/updateUser/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUsuario dtUsuario) {
+    @PutMapping("/api/usuario/updateUsuario/{id}")
+    public ResponseEntity<?> updateUsuario(@PathVariable Integer id, @RequestBody DtUsuario dtUsuario) {
         return usuarioService.modificarUsuario(id, dtUsuario);
     }
 
-    @DeleteMapping("/api/usuario/deleteUser/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
+    @DeleteMapping("/api/usuario/deleteUsuario/{id}")
+    public ResponseEntity<?> deleteUsuario(@PathVariable Integer id) {
         return usuarioService.bajaUsuario(id);
     }
 

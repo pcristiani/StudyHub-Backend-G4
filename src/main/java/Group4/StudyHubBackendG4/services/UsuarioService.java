@@ -92,8 +92,8 @@ public class UsuarioService {
 
     public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {      //TODO: CONTROL EN FRONT: SI ES ESTUDIANTE PRECISA INGRESAR PASSWORD
 
-        Optional<Usuario> existingUser = Optional.ofNullable(usuarioRepo.findByCedula(dtNuevoUsuario.getCedula()));
-        if (existingUser.isPresent()) {
+        Optional<Usuario> existingUsuario = Optional.ofNullable(usuarioRepo.findByCedula(dtNuevoUsuario.getCedula()));
+        if (existingUsuario.isPresent()) {
             return ResponseEntity.badRequest().body("La cedula ingresada ya existe en el sistema.");
         }
 
@@ -101,7 +101,7 @@ public class UsuarioService {
             dtNuevoUsuario.setPassword(passwordService.generateRandomPassword());
         }
 
-        Usuario usuario = existingUser.orElseGet(Usuario::new)
+        Usuario usuario = existingUsuario.orElseGet(Usuario::new)
                 .UserFromDtNewUser(dtNuevoUsuario);
 
         usuarioRepo.save(usuario);
