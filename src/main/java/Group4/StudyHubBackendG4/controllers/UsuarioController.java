@@ -37,8 +37,8 @@ public class UsuarioController {
     }
 
     @PostMapping("/registerUser")
-    public ResponseEntity<?> createUser(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) {
-        return usuarioService.createUser(dtNuevoUsuario);
+    public ResponseEntity<?> createUser(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) throws MessagingException, IOException {
+        return usuarioService.register(dtNuevoUsuario);
     }
 
     @PutMapping("/api/users/updateUser/{id}")

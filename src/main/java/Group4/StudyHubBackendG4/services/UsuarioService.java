@@ -29,8 +29,12 @@ public class UsuarioService {
 
     @Autowired
     private JwtService jwtService;
+
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PasswordService passwordService;
 
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
@@ -50,17 +54,25 @@ public class UsuarioService {
         return userRepo.findByCedula(username);
     }
 
-    public ResponseEntity<String> createUser(DtNuevoUsuario dtNuevoUsuario) {
+    public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
 
         Optional<Usuario> existingUser = Optional.ofNullable(userRepo.findByCedula(dtNuevoUsuario.getCedula()));
         if (existingUser.isPresent()) {
-            return ResponseEntity.badRequest().body("El nombre de usuario ya existe, intente con otro.");
+            return ResponseEntity.badRequest().body("La cedula ingresada ya existe en el sistema.");
+        }
+
+        if(!this.isEstudiante(dtNuevoUsuario)){
+            dtNuevoUsuario.setPassword(passwordService.generateRandomPassword());
         }
 
         Usuario usuario = existingUser.orElseGet(Usuario::new)
                 .UserFromDtNewUser(dtNuevoUsuario);
 
         userRepo.save(usuario);
+
+        if(!this.isEstudiante(dtNuevoUsuario)){
+            this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
+        }
 
         return ResponseEntity.ok().body("Usuario registrado con éxito.");
     }
@@ -144,13 +156,24 @@ public class UsuarioService {
         resetToken.setUsuario(usuario);
         resetToken.setToken(uuid.toString());
         resetToken.setExpiryDateTime(expiration);
-        resetToken.setUsuario(usuario);
         PasswordResetToken token = tokenRepo.save(resetToken);
         if (token != null) {
             String endpointUrl = "http://localhost:3000/resetPassword";
             return endpointUrl + "/?token=" + resetToken.getToken();
         }
         return "";
+    }
+
+    private Boolean isEstudiante(DtNuevoUsuario dtNuevoUsuario){
+        return dtNuevoUsuario.getRol().equals("E");
+    }
+
+    private void notificarAltaDeUsuarioPorMail(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
+        String htmlContent = emailService.getHtmlContent("notifyRegisterByMail.html");
+        htmlContent = htmlContent.replace("$rol", dtNuevoUsuario.getRol());
+        htmlContent = htmlContent.replace("$password", dtNuevoUsuario.getPassword());
+        htmlContent = htmlContent.replace("$nombreCompleto", dtNuevoUsuario.getNombre() + ' ' + dtNuevoUsuario.getApellido());
+        emailService.sendEmail(dtNuevoUsuario.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario" + dtNuevoUsuario.getRol() , htmlContent);
     }
 
 
