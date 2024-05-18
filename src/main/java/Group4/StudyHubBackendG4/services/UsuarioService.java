@@ -39,6 +39,9 @@ public class UsuarioService {
     @Autowired
     private UsuarioTrRepo usuarioTrRepo;
 
+    @Autowired
+    private PasswordService passwordService;
+
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
         return userRepo.findAll().stream()
@@ -66,17 +69,25 @@ public class UsuarioService {
         return userRepo.findByCedula(cedula);
     }
 
-    public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) {
+    public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
 
         Optional<Usuario> existingUser = Optional.ofNullable(userRepo.findByCedula(dtNuevoUsuario.getCedula()));
         if (existingUser.isPresent()) {
-            return ResponseEntity.badRequest().body("Ya existe un usuario registrado con esa cedula.");
+            return ResponseEntity.badRequest().body("La cedula ingresada ya existe en el sistema.");
+        }
+
+        if(!this.isEstudiante(dtNuevoUsuario)){
+            dtNuevoUsuario.setPassword(passwordService.generateRandomPassword());
         }
 
         Usuario usuario = existingUser.orElseGet(Usuario::new)
                 .UserFromDtNewUser(dtNuevoUsuario);
 
         userRepo.save(usuario);
+
+        if(!this.isEstudiante(dtNuevoUsuario)){
+            this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
+        }
 
         return ResponseEntity.ok().body("Usuario registrado con éxito.");
     }
@@ -106,13 +117,16 @@ public class UsuarioService {
 
 
     public ResponseEntity<?> bajaUsuario(Integer id) {
-        if (userRepo.existsById(id)) {
-            userRepo.deleteById(id);
+        Optional<Usuario> userOptional = userRepo.findById(id);
+
+        if (userOptional.isPresent()) {
+            Usuario aux = userOptional.get();
+            aux.setActivo(false);
+            userRepo.save(aux);
 
             return ResponseEntity.ok().body("Usuario eliminado exitosamente.");
         }
-        return ResponseEntity.badRequest().body("Id no existe.");
-
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Id no existe o usuario ya inactivo.");
     }
 
     public ResponseEntity<?> recuperarPassword(String token, String newPassword) {
