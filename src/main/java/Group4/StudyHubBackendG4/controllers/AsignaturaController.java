@@ -20,9 +20,5 @@ public class AsignaturaController {
     @Autowired
     private AsignaturaService asignaturaService;
 
-    @GetMapping("/getAllCarreras")
-    public List<DtAsignatura> getAllAsignaturas() {
-        return asignaturaService.getAllAsignaturas();
-    }
 
 }

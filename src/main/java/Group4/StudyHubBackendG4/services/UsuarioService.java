@@ -56,8 +56,6 @@ public class UsuarioService {
     @Autowired
     private DocenteRepo docenteRepo;
 
-
-    @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
         return userRepo.findAll().stream()
                 .map(usuarioConverter::convertToDto)

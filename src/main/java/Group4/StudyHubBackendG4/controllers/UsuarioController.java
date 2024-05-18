@@ -1,10 +1,15 @@
 package Group4.StudyHubBackendG4.controllers;
 
+import Group4.StudyHubBackendG4.datatypes.DtDocente;
 import Group4.StudyHubBackendG4.datatypes.DtNewPassword;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
+import Group4.StudyHubBackendG4.repositories.DocenteRepo;
+import Group4.StudyHubBackendG4.repositories.UserRepo;
 import Group4.StudyHubBackendG4.services.EmailService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
+import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
+import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
@@ -23,9 +29,27 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private DocenteRepo docenteRepo;
+
+    @Autowired
+    private UsuarioConverter usuarioConverter;
+
+    @Autowired
+    private DocenteConverter docenteConverter;
+
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
         return usuarioService.getAllUsers();
+    }
+
+
+    @GetMapping("/getAllDocentes")
+    public List<DtDocente> getAllDocentes() {
+        return usuarioService.getAllDocentes();
     }
 
     @GetMapping("/api/users/getUser/{id}")

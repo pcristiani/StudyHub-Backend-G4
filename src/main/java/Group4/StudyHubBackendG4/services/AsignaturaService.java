@@ -18,9 +18,4 @@ public class AsignaturaService {
     @Autowired
     private AsignaturaConverter asignaturaConverter;
 
-    public List<DtAsignatura> getAllAsignaturas() {
-        return asignaturaRepo.findAll().stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
-    }
 }
