@@ -18,5 +18,9 @@ public class CarreraController {
     @Autowired
     private CarreraService carreraService;
 
+    @GetMapping("/getAllCarreras")
+    public List<DtCarrera> getAllCarreras() {
+        return carreraService.getAllCarreras();
+    }
 
 }

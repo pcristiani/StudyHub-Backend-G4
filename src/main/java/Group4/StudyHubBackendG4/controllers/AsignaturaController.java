@@ -1,5 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
+import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
@@ -17,5 +19,10 @@ public class AsignaturaController {
 
     @Autowired
     private AsignaturaService asignaturaService;
+
+    @GetMapping("/getAllCarreras")
+    public List<DtAsignatura> getAllAsignaturas() {
+        return asignaturaService.getAllAsignaturas();
+    }
 
 }
