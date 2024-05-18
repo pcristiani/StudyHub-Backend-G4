@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DtDocente {
+    private Integer idDocente;
     private Integer codigoDocente;
     private String nombre;
     private Boolean activo;

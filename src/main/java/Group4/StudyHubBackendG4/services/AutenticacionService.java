@@ -1,7 +1,7 @@
 package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.persistence.Usuario;
-import Group4.StudyHubBackendG4.repositories.UserRepo;
+import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class AutenticacionService {
 
     @Autowired
-    private UserRepo userRepository;
+    private UsuarioRepo usuarioRepository;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -32,7 +32,7 @@ public class AutenticacionService {
 
     @Transactional
     public String authenticateUser(String username, String candidatePassword) {
-        Usuario usuario = userRepository.findByCedula(username);
+        Usuario usuario = usuarioRepository.findByCedula(username);
         if (usuario != null && PasswordService.getInstance().checkPasswordHash(candidatePassword, usuario.getPassword())){
 
             Map<String, Object> claims = new HashMap<>();

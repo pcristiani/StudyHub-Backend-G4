@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserRepo extends JpaRepository<Usuario, Integer> {
+public interface UsuarioRepo extends JpaRepository<Usuario, Integer> {
     Usuario findByCedula(String cedula);
     Usuario findByEmail(String email);
     @Query("SELECT u FROM Usuario u WHERE u.validado = :validado")

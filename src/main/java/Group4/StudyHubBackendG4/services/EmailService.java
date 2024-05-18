@@ -1,6 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
-import Group4.StudyHubBackendG4.repositories.UserRepo;
+import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,6 @@ import org.springframework.util.FileCopyUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 public class EmailService {
@@ -23,12 +21,12 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
     @Autowired
-    UserRepo userRepo;
+    UsuarioRepo usuarioRepo;
     @Autowired
     PasswordResetTokenRepo tokenRepo;
 
     public ResponseEntity<?> sendEmail(String to, String subject, String htmlContent) throws MessagingException {
-        if(userRepo.existsByEmail(to)){
+        if(usuarioRepo.existsByEmail(to)){
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom("studyhubg4@gmail.com");

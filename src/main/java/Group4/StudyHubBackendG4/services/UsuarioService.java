@@ -2,7 +2,6 @@ package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtDocente;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoDocente;
-import Group4.StudyHubBackendG4.datatypes.DtDocente;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.persistence.Docente;
@@ -11,9 +10,8 @@ import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.persistence.UsuarioTR;
 import Group4.StudyHubBackendG4.repositories.DocenteRepo;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
-import Group4.StudyHubBackendG4.repositories.UserRepo;
+import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
-import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
@@ -24,23 +22,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import javax.print.Doc;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
 
     @Autowired
-    private UserRepo userRepo;
+    private UsuarioRepo usuarioRepo;
 
     @Autowired
     private PasswordResetTokenRepo tokenRepo;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
     @Autowired
     private EmailService emailService;
@@ -60,28 +57,28 @@ public class UsuarioService {
     @Autowired
     private DocenteRepo docenteRepo;
 
-    public List<DtUsuario> getAllUsers() {
-        return userRepo.findAll().stream()
+    public List<DtUsuario> getUsuarios() {
+        return usuarioRepo.findAll().stream()
                 .map(usuarioConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/getAllDocentes")
-    public List<DtDocente> getAllDocentes() {
+    public List<DtDocente> getDocentes() {
         return docenteRepo.findAll().stream()
                 .map(docenteConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public ResponseEntity<DtUsuario> getUserById(Integer id) {
-        return userRepo.findById(id)
+        return usuarioRepo.findById(id)
                 .map(usuarioConverter::convertToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }
 
     public Usuario getUserByUsername(String username) {
-        return userRepo.findByCedula(username);
+        return usuarioRepo.findByCedula(username);
     }
 
     public Usuario getUserByJwt(String jwt) {
@@ -90,12 +87,12 @@ public class UsuarioService {
     }
 
     public Usuario getUserByCedula(String cedula) {
-        return userRepo.findByCedula(cedula);
+        return usuarioRepo.findByCedula(cedula);
     }
 
     public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {      //TODO: CONTROL EN FRONT: SI ES ESTUDIANTE PRECISA INGRESAR PASSWORD
 
-        Optional<Usuario> existingUser = Optional.ofNullable(userRepo.findByCedula(dtNuevoUsuario.getCedula()));
+        Optional<Usuario> existingUser = Optional.ofNullable(usuarioRepo.findByCedula(dtNuevoUsuario.getCedula()));
         if (existingUser.isPresent()) {
             return ResponseEntity.badRequest().body("La cedula ingresada ya existe en el sistema.");
         }
@@ -107,7 +104,7 @@ public class UsuarioService {
         Usuario usuario = existingUser.orElseGet(Usuario::new)
                 .UserFromDtNewUser(dtNuevoUsuario);
 
-        userRepo.save(usuario);
+        usuarioRepo.save(usuario);
 
         if(!this.isEstudiante(dtNuevoUsuario)){
             this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
@@ -118,19 +115,19 @@ public class UsuarioService {
 
     public ResponseEntity<?> modificarUsuario(Integer id, DtUsuario dtUsuario) {
         String message = "No se encontró usuario.";
-        Optional<Usuario> userOptional = userRepo.findById(id);
+        Optional<Usuario> userOptional = usuarioRepo.findById(id);
 
         if (userOptional.isPresent()) {
             Usuario aux = userOptional.get();
 
-            if (Objects.equals(dtUsuario.getCedula(), aux.getCedula()) || (!Objects.equals(dtUsuario.getCedula(), aux.getCedula()) && !userRepo.existsByCedula(dtUsuario.getCedula()))) {
+            if (Objects.equals(dtUsuario.getCedula(), aux.getCedula()) || (!Objects.equals(dtUsuario.getCedula(), aux.getCedula()) && !usuarioRepo.existsByCedula(dtUsuario.getCedula()))) {
                 aux.setNombre(dtUsuario.getNombre() == null || dtUsuario.getNombre().isEmpty() ? aux.getNombre() : dtUsuario.getNombre());
                 aux.setApellido(dtUsuario.getApellido() == null || dtUsuario.getApellido().isEmpty() ? aux.getApellido() : dtUsuario.getApellido());
                 aux.setEmail(dtUsuario.getEmail() == null || dtUsuario.getEmail().isEmpty() ? aux.getEmail() : dtUsuario.getEmail());
                 aux.setFechaNacimiento(dtUsuario.getFechaNacimiento() == null || dtUsuario.getFechaNacimiento().isEmpty() ? aux.getFechaNacimiento() : dtUsuario.getFechaNacimiento());
                 aux.setCedula(dtUsuario.getCedula() == null || dtUsuario.getCedula().isEmpty() ? aux.getCedula() : dtUsuario.getCedula());
 
-                userRepo.save(aux);
+                usuarioRepo.save(aux);
                 return ResponseEntity.ok().body("Usuario actualizado con exitosamente");
             } else {
                 message = "Nombre de usuario ya existe.";
@@ -141,12 +138,12 @@ public class UsuarioService {
 
 
     public ResponseEntity<?> bajaUsuario(Integer id) {
-        Optional<Usuario> userOptional = userRepo.findById(id);
+        Optional<Usuario> userOptional = usuarioRepo.findById(id);
 
         if (userOptional.isPresent()) {
             Usuario aux = userOptional.get();
             aux.setActivo(false);
-            userRepo.save(aux);
+            usuarioRepo.save(aux);
 
             return ResponseEntity.ok().body("Usuario desactivado exitosamente.");
         }
@@ -159,9 +156,9 @@ public class UsuarioService {
             LocalDateTime expiration = passwordToken.getExpiryDateTime();
             LocalDateTime now = LocalDateTime.now();
             if(expiration.isAfter(now)){
-                Usuario usuario = userRepo.getReferenceById(passwordToken.getUsuario().getIdUsuario());
+                Usuario usuario = usuarioRepo.getReferenceById(passwordToken.getUsuario().getIdUsuario());
                 usuario.setPassword(PasswordService.getInstance().hashPassword(newPassword));
-                userRepo.save(usuario);
+                usuarioRepo.save(usuario);
                 return ResponseEntity.ok().body("Contraseña actualizada con exito");
             } else {
                 return ResponseEntity.badRequest().body("Token expirado.");
@@ -172,8 +169,8 @@ public class UsuarioService {
     }
 
     public ResponseEntity<?> recuperarPasswordEmail(String email) {
-        if (userRepo.existsByEmail(email)) {
-            Usuario usuario = userRepo.findByEmail(email);
+        if (usuarioRepo.existsByEmail(email)) {
+            Usuario usuario = usuarioRepo.findByEmail(email);
             String nombreCompleto = usuario.getNombre() + ' ' + usuario.getApellido();
             String resetTokenLink = this.generatePasswordResetToken(usuario);
 
@@ -286,17 +283,17 @@ public class UsuarioService {
     }
 
     public List<DtUsuario> getEstudiantesPendientes() {
-        List<Usuario> users = userRepo.findAllByValidado(false);
+        List<Usuario> users = usuarioRepo.findAllByValidado(false);
         return users.stream()
                 .map(usuarioConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public ResponseEntity<?> acceptEstudiante(Integer id, Boolean aceptado) throws IOException, MessagingException {
-        Usuario user = userRepo.findById(id).orElse(null);
+        Usuario user = usuarioRepo.findById(id).orElse(null);
         if (user != null) {
             user.setValidado(aceptado);
-            userRepo.save(user);
+            usuarioRepo.save(user);
             //ENVIAR MAIL AL ESTUDIANTE
             String htmlContent = emailService.getHtmlContent("notifyAcceptedUser.html");
             htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());

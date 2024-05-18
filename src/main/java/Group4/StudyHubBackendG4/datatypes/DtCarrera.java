@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DtCarrera {
+    private Integer idCarrera;
     private String nombre;
     private String descripcion;
     private Boolean activa;

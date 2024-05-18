@@ -1,10 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.*;
-import Group4.StudyHubBackendG4.services.EmailService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
-import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
-import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
@@ -24,41 +20,29 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
-    private DocenteRepo docenteRepo;
-
-    @Autowired
-    private UsuarioConverter usuarioConverter;
-
-    @Autowired
-    private DocenteConverter docenteConverter;
-
-    @GetMapping("/getAllUsers")
+    @GetMapping("/api/usuario/getUsuarios")
     public List<DtUsuario> getAllUsers() {
-        return usuarioService.getAllUsers();
+        return usuarioService.getUsuarios();
     }
 
 
-    @GetMapping("/getAllDocentes")
+    @GetMapping("/api/usuario/getDocentes")
     public List<DtDocente> getAllDocentes() {
-        return usuarioService.getAllDocentes();
+        return usuarioService.getDocentes();
     }
 
-    @GetMapping("/api/users/getUser/{id}")
+    @GetMapping("/api/usuario/getUser/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Integer id) {
         return usuarioService.getUserById(id);
     }
 
-    @GetMapping("/api/users/getEstudiantesPendientes")
+    @GetMapping("/api/usuario/getEstudiantesPendientes")
     public ResponseEntity<?> getEstudiantesPendientes() {
         List<DtUsuario> dtUsuarios = usuarioService.getEstudiantesPendientes();
         return ResponseEntity.ok().body(dtUsuarios);
     }
 
-    @PutMapping("/api/users/acceptEstudiante/{id}")
+    @PutMapping("/api/usuario/acceptEstudiante/{id}")
     public ResponseEntity<?> acceptEstudiante(@PathVariable Integer id, @RequestBody Boolean aceptado) throws MessagingException, IOException {
         return usuarioService.acceptEstudiante(id,aceptado);
     }
@@ -68,12 +52,12 @@ public class UsuarioController {
         return usuarioService.register(dtNuevoUsuario);
     }
 
-    @PutMapping("/api/users/updateUser/{id}")
+    @PutMapping("/api/usuario/updateUser/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody DtUsuario dtUsuario) {
         return usuarioService.modificarUsuario(id, dtUsuario);
     }
 
-    @DeleteMapping("/api/users/deleteUser/{id}")
+    @DeleteMapping("/api/usuario/deleteUser/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
         return usuarioService.bajaUsuario(id);
     }

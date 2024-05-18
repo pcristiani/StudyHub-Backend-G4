@@ -2,29 +2,17 @@ package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
-import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.persistence.Carrera;
-import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.repositories.CarreraRepo;
-import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
+import Group4.StudyHubBackendG4.utils.converters.CarreraConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import Group4.StudyHubBackendG4.datatypes.DtCarrera;
-import Group4.StudyHubBackendG4.persistence.Usuario;
-import Group4.StudyHubBackendG4.repositories.CarreraRepo;
-import Group4.StudyHubBackendG4.repositories.UserRepo;
-import Group4.StudyHubBackendG4.utils.converters.CarreraConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
