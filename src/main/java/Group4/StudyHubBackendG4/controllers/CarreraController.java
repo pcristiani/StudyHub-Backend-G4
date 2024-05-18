@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
@@ -25,8 +24,8 @@ public class CarreraController {
     }
 
     @GetMapping("/api/carrera/getAllCarreras")
-    public List<DtCarrera> getAllCarreras() {
-        return carreraService.getAllCarreras();
+    public ResponseEntity<?> getCarreras() {
+        return ResponseEntity.ok().body(carreraService.getCarreras());
     }
 
     @PostMapping("/api/carrera/altaCarrera")
@@ -34,10 +33,14 @@ public class CarreraController {
         return carreraService.nuevaCarrera(dtNuevaCarrera);
     }
 
+    //TODO: Sacar éste método ya que habría que hacer mil validaciones y se va del scope actual
+    /*
     @DeleteMapping("/api/carrera/bajaCarrera/{id}")
     public ResponseEntity<?> bajaCarrera(@PathVariable Integer id) {
         return carreraService.bajaCarrera(id);
     }
+
+     */
 
     @PutMapping("/api/carrera/modificarCarrera/{id}")
     public ResponseEntity<?> modificarCarrera(@PathVariable Integer id, @RequestBody DtCarrera dtCarrera) {
