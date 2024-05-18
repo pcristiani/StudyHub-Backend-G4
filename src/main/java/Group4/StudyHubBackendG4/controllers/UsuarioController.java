@@ -33,6 +33,17 @@ public class UsuarioController {
         return usuarioService.getUserById(id);
     }
 
+    @GetMapping("/api/users/getEstudiantesPendientes")
+    public ResponseEntity<?> getEstudiantesPendientes() {
+        List<DtUsuario> dtUsuarios = usuarioService.getEstudiantesPendientes();
+        return ResponseEntity.ok().body(dtUsuarios);
+    }
+
+    @PutMapping("/api/users/acceptEstudiante/{id}")
+    public ResponseEntity<?> acceptEstudiante(@PathVariable Integer id, @RequestBody Boolean aceptado) throws MessagingException, IOException {
+        return usuarioService.acceptEstudiante(id,aceptado);
+    }
+
     @PostMapping("/registerUser")
     public ResponseEntity<?> createUser(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) throws MessagingException, IOException {
         return usuarioService.register(dtNuevoUsuario);
