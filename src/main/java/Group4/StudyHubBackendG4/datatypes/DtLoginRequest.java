@@ -1,30 +1,20 @@
 package Group4.StudyHubBackendG4.datatypes;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class DtLoginRequest {
-    private String username;
+    private String cedula;
     private String password;
 
     public DtLoginRequest() {
     }
 
-    public DtLoginRequest(String username, String password) {
-        this.username = username;
+    public DtLoginRequest(String cedula, String password) {
+        this.cedula = cedula;
         this.password = password;
     }
 
-    public String getUsername() {
-        return this.username;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

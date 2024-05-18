@@ -4,8 +4,11 @@ import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
 import Group4.StudyHubBackendG4.persistence.Usuario;
+import Group4.StudyHubBackendG4.persistence.UsuarioTR;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
+import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
+import Group4.StudyHubBackendG4.utils.JwtUtil;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,13 +31,13 @@ public class UsuarioService {
     private PasswordResetTokenRepo tokenRepo;
 
     @Autowired
-    private JwtService jwtService;
+    private JwtUtil jwtUtil;
 
     @Autowired
     private EmailService emailService;
 
     @Autowired
-    private PasswordService passwordService;
+    private UsuarioTrRepo usuarioTrRepo;
 
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
@@ -54,25 +57,26 @@ public class UsuarioService {
         return userRepo.findByCedula(username);
     }
 
-    public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
+    public Usuario getUserByJwt(String jwt) {
+        UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
+        return usuarioTr != null ? usuarioTr.getUsuario() : null;
+    }
+
+    public Usuario getUserByCedula(String cedula) {
+        return userRepo.findByCedula(cedula);
+    }
+
+    public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) {
 
         Optional<Usuario> existingUser = Optional.ofNullable(userRepo.findByCedula(dtNuevoUsuario.getCedula()));
         if (existingUser.isPresent()) {
-            return ResponseEntity.badRequest().body("La cedula ingresada ya existe en el sistema.");
-        }
-
-        if(!this.isEstudiante(dtNuevoUsuario)){
-            dtNuevoUsuario.setPassword(passwordService.generateRandomPassword());
+            return ResponseEntity.badRequest().body("Ya existe un usuario registrado con esa cedula.");
         }
 
         Usuario usuario = existingUser.orElseGet(Usuario::new)
                 .UserFromDtNewUser(dtNuevoUsuario);
 
         userRepo.save(usuario);
-
-        if(!this.isEstudiante(dtNuevoUsuario)){
-            this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
-        }
 
         return ResponseEntity.ok().body("Usuario registrado con éxito.");
     }
@@ -156,12 +160,25 @@ public class UsuarioService {
         resetToken.setUsuario(usuario);
         resetToken.setToken(uuid.toString());
         resetToken.setExpiryDateTime(expiration);
+        resetToken.setUsuario(usuario);
         PasswordResetToken token = tokenRepo.save(resetToken);
         if (token != null) {
             String endpointUrl = "http://localhost:3000/resetPassword";
             return endpointUrl + "/?token=" + resetToken.getToken();
         }
         return "";
+    }
+
+    public void actualizarJwt(Usuario u, String jwt) {
+        UsuarioTR usuarioTr = usuarioTrRepo.findByUsuario(u);
+
+        if (usuarioTr == null) {
+            usuarioTr = new UsuarioTR();
+            usuarioTr.setUsuario(u);
+        }
+
+        usuarioTr.setJwt(jwt);
+        usuarioTrRepo.save(usuarioTr);
     }
 
     private Boolean isEstudiante(DtNuevoUsuario dtNuevoUsuario){
@@ -176,5 +193,8 @@ public class UsuarioService {
         emailService.sendEmail(dtNuevoUsuario.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario" + dtNuevoUsuario.getRol() , htmlContent);
     }
 
-
+    public Boolean existeJwt(String jwt) {
+        UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
+        return usuarioTr != null;
+    }
 }

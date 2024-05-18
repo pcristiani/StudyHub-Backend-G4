@@ -16,10 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class AuthService {
+public class AutenticacionService {
 
     @Autowired
     private UserRepo userRepository;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     private static final long EXPIRATION_TIME = 900_000;
 
@@ -35,16 +38,26 @@ public class AuthService {
             Map<String, Object> claims = new HashMap<>();
             claims.put("id", usuario.getIdUsuario());
             claims.put("ci", usuario.getCedula());
+            claims.put("rol", usuario.getRol());
 
-            return Jwts.builder()
+            String jwt = Jwts.builder()
                     .setClaims(claims)
                     .setSubject(usuario.getCedula())
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                     .signWith(secretKey, SignatureAlgorithm.HS256)
                     .compact();
+
+            usuarioService.actualizarJwt(usuario, jwt);
+            return jwt;
         } else {
             return null;
         }
+    }
+
+    @Transactional
+    public void logoutUser(String jwt) {
+        Usuario usuario = usuarioService.getUserByJwt(jwt);
+        usuarioService.actualizarJwt(usuario, null);
     }
 }

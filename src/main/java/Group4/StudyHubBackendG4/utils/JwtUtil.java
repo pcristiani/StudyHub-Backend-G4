@@ -1,4 +1,4 @@
-package Group4.StudyHubBackendG4.services;
+package Group4.StudyHubBackendG4.utils;
 
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import io.jsonwebtoken.Claims;
@@ -16,20 +16,20 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class JwtService {
+public class JwtUtil {
 
-    private static JwtService instance = null;
+    private static JwtUtil instance = null;
 
     private final String secretKeyString = "44b4ff323b3509c5b897e8199c0655197797128fa71d81335f68b9a2a3286f30";
 
     private final Key secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
 
-    private JwtService() {
+    private JwtUtil() {
     }
 
-    public static JwtService getInstance() {
+    public static JwtUtil getInstance() {
         if (instance == null) {
-            instance = new JwtService();
+            instance = new JwtUtil();
         }
         return instance;
     }
@@ -66,9 +66,9 @@ public class JwtService {
         return usuario;
     }
 
-    public String getUsernameFromToken(String token) {
+    public String getCedulaFromToken(String token) {
         Claims c =  getAllClaimsFromToken(token);
-        return c.get("username", String.class);
+        return c.get("cedula", String.class);
     }
 
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
@@ -81,8 +81,8 @@ public class JwtService {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String cedula = getCedulaFromToken(token);
+        return (cedula.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     private Boolean isTokenExpired(String token) {

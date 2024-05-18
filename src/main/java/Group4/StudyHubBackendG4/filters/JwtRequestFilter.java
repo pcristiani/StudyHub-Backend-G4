@@ -1,7 +1,8 @@
 package Group4.StudyHubBackendG4.filters;
 
-import Group4.StudyHubBackendG4.services.JwtService;
-import Group4.StudyHubBackendG4.services.JwtUserDetailsService;
+import Group4.StudyHubBackendG4.utils.JwtUtil;
+import Group4.StudyHubBackendG4.utils.JwtUserDetailsUtil;
+import Group4.StudyHubBackendG4.services.UsuarioService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,9 +21,11 @@ import java.io.IOException;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+    private JwtUserDetailsUtil jwtUserDetailsUtil;
     @Autowired
-    private JwtService jwtTokenUtil;
+    private JwtUtil jwtTokenUtil;
+    @Autowired
+    private UsuarioService usuarioService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -36,12 +39,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final String requestTokenHeader = request.getHeader("Authorization");
 
-        String username = null;
+        String cedula = null;
         String jwtToken = null;
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
+            if(!usuarioService.existeJwt(jwtToken)){
+                response.sendError(498, "Sesion invalida.");
+            }
             try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                cedula = jwtTokenUtil.getCedulaFromToken(jwtToken);
             } catch (IllegalArgumentException e) {
                 response.sendError(498, "No se ha proporcionado un token válido");
             } catch (ExpiredJwtException e) {
@@ -51,9 +57,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             response.sendError(498, "No se ha proporcionado un token válido");
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (cedula != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = this.jwtUserDetailsUtil.loadUserByUsername(cedula);
 
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
