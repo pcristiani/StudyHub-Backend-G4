@@ -4,8 +4,11 @@ import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
 import Group4.StudyHubBackendG4.persistence.Usuario;
+import Group4.StudyHubBackendG4.persistence.UsuarioTR;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
+import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
+import Group4.StudyHubBackendG4.utils.JwtUtil;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,9 +31,12 @@ public class UsuarioService {
     private PasswordResetTokenRepo tokenRepo;
 
     @Autowired
-    private JwtService jwtService;
+    private JwtUtil jwtUtil;
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private UsuarioTrRepo usuarioTrRepo;
 
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
@@ -48,6 +54,15 @@ public class UsuarioService {
 
     public Usuario getUserByUsername(String username) {
         return userRepo.findByCedula(username);
+    }
+
+    public Usuario getUserByJwt(String jwt) {
+        UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
+        return usuarioTr != null ? usuarioTr.getUsuario() : null;
+    }
+
+    public Usuario getUserByCedula(String cedula) {
+        return userRepo.findByCedula(cedula);
     }
 
     public ResponseEntity<String> createUser(DtNuevoUsuario dtNuevoUsuario) {
@@ -153,5 +168,20 @@ public class UsuarioService {
         return "";
     }
 
+    public void actualizarJwt(Usuario u, String jwt) {
+        UsuarioTR usuarioTr = usuarioTrRepo.findByUsuario(u);
 
+        if (usuarioTr == null) {
+            usuarioTr = new UsuarioTR();
+            usuarioTr.setUsuario(u);
+        }
+
+        usuarioTr.setJwt(jwt);
+        usuarioTrRepo.save(usuarioTr);
+    }
+
+    public Boolean existeJwt(String jwt) {
+        UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
+        return usuarioTr != null;
+    }
 }

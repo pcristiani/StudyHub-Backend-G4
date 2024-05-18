@@ -2,10 +2,12 @@ package Group4.StudyHubBackendG4.persistence;
 
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
+import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
 import Group4.StudyHubBackendG4.services.PasswordService;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Entity
 @Table(name = "Usuario")
