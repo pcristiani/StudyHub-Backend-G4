@@ -1,8 +1,6 @@
 package Group4.StudyHubBackendG4.controllers;
 
-import Group4.StudyHubBackendG4.datatypes.DtNewPassword;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
-import Group4.StudyHubBackendG4.datatypes.DtUsuario;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.services.EmailService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import jakarta.mail.MessagingException;
@@ -57,4 +55,21 @@ public class UsuarioController {
     public ResponseEntity<?> recuperarPassword(@RequestBody DtNewPassword dtNewPassword){
         return usuarioService.recuperarPassword(dtNewPassword.getToken(), dtNewPassword.getNewPassword());
     }
+
+    @PostMapping("/api/docente/altaDocente")
+    public ResponseEntity<?> altaDocente(@Valid @RequestBody DtNuevoDocente dtNuevoDocente) throws MessagingException, IOException {
+        return usuarioService.nuevoDocente(dtNuevoDocente);
+    }
+
+    @DeleteMapping("/api/docente/bajaDocente/{id}")
+    public ResponseEntity<?> bajaDocente(@PathVariable Integer id) {
+        return usuarioService.bajaDocente(id);
+    }
+
+    @PutMapping("/api/docente/modificarDocente/{id}")
+    public ResponseEntity<?> modificarDocente(@PathVariable Integer id, @RequestBody DtDocente dtDocente) {
+        return usuarioService.modificarDocente(id, dtDocente);
+    }
+
+
 }

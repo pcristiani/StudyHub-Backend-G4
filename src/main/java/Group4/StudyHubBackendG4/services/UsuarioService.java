@@ -1,10 +1,14 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtDocente;
+import Group4.StudyHubBackendG4.datatypes.DtNuevoDocente;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
+import Group4.StudyHubBackendG4.persistence.Docente;
 import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.persistence.UsuarioTR;
+import Group4.StudyHubBackendG4.repositories.DocenteRepo;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
@@ -16,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.print.Doc;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -38,6 +43,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioTrRepo usuarioTrRepo;
+
+    @Autowired
+    private DocenteRepo docenteRepo;
 
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
@@ -196,5 +204,54 @@ public class UsuarioService {
     public Boolean existeJwt(String jwt) {
         UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
         return usuarioTr != null;
+    }
+
+    public ResponseEntity<String> nuevoDocente(DtNuevoDocente dtNuevoDocente) {
+
+        Optional<Docente> existingDocente = Optional.ofNullable(docenteRepo.findByCodigoDocente(dtNuevoDocente.getCodigoDocente()));
+        if (existingDocente.isPresent()) {
+            return ResponseEntity.badRequest().body("Ya existe ese codigo de docente.");
+        }
+
+        Docente docente = existingDocente.orElseGet(Docente::new)
+                .DocenteFromDtNuevoDocente(dtNuevoDocente);
+
+        docenteRepo.save(docente);
+
+        return ResponseEntity.ok().body("Docente registrado con éxito.");
+    }
+
+    public ResponseEntity<?> bajaDocente(Integer id) {
+        Optional<Docente> docenteOpt = docenteRepo.findById(id);
+
+        if (docenteOpt.isPresent()) {
+            Docente docente = docenteOpt.get();
+            docente.setActivo(false);
+            docenteRepo.save(docente);
+
+            return ResponseEntity.ok().body("Docente desactivado exitosamente.");
+        }
+        return ResponseEntity.badRequest().body("Id no existe.");
+    }
+
+    public ResponseEntity<?> modificarDocente(Integer id, DtDocente dtDocente) {
+        String message = "No se encontró docente.";
+        Optional<Docente> docenteOptional = docenteRepo.findById(id);
+
+        if (docenteOptional.isPresent()) {
+            Docente aux = docenteOptional.get();
+
+            if (Objects.equals(dtDocente.getCodigoDocente(), aux.getCodigoDocente()) || (!Objects.equals(dtDocente.getCodigoDocente(), aux.getCodigoDocente()) && !docenteRepo.existsByCodigoDocente(dtDocente.getCodigoDocente()))) {
+                aux.setNombre(dtDocente.getNombre() == null || dtDocente.getNombre().isEmpty() ? aux.getNombre() : dtDocente.getNombre());
+                aux.setCodigoDocente(dtDocente.getCodigoDocente() == null || dtDocente.getCodigoDocente().equals(0) ? aux.getCodigoDocente() : dtDocente.getCodigoDocente());
+                aux.setActivo(dtDocente.getActivo() == null ? aux.getActivo() : dtDocente.getActivo());
+
+                docenteRepo.save(aux);
+                return ResponseEntity.ok().body("Docente actualizado exitosamente");
+            } else {
+                message = "Ya existe un docente con ese codigo.";
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
 }

@@ -39,7 +39,7 @@ public class JwtUtil {
         claims.put("id", usuario.getIdUsuario());
         claims.put("ci", usuario.getCedula());
 
-        long expirationTime = 1000 * 60 * 60 * 24;
+        long expirationTime = 1000L * 60 * 60 * 24 * 365;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
         jwtToken = Jwts.builder()
