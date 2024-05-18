@@ -9,6 +9,7 @@ import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
+import Group4.StudyHubBackendG4.utils.RoleUtil;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -69,7 +70,7 @@ public class UsuarioService {
         return userRepo.findByCedula(cedula);
     }
 
-    public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
+    public ResponseEntity<String> register(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {      //TODO: CONTROL EN FRONT: SI ES ESTUDIANTE PRECISA INGRESAR PASSWORD
 
         Optional<Usuario> existingUser = Optional.ofNullable(userRepo.findByCedula(dtNuevoUsuario.getCedula()));
         if (existingUser.isPresent()) {
@@ -124,7 +125,7 @@ public class UsuarioService {
             aux.setActivo(false);
             userRepo.save(aux);
 
-            return ResponseEntity.ok().body("Usuario eliminado exitosamente.");
+            return ResponseEntity.ok().body("Usuario desactivado exitosamente.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Id no existe o usuario ya inactivo.");
     }
@@ -201,7 +202,7 @@ public class UsuarioService {
 
     private void notificarAltaDeUsuarioPorMail(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
         String htmlContent = emailService.getHtmlContent("notifyRegisterByMail.html");
-        htmlContent = htmlContent.replace("$rol", dtNuevoUsuario.getRol());
+        htmlContent = htmlContent.replace("$rol", RoleUtil.getRoleName(dtNuevoUsuario.getRol()));
         htmlContent = htmlContent.replace("$password", dtNuevoUsuario.getPassword());
         htmlContent = htmlContent.replace("$nombreCompleto", dtNuevoUsuario.getNombre() + ' ' + dtNuevoUsuario.getApellido());
         emailService.sendEmail(dtNuevoUsuario.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario" + dtNuevoUsuario.getRol() , htmlContent);
