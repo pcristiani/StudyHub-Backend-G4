@@ -9,6 +9,7 @@ import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
+import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioTrRepo usuarioTrRepo;
+    @Autowired
+    private UsuarioConverter usuarioConverter;
+
 
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
@@ -196,5 +200,27 @@ public class UsuarioService {
     public Boolean existeJwt(String jwt) {
         UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
         return usuarioTr != null;
+    }
+
+    public List<DtUsuario> getEstudiantesPendientes() {
+        List<Usuario> users = userRepo.findAllByValidado(false);
+        return users.stream()
+                .map(usuarioConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public ResponseEntity<?> acceptEstudiante(Integer id, Boolean aceptado) throws IOException, MessagingException {
+        Usuario user = userRepo.findById(id).orElse(null);
+        if (user != null) {
+            user.setValidado(aceptado);
+            userRepo.save(user);
+            //ENVIAR MAIL AL ESTUDIANTE
+            String htmlContent = emailService.getHtmlContent("notifyAcceptedUser.html");
+            htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
+            emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario", htmlContent);
+            return ResponseEntity.ok().body("Usuario aceptado con exito");
+        } else {
+            return ResponseEntity.badRequest().body("Usuario no existe en el sistema.");
+        }
     }
 }
