@@ -41,20 +41,6 @@ public class Usuario {
                 return usuario;
         }
 
-        public DtUsuario userToDtUser() {
-                DtUsuario dtUsuario = new DtUsuario();
-                dtUsuario.setCedula(this.getCedula());
-                dtUsuario.setIdUsuario(this.getIdUsuario());
-                dtUsuario.setNombre(this.getNombre());
-                dtUsuario.setApellido(this.getApellido());
-                dtUsuario.setEmail(this.getEmail());
-                dtUsuario.setFechaNacimiento(this.getFechaNacimiento());
-                dtUsuario.setRol(this.getRol());
-                dtUsuario.setActivo(this.getActivo());
-                dtUsuario.setValidado(this.getValidado());
-                return dtUsuario;
-        }
-
         public void encryptPassword(){
                 this.password = PasswordService.getInstance().hashPassword(this.password);
         }

@@ -1,15 +1,18 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtDocente;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.persistence.UsuarioTR;
+import Group4.StudyHubBackendG4.repositories.DocenteRepo;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.repositories.UserRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
+import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,20 +43,37 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioTrRepo usuarioTrRepo;
+
     @Autowired
     private UsuarioConverter usuarioConverter;
+
+    @Autowired
+    private DocenteConverter docenteConverter;
+
+    @Autowired
+    private PasswordService passwordService;
+
+    @Autowired
+    private DocenteRepo docenteRepo;
 
 
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
         return userRepo.findAll().stream()
-                .map(Usuario::userToDtUser)
+                .map(usuarioConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/getAllDocentes")
+    public List<DtDocente> getAllDocentes() {
+        return docenteRepo.findAll().stream()
+                .map(docenteConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public ResponseEntity<DtUsuario> getUserById(Integer id) {
         return userRepo.findById(id)
-                .map(Usuario::userToDtUser)
+                .map(usuarioConverter::convertToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }

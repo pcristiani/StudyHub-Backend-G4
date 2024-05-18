@@ -1,6 +1,8 @@
 package Group4.StudyHubBackendG4.utils.converters;
 
+import Group4.StudyHubBackendG4.datatypes.DtCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
+import Group4.StudyHubBackendG4.persistence.Carrera;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import org.springframework.stereotype.Component;
 
