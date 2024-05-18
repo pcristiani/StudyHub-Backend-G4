@@ -23,9 +23,6 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Autowired
-    private EmailService emailService;
-
     @GetMapping("/getAllUsers")
     public List<DtUsuario> getAllUsers() {
         return usuarioService.getAllUsers();
