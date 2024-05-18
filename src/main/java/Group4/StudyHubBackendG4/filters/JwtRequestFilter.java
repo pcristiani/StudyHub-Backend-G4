@@ -32,6 +32,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
+
         if (!path.startsWith("/api/")) {
             chain.doFilter(request, response);
             return;
@@ -43,18 +44,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String jwtToken = null;
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
-            if(!usuarioService.existeJwt(jwtToken)){
+            if (!usuarioService.existeJwt(jwtToken)) {
                 response.sendError(498, "Sesion invalida.");
+                return;
             }
             try {
                 cedula = jwtTokenUtil.getCedulaFromToken(jwtToken);
             } catch (IllegalArgumentException e) {
                 response.sendError(498, "No se ha proporcionado un token válido");
+                return;
             } catch (ExpiredJwtException e) {
                 response.sendError(498, "Token expirado");
+                return;
             }
         } else {
             response.sendError(498, "No se ha proporcionado un token válido");
+            return;
         }
 
         if (cedula != null && SecurityContextHolder.getContext().getAuthentication() == null) {

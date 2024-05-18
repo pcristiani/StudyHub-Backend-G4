@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.datatypes;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DtCarrera {
+public class DtNuevaCarrera {
+    @NotBlank(message = "Ingrese un nombre.")
     private String nombre;
+
+    @NotBlank(message = "Ingrese una descripcion.")
     private String descripcion;
-    private Boolean activa;
 }
