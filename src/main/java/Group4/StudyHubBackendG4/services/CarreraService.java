@@ -24,11 +24,11 @@ public class CarreraService {
     @Autowired
     private CarreraConverter carreraConverter;
 
-
-    public List<DtCarrera> getCarreras() {
-        return carreraRepo.findAll().stream()
+    public ResponseEntity<List<DtCarrera>> getCarreras() {
+        return ResponseEntity.ok(carreraRepo.findAll()
+                .stream()
                 .map(carreraConverter::convertToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     public ResponseEntity<String> nuevaCarrera(DtNuevaCarrera dtNuevaCarrera) {

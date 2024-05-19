@@ -1,6 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtCarrera;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,11 @@ public class AsignaturaController {
     @GetMapping("/api/asignatura/getAsignaturas")
     public ResponseEntity<?> getAsignaturas() {
         return asignaturaService.getAsignaturas();
+    }
+
+    @GetMapping("/api/asignatura/getAsignaturasDeCarrera")
+    public ResponseEntity<?> getAsignaturasDeCarrera(Integer idCarrera) {
+        return asignaturaService.getAsignaturasDeCarrera(idCarrera);
     }
 
     @PostMapping("/api/asignatura/altaAsignatura")

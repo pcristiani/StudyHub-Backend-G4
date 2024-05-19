@@ -23,7 +23,7 @@ public class CarreraController {
         this.carreraService = carreraService;
     }
 
-    @GetMapping("/api/carrera/getAllCarreras")
+    @GetMapping("/api/carrera/getCarreras")
     public ResponseEntity<?> getCarreras() {
         return ResponseEntity.ok().body(carreraService.getCarreras());
     }
