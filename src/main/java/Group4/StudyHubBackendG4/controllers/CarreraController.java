@@ -24,9 +24,19 @@ public class CarreraController {
         this.carreraService = carreraService;
     }
 
-    @GetMapping("/api/carrera/getAllCarreras")
+    @GetMapping("/api/carrera/getCarreras")
     public ResponseEntity<?> getCarreras() {
         return ResponseEntity.ok().body(carreraService.getCarreras());
+    }
+
+    @GetMapping("/api/carrera/getCarrerasInscripcionesPendientes")
+    public ResponseEntity<?> getCarrerasInscripcionesPendientes() {
+        return ResponseEntity.ok().body(carreraService.getCarrerasInscripcionesPendientes());
+    }
+
+    @GetMapping("/api/carrera/getInscriptosPendientes/{id}")
+    public ResponseEntity<?> getInscriptosPendientes(@PathVariable Integer id) {
+        return ResponseEntity.ok().body(carreraService.getInscriptosPendientes(id));
     }
 
     @PostMapping("/api/carrera/altaCarrera")
@@ -54,5 +64,9 @@ public class CarreraController {
         return carreraService.inscripcionCarrera(dtInscripcionCarrera);
     }
 
+    @PutMapping("/api/carrera/acceptEstudianteCarrera")
+    public ResponseEntity<?> acceptEstudianteCarrera(@RequestBody DtInscripcionCarrera dtInscripcionCarrera) throws MessagingException, IOException {
+        return carreraService.acceptEstudianteCarrera(dtInscripcionCarrera);
+    }
 
 }

@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class DtInscripcionCarrera {
     private Integer idCarrera;
     private Integer idEstudiante;
+    private Boolean validado;
 }
