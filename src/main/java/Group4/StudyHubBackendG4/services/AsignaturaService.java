@@ -26,6 +26,10 @@ public class AsignaturaService {
     @Autowired
     private AsignaturaConverter asignaturaConverter;
 
+    public ResponseEntity<?> getAsignaturas() {
+        return ResponseEntity.ok().body(asignaturaRepo.findAll());
+    }
+
     public ResponseEntity<?> altaAsignatura(DtAsignatura dtAsignatura) {
 
         if(asignaturaRepo.existsByNombre(dtAsignatura.getNombre())){
@@ -60,11 +64,11 @@ public class AsignaturaService {
             return false;
         }
 
-        Set<Integer> visited = new HashSet<>();
+        Set<Integer> visitado = new HashSet<>();
         Set<Integer> stack = new HashSet<>();
 
         for (Integer idPrevia : idsPreviaturas) {
-            if (isCyclic(idPrevia, visited, stack)) {
+            if (esCiclico(idPrevia, visitado, stack)) {
                 return true;
             }
         }
@@ -72,22 +76,21 @@ public class AsignaturaService {
         return false;
     }
 
-    private boolean isCyclic(Integer idAsignatura, Set<Integer> visited, Set<Integer> stack) {
+    private boolean esCiclico(Integer idAsignatura, Set<Integer> visitado, Set<Integer> stack) {
         if (stack.contains(idAsignatura)) {
-            return true; // Cycle detected
+            return true; // Ciclo detectado
         }
 
-        if (visited.contains(idAsignatura)) {
+        if (visitado.contains(idAsignatura)) {
             return false;
         }
 
-        visited.add(idAsignatura);
+        visitado.add(idAsignatura);
         stack.add(idAsignatura);
-
 
         List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignaturaRepo.findById(idAsignatura));
         for (Previaturas previatura : previaturas) {
-            if (isCyclic(previatura.getPrevia().getIdAsignatura(), visited, stack)) {
+            if (esCiclico(previatura.getPrevia().getIdAsignatura(), visitado, stack)) {
                 return true;
             }
         }
@@ -95,4 +98,5 @@ public class AsignaturaService {
         stack.remove(idAsignatura);
         return false;
     }
+
 }
