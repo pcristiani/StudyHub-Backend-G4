@@ -1,6 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtCarrera;
+import Group4.StudyHubBackendG4.datatypes.DtInscripcionCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
 import Group4.StudyHubBackendG4.services.CarreraService;
 import jakarta.mail.MessagingException;
@@ -46,5 +47,12 @@ public class CarreraController {
     public ResponseEntity<?> modificarCarrera(@PathVariable Integer id, @RequestBody DtCarrera dtCarrera) {
         return carreraService.modificarCarrera(id, dtCarrera);
     }
+
+    //inscripcion a carrera
+    @PostMapping("/api/carrera/inscripcionCarrera")
+    public ResponseEntity<?> inscripcionCarrera(@RequestBody DtInscripcionCarrera dtInscripcionCarrera) {
+        return carreraService.inscripcionCarrera(dtInscripcionCarrera);
+    }
+
 
 }

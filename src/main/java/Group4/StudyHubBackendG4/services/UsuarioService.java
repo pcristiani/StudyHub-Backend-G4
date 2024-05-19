@@ -1,9 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.datatypes.DtDocente;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoDocente;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
-import Group4.StudyHubBackendG4.datatypes.DtUsuario;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.Docente;
 import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
 import Group4.StudyHubBackendG4.persistence.Usuario;
@@ -302,5 +299,27 @@ public class UsuarioService {
         } else {
             return ResponseEntity.badRequest().body("Usuario no existe en el sistema.");
         }
+    }
+
+    public ResponseEntity<?> modificarPerfil(Integer id, DtPerfil dtPerfil) {
+        String message = "No se encontró usuario.";
+        Optional<Usuario> userOptional = usuarioRepo.findById(id);
+
+        if (userOptional.isPresent()) {
+            Usuario aux = userOptional.get();
+
+            if (Objects.equals(dtPerfil.getEmail(), aux.getEmail()) || (!Objects.equals(dtPerfil.getEmail(), aux.getEmail()) && !usuarioRepo.existsByEmail(dtPerfil.getEmail()))) {
+                aux.setNombre(dtPerfil.getNombre() == null || dtPerfil.getNombre().isEmpty() ? aux.getNombre() : dtPerfil.getNombre());
+                aux.setApellido(dtPerfil.getApellido() == null || dtPerfil.getApellido().isEmpty() ? aux.getApellido() : dtPerfil.getApellido());
+                aux.setEmail(dtPerfil.getEmail() == null || dtPerfil.getEmail().isEmpty() ? aux.getEmail() : dtPerfil.getEmail());
+                aux.setFechaNacimiento(dtPerfil.getFechaNacimiento() == null || dtPerfil.getFechaNacimiento().isEmpty() ? aux.getFechaNacimiento() : dtPerfil.getFechaNacimiento());
+
+                usuarioRepo.save(aux);
+                return ResponseEntity.ok().body("Perfil modificado exitosamente.");
+            } else {
+                message = "Ese email ya esta en uso.";
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
 }

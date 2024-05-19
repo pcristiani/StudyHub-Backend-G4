@@ -1,9 +1,14 @@
 package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtCarrera;
+import Group4.StudyHubBackendG4.datatypes.DtInscripcionCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
 import Group4.StudyHubBackendG4.persistence.Carrera;
+import Group4.StudyHubBackendG4.persistence.InscripcionCarrera;
+import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.repositories.CarreraRepo;
+import Group4.StudyHubBackendG4.repositories.InscripcionCarreraRepo;
+import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
 import Group4.StudyHubBackendG4.utils.converters.CarreraConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +28,10 @@ public class CarreraService {
 
     @Autowired
     private CarreraConverter carreraConverter;
+    @Autowired
+    private UsuarioRepo usuarioRepo;
+    @Autowired
+    private InscripcionCarreraRepo inscripcionCarreraRepo;
 
 
     public List<DtCarrera> getCarreras() {
@@ -78,5 +87,41 @@ public class CarreraService {
             }
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    }
+
+    public ResponseEntity<?> inscripcionCarrera(DtInscripcionCarrera dtInscripcionCarrera) {
+        Optional<Carrera> carreraOptional = carreraRepo.findById(dtInscripcionCarrera.getIdCarrera());
+        Optional<Usuario> estudianteOptional = usuarioRepo.findById(dtInscripcionCarrera.getIdEstudiante());
+
+        if (estudianteOptional.isPresent()) {
+            Usuario estudiante = estudianteOptional.get();
+            if(!estudiante.getRol().equals("E")){
+                return ResponseEntity.badRequest().body("El usuario no es un estudiante.");
+            }
+
+            if(carreraOptional.isEmpty()){
+                return ResponseEntity.badRequest().body("La carrera no fue encontrada.");
+            }
+
+            // Verificar si el estudiante ya tiene una inscripción activa y no validada a esta carrera
+            Optional<InscripcionCarrera> existingInscripcion = inscripcionCarreraRepo
+                    .findByUsuarioAndCarreraAndActivaAndValidada(estudiante, carreraOptional.get(), true, false);
+
+            if (existingInscripcion.isPresent()) {
+                return ResponseEntity.badRequest().body("El estudiante ya tiene una inscripción activa.");
+            }
+
+        }else{
+            return ResponseEntity.badRequest().body("El estudiante no fue encontrado.");
+        }
+
+        InscripcionCarrera inscripcionCarrera = new InscripcionCarrera();
+        inscripcionCarrera.setCarrera(carreraOptional.get());
+        inscripcionCarrera.setUsuario(estudianteOptional.get());
+        inscripcionCarrera.setActiva(true);
+        inscripcionCarrera.setValidada(false);
+        inscripcionCarreraRepo.save(inscripcionCarrera);
+
+        return ResponseEntity.ok().body("Inscripcion solicitada exitosamente.");
     }
 }

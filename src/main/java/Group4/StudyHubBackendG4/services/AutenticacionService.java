@@ -35,6 +35,10 @@ public class AutenticacionService {
         Usuario usuario = usuarioRepository.findByCedula(username);
         if (usuario != null && PasswordService.getInstance().checkPasswordHash(candidatePassword, usuario.getPassword())){
 
+            if(!usuario.getValidado()){
+                return "noValidado";
+            }
+
             Map<String, Object> claims = new HashMap<>();
             claims.put("id", usuario.getIdUsuario());
             claims.put("ci", usuario.getCedula());

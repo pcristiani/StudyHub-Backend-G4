@@ -18,5 +18,6 @@ public class InscripcionCarrera {
     @ManyToOne
     @JoinColumn(name = "idCarrera", nullable = false)
     private Carrera carrera;
+    private Boolean validada;
     private Boolean activa;
 }

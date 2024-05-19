@@ -86,5 +86,8 @@ public class UsuarioController {
         return usuarioService.modificarDocente(id, dtDocente);
     }
 
-
+    @PutMapping("/api/usuario/modificarPerfil/{id}")
+    public ResponseEntity<?> modificarPerfil(@PathVariable Integer id, @RequestBody DtPerfil dtPerfil) {
+        return usuarioService.modificarPerfil(id, dtPerfil);
+    }
 }
