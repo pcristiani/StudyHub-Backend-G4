@@ -29,7 +29,7 @@ public class AsignaturaService {
     public ResponseEntity<?> altaAsignatura(DtAsignatura dtAsignatura) {
 
         if(asignaturaRepo.existsByNombre(dtAsignatura.getNombre())){
-            return ResponseEntity.badRequest().body("La carrera ya existe.");
+            return ResponseEntity.badRequest().body("La asignatura ya existe.");
         }
 
         if(this.validarCircularidad(dtAsignatura)){
