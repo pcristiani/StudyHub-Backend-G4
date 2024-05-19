@@ -14,6 +14,11 @@ public class AsignaturaController {
     @Autowired
     private AsignaturaService asignaturaService;
 
+    @GetMapping("/api/asignatura/getAsignaturas")
+    public ResponseEntity<?> getAsignaturas() {
+        return asignaturaService.getAsignaturas();
+    }
+
     @PostMapping("/api/asignatura/altaAsignatura")
     public ResponseEntity<?> altaAsignatura(@Valid @RequestBody DtAsignatura dtAsignatura) {
         return asignaturaService.altaAsignatura(dtAsignatura);
