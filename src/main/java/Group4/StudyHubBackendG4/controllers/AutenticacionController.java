@@ -17,10 +17,10 @@ public class AutenticacionController {
     public ResponseEntity<?> login(@RequestBody DtLoginRequest loginRequest) {
         try {
             String token = autenticacionService.authenticateUser(loginRequest.getCedula(), loginRequest.getPassword());
-            if (token != null && !token.equals("noValidado")) {
+            if (token != null && !token.equals("notJoined")) {
                 return ResponseEntity.ok().body(token);
-            } else if ("noValidado".equals(token)) {
-                return ResponseEntity.status(403).body("Usuario aun no fue validado.");
+            } else if ("notJoined".equals(token)) {
+                return ResponseEntity.status(403).body("El usuario no esta validado o se encuentra inactivo.");
             }else {
                 return ResponseEntity.status(403).body("Usuario o contraseña incorrectos");
             }

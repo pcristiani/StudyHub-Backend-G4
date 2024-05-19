@@ -35,8 +35,8 @@ public class AutenticacionService {
         Usuario usuario = usuarioRepository.findByCedula(username);
         if (usuario != null && PasswordService.getInstance().checkPasswordHash(candidatePassword, usuario.getPassword())){
 
-            if(!usuario.getValidado()){
-                return "noValidado";
+            if(!usuario.getValidado() || !usuario.getActivo()){
+                return "notJoined";
             }
 
             Map<String, Object> claims = new HashMap<>();
