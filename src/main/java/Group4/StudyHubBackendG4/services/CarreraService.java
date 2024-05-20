@@ -1,6 +1,7 @@
 package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtCarrera;
+import Group4.StudyHubBackendG4.datatypes.DtFecha;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
 import Group4.StudyHubBackendG4.persistence.Carrera;
 import Group4.StudyHubBackendG4.repositories.CarreraRepo;
@@ -79,4 +80,11 @@ public class CarreraService {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
+
+    public ResponseEntity<?> altaPeriodoDeExamen(Integer idCarrera, DtFecha inicio, DtFecha fin) {
+        //TODO: Implement
+        return null;
+    }
+
+
 }

@@ -1,8 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtCarrera;
-import Group4.StudyHubBackendG4.datatypes.DtHorario;
+import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +32,9 @@ public class AsignaturaController {
         return asignaturaService.altaAsignatura(dtAsignatura);
     }
 
-    @PostMapping("/api/asignatura/registroHorarios")
-    public ResponseEntity<?> registroHorarios(@Valid @RequestBody DtAsignatura dtAsignatura, @Valid @RequestBody List<DtHorario> listHorarios) {
-        return asignaturaService.registroHorarios(dtAsignatura,listHorarios);
+    @PostMapping("/api/asignatura/registroHorarios/{id}")
+    public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody List<DtHorarioAsignatura> listHorarios) {
+        return asignaturaService.registroHorarios(idAsignatura,listHorarios);
     }
 
 }

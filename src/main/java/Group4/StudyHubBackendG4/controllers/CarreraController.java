@@ -1,10 +1,12 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtCarrera;
+import Group4.StudyHubBackendG4.datatypes.DtFecha;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
 import Group4.StudyHubBackendG4.services.CarreraService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
@@ -17,7 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class CarreraController {
 
-    private final CarreraService carreraService;
+    @Autowired
+    private CarreraService carreraService;
 
     public CarreraController(CarreraService carreraService) {
         this.carreraService = carreraService;
@@ -33,14 +36,12 @@ public class CarreraController {
         return carreraService.nuevaCarrera(dtNuevaCarrera);
     }
 
-    //TODO: Sacar éste método ya que habría que hacer mil validaciones y se va del scope actual
-    /*
-    @DeleteMapping("/api/carrera/bajaCarrera/{id}")
-    public ResponseEntity<?> bajaCarrera(@PathVariable Integer id) {
-        return carreraService.bajaCarrera(id);
+    @PostMapping("/api/carrera/altaPeriodoDeExamen")
+    public ResponseEntity<?> altaPeriodoDeExamen(@Valid @RequestBody Integer idCarrera, DtFecha inicio, DtFecha fin) {
+        return carreraService.altaPeriodoDeExamen(idCarrera, inicio, fin);
     }
 
-     */
+
 
     @PutMapping("/api/carrera/modificarCarrera/{id}")
     public ResponseEntity<?> modificarCarrera(@PathVariable Integer id, @RequestBody DtCarrera dtCarrera) {
