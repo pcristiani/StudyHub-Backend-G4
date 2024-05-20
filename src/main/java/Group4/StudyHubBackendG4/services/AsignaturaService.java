@@ -50,11 +50,15 @@ public class AsignaturaService {
     }
 
     public ResponseEntity<?> altaAsignatura(DtAsignatura dtAsignatura) {
-        Carrera carrera = carreraRepo.findById(dtAsignatura.getIdCarrera())
-                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+        Carrera carrera = carreraRepo.findById(dtAsignatura.getIdCarrera()).orElse(null);
 
-        if(asignaturaRepo.existsByNombre(dtAsignatura.getNombre())){
+        if(carrera == null){
+            return ResponseEntity.badRequest().body("Carrera no encontrada.");
+        }
+        if(asignaturaRepo.existsByNombreAndCarrera(dtAsignatura.getNombre(), carrera)){
             return ResponseEntity.badRequest().body("La asignatura ya existe.");
+        }
+
         if(asignaturaRepo.existsByNombreAndCarrera(dtAsignatura.getNombre(), carrera)){
             return ResponseEntity.badRequest().body("La asignatura ya existe.");
         }

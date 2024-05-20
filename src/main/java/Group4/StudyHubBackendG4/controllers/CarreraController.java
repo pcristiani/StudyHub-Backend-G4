@@ -2,6 +2,7 @@ package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtFecha;
+import Group4.StudyHubBackendG4.datatypes.DtInscripcionCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
 import Group4.StudyHubBackendG4.services.CarreraService;
 import jakarta.mail.MessagingException;
