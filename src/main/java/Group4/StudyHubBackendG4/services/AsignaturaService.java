@@ -1,6 +1,7 @@
 package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtHorario;
 import Group4.StudyHubBackendG4.persistence.Asignatura;
 import Group4.StudyHubBackendG4.persistence.Carrera;
 import Group4.StudyHubBackendG4.persistence.Previaturas;
@@ -119,4 +120,8 @@ public class AsignaturaService {
         return false;
     }
 
+    public ResponseEntity<?> registroHorarios(DtAsignatura dtAsignatura, List<DtHorario> listHorarios) {
+        //TODO: Implement
+        return null;
+    }
 }

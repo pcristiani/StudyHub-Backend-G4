@@ -97,7 +97,7 @@ public class UsuarioService {
             return ResponseEntity.badRequest().body("La cedula ingresada ya existe en el sistema.");
         }
 
-        if(!this.isEstudiante(dtNuevoUsuario)){
+        if(!RoleUtil.isEstudiante(dtNuevoUsuario)){
             dtNuevoUsuario.setPassword(passwordService.generateRandomPassword());
         }
 
@@ -106,7 +106,7 @@ public class UsuarioService {
 
         usuarioRepo.save(usuario);
 
-        if(!this.isEstudiante(dtNuevoUsuario)){
+        if(!RoleUtil.isEstudiante(dtNuevoUsuario)){
             this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
         }
 
@@ -216,10 +216,6 @@ public class UsuarioService {
         usuarioTrRepo.save(usuarioTr);
     }
 
-    private Boolean isEstudiante(DtNuevoUsuario dtNuevoUsuario){
-        return dtNuevoUsuario.getRol().equals("E");
-    }
-
     private void notificarAltaDeUsuarioPorMail(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
         String htmlContent = emailService.getHtmlContent("notifyRegisterByMail.html");
         htmlContent = htmlContent.replace("$rol", RoleUtil.getRoleName(dtNuevoUsuario.getRol()));
@@ -297,7 +293,7 @@ public class UsuarioService {
             //ENVIAR MAIL AL ESTUDIANTE
             String htmlContent = emailService.getHtmlContent("notifyAcceptedUser.html");
             htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
-            emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario", htmlContent);
+            emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario ", htmlContent);
             return ResponseEntity.ok().body("Usuario aceptado con exito");
         } else {
             return ResponseEntity.badRequest().body("Usuario no existe en el sistema.");
