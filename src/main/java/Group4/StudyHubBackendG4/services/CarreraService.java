@@ -2,6 +2,7 @@ package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtInscripcionCarrera;
+import Group4.StudyHubBackendG4.datatypes.DtFecha;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.persistence.Carrera;
@@ -46,11 +47,11 @@ public class CarreraService {
     @Autowired
     private CarreraCoordinadorRepo carreraCoordinadorRepo;
 
-
-    public List<DtCarrera> getCarreras() {
-        return carreraRepo.findAll().stream()
+    public ResponseEntity<List<DtCarrera>> getCarreras() {
+        return ResponseEntity.ok(carreraRepo.findAll()
+                .stream()
                 .map(carreraConverter::convertToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     public List<DtCarrera> getCarrerasInscripcionesPendientes() {
@@ -234,4 +235,11 @@ public class CarreraService {
         }
         return true; // Todas las carreras tienen otros coordinadores
     }
+
+    public ResponseEntity<?> altaPeriodoDeExamen(Integer idCarrera, DtFecha inicio, DtFecha fin) {
+        //TODO: Implement
+        return null;
+    }
+
+
 }

@@ -25,7 +25,7 @@ public class AutenticacionController {
                 return ResponseEntity.status(403).body("Usuario o contraseña incorrectos");
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("No se pudo cerrar sesion, verifique datos enviados.");
+            return ResponseEntity.badRequest().body("No se pudo iniciar sesion, verifique datos enviados.");
         }
     }
 

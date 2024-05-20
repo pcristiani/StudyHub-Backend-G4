@@ -1,12 +1,17 @@
 package Group4.StudyHubBackendG4.repositories;
 
 import Group4.StudyHubBackendG4.persistence.Asignatura;
+import Group4.StudyHubBackendG4.persistence.Carrera;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface AsignaturaRepo extends JpaRepository<Asignatura, Integer>{
 
-    Boolean existsByNombre(String nombreAsignatura);
+    Boolean existsByNombreAndCarrera(String nombreAsignatura, Carrera nombreCarrera);
+
+    List<Asignatura> findByCarrera(Carrera idCarrera);
 
 }

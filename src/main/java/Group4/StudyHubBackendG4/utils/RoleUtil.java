@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.utils;
 
+import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import lombok.experimental.UtilityClass;
 
 import java.util.HashMap;
@@ -29,5 +30,21 @@ public class RoleUtil {
 
     public static String getRoleAbbreviation(String roleFullName) {
         return reverseRoleMap.getOrDefault(roleFullName, null);
+    }
+
+    public Boolean isEstudiante(DtNuevoUsuario dtNuevoUsuario){
+        return dtNuevoUsuario.getRol().equals("E");
+    }
+
+    public Boolean isFuncionario(DtNuevoUsuario dtNuevoUsuario){
+        return dtNuevoUsuario.getRol().equals("F");
+    }
+
+    public Boolean isCoordinador(DtNuevoUsuario dtNuevoUsuario){
+        return dtNuevoUsuario.getRol().equals("C");
+    }
+
+    public Boolean isAdmin(DtNuevoUsuario dtNuevoUsuario){
+        return dtNuevoUsuario.getRol().equals("A");
     }
 }

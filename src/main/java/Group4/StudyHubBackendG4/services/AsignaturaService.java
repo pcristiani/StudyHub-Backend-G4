@@ -1,9 +1,12 @@
 package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
 import Group4.StudyHubBackendG4.persistence.Asignatura;
+import Group4.StudyHubBackendG4.persistence.Carrera;
 import Group4.StudyHubBackendG4.persistence.Previaturas;
 import Group4.StudyHubBackendG4.repositories.AsignaturaRepo;
+import Group4.StudyHubBackendG4.repositories.CarreraRepo;
 import Group4.StudyHubBackendG4.repositories.PreviaturasRepo;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AsignaturaService {
@@ -24,15 +28,34 @@ public class AsignaturaService {
     private PreviaturasRepo previaturasRepo;
 
     @Autowired
+    private CarreraRepo carreraRepo;
+
+    @Autowired
     private AsignaturaConverter asignaturaConverter;
 
     public ResponseEntity<?> getAsignaturas() {
         return ResponseEntity.ok().body(asignaturaRepo.findAll());
     }
 
+    public ResponseEntity<List<DtAsignatura>> getAsignaturasDeCarrera(Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera)
+                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+
+        List<DtAsignatura> dtAsignaturas = asignaturaRepo.findByCarrera(carrera)
+                .stream()
+                .map(asignaturaConverter::convertToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtAsignaturas);
+    }
+
     public ResponseEntity<?> altaAsignatura(DtAsignatura dtAsignatura) {
+        Carrera carrera = carreraRepo.findById(dtAsignatura.getIdCarrera())
+                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
 
         if(asignaturaRepo.existsByNombre(dtAsignatura.getNombre())){
+            return ResponseEntity.badRequest().body("La asignatura ya existe.");
+        if(asignaturaRepo.existsByNombreAndCarrera(dtAsignatura.getNombre(), carrera)){
             return ResponseEntity.badRequest().body("La asignatura ya existe.");
         }
 
@@ -99,4 +122,8 @@ public class AsignaturaService {
         return false;
     }
 
+    public ResponseEntity<?> registroHorarios(Integer idAsignatura, List<DtHorarioAsignatura> listHorarios) {
+        //TODO: Impl
+        return null;
+    }
 }
