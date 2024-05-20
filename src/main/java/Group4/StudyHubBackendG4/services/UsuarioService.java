@@ -1,14 +1,8 @@
 package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.*;
-import Group4.StudyHubBackendG4.persistence.Docente;
-import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
-import Group4.StudyHubBackendG4.persistence.Usuario;
-import Group4.StudyHubBackendG4.persistence.UsuarioTR;
-import Group4.StudyHubBackendG4.repositories.DocenteRepo;
-import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
-import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
-import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
+import Group4.StudyHubBackendG4.persistence.*;
+import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
@@ -53,6 +47,11 @@ public class UsuarioService {
 
     @Autowired
     private DocenteRepo docenteRepo;
+
+    @Autowired
+    private CarreraCoordinadorRepo carreraCoordinadorRepo;
+    @Autowired
+    private CarreraService carreraService;
 
     public List<DtUsuario> getUsuarios() {
         return usuarioRepo.findAll().stream()
@@ -120,25 +119,35 @@ public class UsuarioService {
             if (Objects.equals(dtUsuario.getCedula(), aux.getCedula()) || (!Objects.equals(dtUsuario.getCedula(), aux.getCedula()) && !usuarioRepo.existsByCedula(dtUsuario.getCedula()))) {
                 aux.setNombre(dtUsuario.getNombre() == null || dtUsuario.getNombre().isEmpty() ? aux.getNombre() : dtUsuario.getNombre());
                 aux.setApellido(dtUsuario.getApellido() == null || dtUsuario.getApellido().isEmpty() ? aux.getApellido() : dtUsuario.getApellido());
-                aux.setEmail(dtUsuario.getEmail() == null || dtUsuario.getEmail().isEmpty() ? aux.getEmail() : dtUsuario.getEmail());
                 aux.setFechaNacimiento(dtUsuario.getFechaNacimiento() == null || dtUsuario.getFechaNacimiento().isEmpty() ? aux.getFechaNacimiento() : dtUsuario.getFechaNacimiento());
                 aux.setCedula(dtUsuario.getCedula() == null || dtUsuario.getCedula().isEmpty() ? aux.getCedula() : dtUsuario.getCedula());
+
+                //Controlar que el email no exista
+                if (Objects.equals(dtUsuario.getEmail(), aux.getEmail()) || (!Objects.equals(dtUsuario.getEmail(), aux.getEmail()) && !usuarioRepo.existsByEmail(dtUsuario.getEmail()))) {
+                    aux.setEmail(dtUsuario.getEmail() == null || dtUsuario.getEmail().isEmpty() ? aux.getEmail() : dtUsuario.getEmail());
+                } else {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("El email ingresado ya existe en el sistema.");
+                }
 
                 usuarioRepo.save(aux);
                 return ResponseEntity.ok().body("Usuario actualizado con exitosamente");
             } else {
-                message = "Nombre de usuario ya existe.";
+                message = "La nueva cedula ya existe en el sistema.";
             }
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
-
 
     public ResponseEntity<?> bajaUsuario(Integer id) {
         Optional<Usuario> userOptional = usuarioRepo.findById(id);
 
         if (userOptional.isPresent()) {
             Usuario aux = userOptional.get();
+
+            if (aux.getRol().equals("C") && !carreraService.quedanCarrerasDesatentidas(id)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede desactivar al coordinador porque dejaría una carrera sin coordinador.");
+            }
+
             aux.setActivo(false);
             usuarioRepo.save(aux);
 

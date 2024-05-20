@@ -5,8 +5,10 @@ import Group4.StudyHubBackendG4.datatypes.DtInscripcionCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.persistence.Carrera;
+import Group4.StudyHubBackendG4.persistence.CarreraCoordinador;
 import Group4.StudyHubBackendG4.persistence.InscripcionCarrera;
 import Group4.StudyHubBackendG4.persistence.Usuario;
+import Group4.StudyHubBackendG4.repositories.CarreraCoordinadorRepo;
 import Group4.StudyHubBackendG4.repositories.CarreraRepo;
 import Group4.StudyHubBackendG4.repositories.InscripcionCarreraRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
@@ -41,6 +43,8 @@ public class CarreraService {
     private InscripcionCarreraRepo inscripcionCarreraRepo;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private CarreraCoordinadorRepo carreraCoordinadorRepo;
 
 
     public List<DtCarrera> getCarreras() {
@@ -161,6 +165,8 @@ public class CarreraService {
         inscripcionCarrera.setValidada(true);
         inscripcionCarreraRepo.save(inscripcionCarrera);
 
+        assert user != null;
+        assert carrera != null;
         this.notificarValidacionCarrera(user, carrera.getNombre());
 
         return ResponseEntity.ok().body("Se aceptó la inscripcion del estudiante a la carrera.");
@@ -182,6 +188,32 @@ public class CarreraService {
         return null;
     }
 
+    //Funcion que asigne coordinadores a carreras en la tabla carrera_coordinador
+    public ResponseEntity<?> asignarCoordinador(Integer idCarrera, Integer idCoordinador) {
+        Optional<Carrera> carreraOpt = carreraRepo.findById(idCarrera);
+        Optional<Usuario> coordinadorOpt = usuarioRepo.findById(idCoordinador);
+
+        if (carreraOpt.isPresent() && coordinadorOpt.isPresent()) {
+            Carrera carrera = carreraOpt.get();
+            Usuario coordinador = coordinadorOpt.get();
+
+            if (carreraCoordinadorRepo.existsByCarreraAndUsuario(carrera, coordinador)) {
+                return ResponseEntity.badRequest().body("El coordinador ya está asignado a la carrera.");
+            }
+
+            if (!RoleUtil.getRoleName(coordinador.getRol()).equals("Coordinador")) {
+                return ResponseEntity.badRequest().body("El usuario no es un coordinador.");
+            }
+
+            CarreraCoordinador carreraCoordinador = new CarreraCoordinador();
+            carreraCoordinador.setCarrera(carrera);
+            carreraCoordinador.setUsuario(coordinador);
+            carreraCoordinadorRepo.save(carreraCoordinador);
+
+            return ResponseEntity.ok().body("Coordinador asignado exitosamente.");
+        }
+        return ResponseEntity.badRequest().body("Id no existe.");
+    }
 
 
     private void notificarValidacionCarrera(Usuario user, String carrera) throws IOException, MessagingException {
@@ -189,5 +221,17 @@ public class CarreraService {
         htmlContent = htmlContent.replace("$carrera", carrera);
         htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
         emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de validación a carrera", htmlContent);
+    }
+
+    boolean quedanCarrerasDesatentidas(Integer coordinadorId) {
+        List<Carrera> carreras = carreraCoordinadorRepo.findCarrerasByCoordinadorId(coordinadorId);
+
+        for (Carrera carrera : carreras) {
+            long countCoordinadores = carreraCoordinadorRepo.countCoordinadoresByCarreraId(carrera.getIdCarrera());
+            if (countCoordinadores <= 1) {
+                return false; // Hay una carrera que quedaría sin coordinador
+            }
+        }
+        return true; // Todas las carreras tienen otros coordinadores
     }
 }

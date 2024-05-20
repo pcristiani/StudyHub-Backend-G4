@@ -51,13 +51,13 @@ public class UsuarioController {
         return usuarioService.register(dtNuevoUsuario);
     }
 
-    @PutMapping("/api/usuario/updateUsuario/{id}")
-    public ResponseEntity<?> updateUsuario(@PathVariable Integer id, @RequestBody DtUsuario dtUsuario) {
+    @PutMapping("/api/usuario/modificarUsuario/{id}")
+    public ResponseEntity<?> modificarUsuario(@PathVariable Integer id, @RequestBody DtUsuario dtUsuario) {
         return usuarioService.modificarUsuario(id, dtUsuario);
     }
 
-    @DeleteMapping("/api/usuario/deleteUsuario/{id}")
-    public ResponseEntity<?> deleteUsuario(@PathVariable Integer id) {
+    @DeleteMapping("/api/usuario/bajaUsuario/{id}")
+    public ResponseEntity<?> bajaUsuario(@PathVariable Integer id) {
         return usuarioService.bajaUsuario(id);
     }
 

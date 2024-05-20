@@ -69,4 +69,9 @@ public class CarreraController {
         return carreraService.acceptEstudianteCarrera(dtInscripcionCarrera);
     }
 
+    //Este metodo es temporal, se va a sacar: asignar coordinador a carrera
+    @PutMapping("/api/carrera/asignarCoordinadorCarrera/{id}")
+    public ResponseEntity<?> asignarCoordinadorCarrera(@PathVariable Integer id, @RequestBody Integer idUsuario) {
+        return carreraService.asignarCoordinador(id, idUsuario);
+    }
 }
