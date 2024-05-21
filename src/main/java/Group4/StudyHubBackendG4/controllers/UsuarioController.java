@@ -90,4 +90,9 @@ public class UsuarioController {
     public ResponseEntity<?> modificarPerfil(@PathVariable Integer id, @RequestBody DtPerfil dtPerfil) {
         return usuarioService.modificarPerfil(id, dtPerfil);
     }
+
+    @PutMapping("/api/usuario/modificarPassword/{id}")
+    public ResponseEntity<?> modificarPassword(@PathVariable Integer id, @RequestBody String newPassword) {
+        return usuarioService.modificarPassword(id, newPassword);
+    }
 }
