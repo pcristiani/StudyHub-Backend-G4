@@ -6,6 +6,7 @@ import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,27 +22,32 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @GetMapping("/api/usuario/getUsuarios")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F')")
     public List<DtUsuario> getUsuarios() {
         return usuarioService.getUsuarios();
     }
 
     @GetMapping("/api/usuario/getDocentes")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getDocentes() {
         return ResponseEntity.ok().body(usuarioService.getDocentes());
     }
 
     @GetMapping("/api/usuario/getUsuario/{id}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getUsuariosById(@PathVariable Integer id) {
         return usuarioService.getUserById(id);
     }
 
     @GetMapping("/api/usuario/getEstudiantesPendientes")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getEstudiantesPendientes() {
         List<DtUsuario> dtUsuarios = usuarioService.getEstudiantesPendientes();
         return ResponseEntity.ok().body(dtUsuarios);
     }
 
     @PutMapping("/api/usuario/acceptEstudiante/{id}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> acceptEstudiante(@PathVariable Integer id, @RequestBody Boolean aceptado) throws MessagingException, IOException {
         return usuarioService.acceptEstudiante(id,aceptado);
     }
@@ -52,11 +58,13 @@ public class UsuarioController {
     }
 
     @PutMapping("/api/usuario/modificarUsuario/{id}")
+    @PreAuthorize("hasRole('ROLE_A')")
     public ResponseEntity<?> modificarUsuario(@PathVariable Integer id, @RequestBody DtUsuario dtUsuario) {
         return usuarioService.modificarUsuario(id, dtUsuario);
     }
 
     @DeleteMapping("/api/usuario/bajaUsuario/{id}")
+    @PreAuthorize("hasRole('ROLE_A')")
     public ResponseEntity<?> bajaUsuario(@PathVariable Integer id) {
         return usuarioService.bajaUsuario(id);
     }
@@ -72,26 +80,31 @@ public class UsuarioController {
     }
 
     @PostMapping("/api/docente/altaDocente")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> altaDocente(@Valid @RequestBody DtNuevoDocente dtNuevoDocente) throws MessagingException, IOException {
         return usuarioService.nuevoDocente(dtNuevoDocente);
     }
 
     @DeleteMapping("/api/docente/bajaDocente/{id}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> bajaDocente(@PathVariable Integer id) {
         return usuarioService.bajaDocente(id);
     }
 
     @PutMapping("/api/docente/modificarDocente/{id}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> modificarDocente(@PathVariable Integer id, @RequestBody DtDocente dtDocente) {
         return usuarioService.modificarDocente(id, dtDocente);
     }
 
     @PutMapping("/api/usuario/modificarPerfil/{id}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> modificarPerfil(@PathVariable Integer id, @RequestBody DtPerfil dtPerfil) {
         return usuarioService.modificarPerfil(id, dtPerfil);
     }
 
     @PutMapping("/api/usuario/modificarPassword/{id}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> modificarPassword(@PathVariable Integer id, @RequestBody String newPassword) {
         return usuarioService.modificarPassword(id, newPassword);
     }

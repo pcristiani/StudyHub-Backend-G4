@@ -67,8 +67,14 @@ public class JwtUtil {
         usuario.setNombre((String) claims.get("nombre"));
         usuario.setApellido((String) claims.get("apellido"));
         usuario.setFechaNacimiento((String) claims.get("fechaNacimiento"));
+        usuario.setRol((String) claims.get("rol"));
 
         return usuario;
+    }
+
+    public String getRoleFromToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get("rol", String.class);
     }
 
     public String getCedulaFromToken(String token) {
