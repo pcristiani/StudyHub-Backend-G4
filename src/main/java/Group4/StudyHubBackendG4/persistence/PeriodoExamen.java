@@ -19,7 +19,6 @@ public class PeriodoExamen {
     @ManyToOne
     @JoinColumn(name = "idCarrera", nullable = false)
     private Carrera carrera;
-    private Integer anio;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
 }
