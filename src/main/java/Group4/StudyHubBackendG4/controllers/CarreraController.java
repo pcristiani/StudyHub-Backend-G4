@@ -1,9 +1,6 @@
 package Group4.StudyHubBackendG4.controllers;
 
-import Group4.StudyHubBackendG4.datatypes.DtCarrera;
-import Group4.StudyHubBackendG4.datatypes.DtFecha;
-import Group4.StudyHubBackendG4.datatypes.DtInscripcionCarrera;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.services.CarreraService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -52,10 +49,11 @@ public class CarreraController {
         return carreraService.nuevaCarrera(dtNuevaCarrera);
     }
 
-    @PostMapping("/api/carrera/altaPeriodoDeExamen")
+
+    @PostMapping("/api/carrera/altaPeriodoDeExamen/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
-    public ResponseEntity<?> altaPeriodoDeExamen(@Valid @RequestBody Integer idCarrera, DtFecha inicio, DtFecha fin) {
-        return carreraService.altaPeriodoDeExamen(idCarrera, inicio, fin);
+    public ResponseEntity<?> altaPeriodoDeExamen(@PathVariable Integer idCarrera, @RequestBody DtPeriodoExamenRequest fechas) {
+        return carreraService.altaPeriodoDeExamen(idCarrera, fechas);
     }
 
     @PutMapping("/api/carrera/modificarCarrera/{id}")

@@ -1,18 +1,8 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.datatypes.DtCarrera;
-import Group4.StudyHubBackendG4.datatypes.DtInscripcionCarrera;
-import Group4.StudyHubBackendG4.datatypes.DtFecha;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaCarrera;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
-import Group4.StudyHubBackendG4.persistence.Carrera;
-import Group4.StudyHubBackendG4.persistence.CarreraCoordinador;
-import Group4.StudyHubBackendG4.persistence.InscripcionCarrera;
-import Group4.StudyHubBackendG4.persistence.Usuario;
-import Group4.StudyHubBackendG4.repositories.CarreraCoordinadorRepo;
-import Group4.StudyHubBackendG4.repositories.CarreraRepo;
-import Group4.StudyHubBackendG4.repositories.InscripcionCarreraRepo;
-import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
+import Group4.StudyHubBackendG4.datatypes.*;
+import Group4.StudyHubBackendG4.persistence.*;
+import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.CarreraConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
@@ -23,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,21 +23,31 @@ import java.util.stream.Collectors;
 @Service
 public class CarreraService {
 
+    private String message = "";
+
     @Autowired
     private CarreraRepo carreraRepo;
 
     @Autowired
     private CarreraConverter carreraConverter;
+
     @Autowired
     private UsuarioConverter usuarioConverter;
+
     @Autowired
     private UsuarioRepo usuarioRepo;
+
     @Autowired
     private InscripcionCarreraRepo inscripcionCarreraRepo;
+
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private CarreraCoordinadorRepo carreraCoordinadorRepo;
+
+    @Autowired
+    private PeriodoExamenRepo periodoExamenRepo;
 
     public ResponseEntity<List<DtCarrera>> getCarreras() {
         return ResponseEntity.ok(carreraRepo.findAll()
@@ -216,15 +218,7 @@ public class CarreraService {
         return ResponseEntity.badRequest().body("Id no existe.");
     }
 
-
-    private void notificarValidacionCarrera(Usuario user, String carrera) throws IOException, MessagingException {
-        String htmlContent = emailService.getHtmlContent("notifyAcceptedCarrera.html");
-        htmlContent = htmlContent.replace("$carrera", carrera);
-        htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
-        emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de validación a carrera", htmlContent);
-    }
-
-    boolean quedanCarrerasDesatentidas(Integer coordinadorId) {
+    public boolean quedanCarrerasDesatentidas(Integer coordinadorId) {
         List<Carrera> carreras = carreraCoordinadorRepo.findCarrerasByCoordinadorId(coordinadorId);
 
         for (Carrera carrera : carreras) {
@@ -236,10 +230,51 @@ public class CarreraService {
         return true; // Todas las carreras tienen otros coordinadores
     }
 
-    public ResponseEntity<?> altaPeriodoDeExamen(Integer idCarrera, DtFecha inicio, DtFecha fin) {
-        //TODO: Implement
-        return null;
+    public ResponseEntity<?> altaPeriodoDeExamen(Integer idCarrera, DtPeriodoExamenRequest fechas) {
+        try {
+            LocalDate fechaInicio = fechas.getInicio().convertToLocalDate();
+            LocalDate fechaFin = fechas.getFin().convertToLocalDate();
+
+            Carrera carrera = carreraRepo.findById(idCarrera)
+                    .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+
+            if (!validatePeriodo(carrera, fechaInicio, fechaFin)) {
+                return ResponseEntity.badRequest().body(this.message);
+            }
+
+            // Crear y guardar el nuevo período
+            PeriodoExamen nuevoPeriodo = new PeriodoExamen();
+            nuevoPeriodo.setCarrera(carrera);
+            nuevoPeriodo.setFechaInicio(fechaInicio);
+            nuevoPeriodo.setFechaFin(fechaFin);
+
+            periodoExamenRepo.save(nuevoPeriodo);
+
+            return ResponseEntity.ok("Período de examen añadido con éxito.");
+        } catch (DateTimeException e) {
+            this.message = "Se ha ingresado una fecha invalida";
+            return ResponseEntity.badRequest().body(this.message);
+        }
     }
 
+    private void notificarValidacionCarrera(Usuario user, String carrera) throws IOException, MessagingException {
+        String htmlContent = emailService.getHtmlContent("notifyAcceptedCarrera.html");
+        htmlContent = htmlContent.replace("$carrera", carrera);
+        htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
+        emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de validación a carrera", htmlContent);
+    }
 
+    private boolean validatePeriodo(Carrera carrera, LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fechaFin.isBefore(fechaInicio)) {
+            this.message = "La fecha de fin no puede ser antes de la fecha de inicio.";
+            return false;
+        }
+
+        List<PeriodoExamen> periodosExistentes = periodoExamenRepo.findByCarreraAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                carrera, fechaFin, fechaInicio);
+        this.message = "El período ingresado se solapa con un período existente.";
+
+
+        return periodosExistentes.isEmpty();
+    }
 }

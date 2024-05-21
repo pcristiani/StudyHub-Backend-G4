@@ -1,9 +1,11 @@
 package Group4.StudyHubBackendG4.persistence;
 
+import Group4.StudyHubBackendG4.datatypes.DtFecha;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -17,9 +19,7 @@ public class PeriodoExamen {
     @ManyToOne
     @JoinColumn(name = "idCarrera", nullable = false)
     private Carrera carrera;
-    private String nombre;
-    private String descripcion;
-    private String departamento;
-    private Integer creditos;
-    private Boolean activo;
+    private LocalDate fechaInicio;
+    private LocalDate fechaFin;
 }
+
