@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @Service
 public class CarreraService {
 
+    private String message = "";
+
     @Autowired
     private CarreraRepo carreraRepo;
 
@@ -245,7 +247,7 @@ public class CarreraService {
                     .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
 
             if (!validatePeriodo(carrera, fechaInicio, fechaFin)) {
-                return ResponseEntity.badRequest().body("El período ingresado se solapa con un período existente.");
+                return ResponseEntity.badRequest().body(this.message);
             }
 
             // Crear y guardar el nuevo período
@@ -259,15 +261,22 @@ public class CarreraService {
 
             return ResponseEntity.ok("Período de examen añadido con éxito.");
         } catch (DateTimeException e) {
-            return ResponseEntity.badRequest().body("Se ha ingresado una fecha invalida");
+            this.message = "Se ha ingresado una fecha invalida";
+            return ResponseEntity.badRequest().body(this.message);
         }
     }
 
     private boolean validatePeriodo(Carrera carrera, LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fechaFin.isBefore(fechaInicio)) {
+            this.message = "La fecha de fin no puede ser antes de la fecha de inicio.";
+            return false;
+        }
+
         List<PeriodoExamen> periodosExistentes = periodoExamenRepo.findByCarreraAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
                 carrera, fechaFin, fechaInicio);
+        this.message = "El período ingresado se solapa con un período existente.";
+
 
         return periodosExistentes.isEmpty();
     }
-
 }
