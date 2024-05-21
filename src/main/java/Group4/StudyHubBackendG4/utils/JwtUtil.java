@@ -37,7 +37,12 @@ public class JwtUtil {
         String jwtToken = "";
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", usuario.getIdUsuario());
-        claims.put("ci", usuario.getCedula());
+        claims.put("cedula", usuario.getCedula());
+        claims.put("rol", usuario.getRol());
+        claims.put("nombre", usuario.getNombre());
+        claims.put("apellido", usuario.getApellido());
+        claims.put("email", usuario.getEmail());
+        claims.put("fechaNacimiento", usuario.getFechaNacimiento());
 
         long expirationTime = 1000L * 60 * 60 * 24 * 365;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
@@ -62,8 +67,14 @@ public class JwtUtil {
         usuario.setNombre((String) claims.get("nombre"));
         usuario.setApellido((String) claims.get("apellido"));
         usuario.setFechaNacimiento((String) claims.get("fechaNacimiento"));
+        usuario.setRol((String) claims.get("rol"));
 
         return usuario;
+    }
+
+    public String getRoleFromToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get("rol", String.class);
     }
 
     public String getCedulaFromToken(String token) {

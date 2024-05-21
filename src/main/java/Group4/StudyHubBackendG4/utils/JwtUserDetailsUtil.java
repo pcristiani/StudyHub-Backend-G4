@@ -24,15 +24,15 @@ public class JwtUserDetailsUtil implements UserDetailsService {
         Usuario usuario = usuarioService.getUserByUsername(cedula);
 
         if (usuario == null) {
-            throw new UsernameNotFoundException("No existe un usuario registrado con la cedula:  " + cedula);
+            throw new UsernameNotFoundException("No existe un usuario registrado con la cedula: " + cedula);
         }
 
-        Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(String.valueOf("AUTH_USER")));
+        Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()));
         return new org.springframework.security.core.userdetails.User(usuario.getCedula(), usuario.getPassword(), authorities);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+        return null; // No se necesita este método para nuestro caso
     }
 }

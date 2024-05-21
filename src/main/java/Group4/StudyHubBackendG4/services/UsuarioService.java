@@ -327,4 +327,16 @@ public class UsuarioService {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
+
+    public ResponseEntity<?> modificarPassword(Integer id, String newPassword) {
+        Optional<Usuario> userOptional = usuarioRepo.findById(id);
+
+        if (userOptional.isPresent()) {
+            Usuario aux = userOptional.get();
+            aux.setPassword(PasswordService.getInstance().hashPassword(newPassword));
+            usuarioRepo.save(aux);
+            return ResponseEntity.ok().body("Contraseña modificada exitosamente.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró usuario.");
+    }
 }

@@ -41,14 +41,21 @@ public class AutenticacionService {
 
             Map<String, Object> claims = new HashMap<>();
             claims.put("id", usuario.getIdUsuario());
-            claims.put("ci", usuario.getCedula());
+            claims.put("cedula", usuario.getCedula());
             claims.put("rol", usuario.getRol());
+            claims.put("nombre", usuario.getNombre());
+            claims.put("apellido", usuario.getApellido());
+            claims.put("email", usuario.getEmail());
+            claims.put("fechaNacimiento", usuario.getFechaNacimiento());
+
+            long expirationTime = 1000L * 60 * 60 * 24 * 365;
+            Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
             String jwt = Jwts.builder()
                     .setClaims(claims)
-                    .setSubject(usuario.getCedula())
+                    .setSubject("userDetails")
                     .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                    .setExpiration(expirationDate)
                     .signWith(secretKey, SignatureAlgorithm.HS256)
                     .compact();
 
