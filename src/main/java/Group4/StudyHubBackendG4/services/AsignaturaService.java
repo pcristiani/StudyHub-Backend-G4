@@ -1,12 +1,11 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
 import Group4.StudyHubBackendG4.utils.converters.HorarioAsignaturaConverter;
+import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,13 @@ public class AsignaturaService {
     private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @Autowired
+    private HorarioDiasRepo horarioDiasRepo;
+
+    @Autowired
     private DocenteAsignaturaRepo docenteAsignaturaRepo;
+
+    @Autowired
+    private DocenteHorarioAsignaturaRepo docenteHorarioAsignaturaRepo;
 
     @Autowired
     private AsignaturaConverter asignaturaConverter;
@@ -125,6 +130,7 @@ public class AsignaturaService {
         return ResponseEntity.ok().body("Asignatura creada exitosamente.");
     }
 
+    //TODO: Contemplar con las previaturas ya existentes en la BD
     private Boolean validarCircularidad(List<Integer> idsPreviaturas) {
         if (idsPreviaturas == null || idsPreviaturas.isEmpty()) {
             return false;
@@ -165,12 +171,84 @@ public class AsignaturaService {
         return false;
     }
 
-    /*No funca
-    public List<HorarioAsignatura> findHorarioAsignaturasByDocenteAndAnioAndDias(Integer idAsignatura, String docenteNombre,
-                                                                                 Integer anio,
-                                                                                 List<Integer> dias) {
-        return horarioAsignaturaRepo.findHorarioAsignaturasByDocenteAndAnioAndDiasAndAsignaturaId(idAsignatura, docenteNombre, anio, dias);
+    @Transactional
+    public ResponseEntity<?> registroHorarios(Integer idAsignatura, DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
+        try {
+            Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid idAsignatura"));
+
+            Docente docente = docenteRepo.findById(dtNuevoHorarioAsignatura.getIdDocente())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid idDocente"));
+
+            // Obtener horarios para ese docente y ese anio
+            List<HorarioDias> existingHorarioDias = getExistingHorarioDiasForDocenteAndAnio(docente, dtNuevoHorarioAsignatura.getAnio());
+
+            // Validate for overlapping schedules
+            validateNoOverlappingSchedules(existingHorarioDias, dtNuevoHorarioAsignatura.getDtHorarioDias());
+
+            // Create and save HorarioAsignatura
+            HorarioAsignatura horarioAsignatura = createAndSaveHorarioAsignatura(asignatura, dtNuevoHorarioAsignatura.getAnio());
+
+            // Create and save HorarioDias
+            createAndSaveHorarioDias(horarioAsignatura, dtNuevoHorarioAsignatura.getDtHorarioDias());
+
+            // Create and save DocenteHorarioAsignatura
+            createAndSaveDocenteHorarioAsignatura(docente, horarioAsignatura);
+
+            return ResponseEntity.ok("Horarios registered successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-     */
+    private List<HorarioDias> getExistingHorarioDiasForDocenteAndAnio(Docente docente, Integer anio) {
+        return docenteHorarioAsignaturaRepo.findHorarioDiasByDocenteIdAndAnio(docente.getIdDocente(), anio);
+    }
+
+
+    private void validateNoOverlappingSchedules(List<HorarioDias> existingHorarioDias, List<DtHorarioDias> newHorarioDias) {
+        for (DtHorarioDias newHorarioDia : newHorarioDias) {
+            DiaSemana diaSemana = newHorarioDia.getDiaSemana();
+            Integer horaInicio = newHorarioDia.getHoraInicio();
+            Integer horaFin = newHorarioDia.getHoraFin();
+
+            if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
+                throw new IllegalArgumentException("Invalid hours: horaInicio should be less than horaFin and between 0 and 23");
+            }
+
+            for (HorarioDias existingHorarioDia : existingHorarioDias) {
+                if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
+                    if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
+                        throw new IllegalArgumentException("Overlapping schedule detected for " + diaSemana);
+                    }
+                }
+            }
+        }
+    }
+
+    private HorarioAsignatura createAndSaveHorarioAsignatura(Asignatura asignatura, Integer anio) {
+        HorarioAsignatura horarioAsignatura = new HorarioAsignatura();
+        horarioAsignatura.setAsignatura(asignatura);
+        horarioAsignatura.setAnio(anio);
+        return horarioAsignaturaRepo.save(horarioAsignatura);
+    }
+
+    private void createAndSaveHorarioDias(HorarioAsignatura horarioAsignatura, List<DtHorarioDias> dtHorarioDiasList) {
+        for (DtHorarioDias dtHorarioDias : dtHorarioDiasList) {
+            HorarioDias horarioDias = new HorarioDias();
+            horarioDias.setDiaSemana(dtHorarioDias.getDiaSemana());
+            horarioDias.setHoraInicio(dtHorarioDias.getHoraInicio());
+            horarioDias.setHoraFin(dtHorarioDias.getHoraFin());
+            horarioDias.setHorarioAsignatura(horarioAsignatura);
+            horarioDiasRepo.save(horarioDias);
+        }
+    }
+
+    private void createAndSaveDocenteHorarioAsignatura(Docente docente, HorarioAsignatura horarioAsignatura) {
+        DocenteHorarioAsignatura docenteHorarioAsignatura = new DocenteHorarioAsignatura();
+        docenteHorarioAsignatura.setDocente(docente);
+        docenteHorarioAsignatura.setHorarioAsignatura(horarioAsignatura);
+        docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
+    }
+
 }

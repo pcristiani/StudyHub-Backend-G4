@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class AsignaturaController {
@@ -49,19 +47,10 @@ public class AsignaturaController {
 
     @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
-    public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody List<DtNuevoHorarioAsignatura> listHorarios) {
-        //return asignaturaService.registroHorarios(idAsignatura,listHorarios);
+    public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
         //TODO: Impl
-        return null;
+        return ResponseEntity.ok(asignaturaService.registroHorarios(idAsignatura,dtNuevoHorarioAsignatura));
+
     }
-
-
-   /* Test
-    @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}/horarios")
-    public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @RequestParam String docenteNombre,@RequestParam Integer anio, @Valid @RequestBody List<Integer> listHorarios) {
-        return ResponseEntity.ok(asignaturaService.findHorarioAsignaturasByDocenteAndAnioAndDias(idAsignatura, docenteNombre, anio, listHorarios));
-    }
-
-     */
 
 }

@@ -31,6 +31,7 @@ public class HorarioDias {
     @JoinColumn(name = "idHorarioAsignatura", nullable = false)
     private HorarioAsignatura horarioAsignatura;
 
+
     public void setHoraInicio(Integer horaInicio) {
         if (horaInicio < 0 || horaInicio > 23) {
             throw new IllegalArgumentException("horaInicio debe ser un valor entre 0 y 23");

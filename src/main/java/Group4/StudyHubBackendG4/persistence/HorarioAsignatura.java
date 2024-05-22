@@ -21,9 +21,11 @@ public class HorarioAsignatura {
     @JoinColumn(name = "idAsignatura", nullable = false)
     private Asignatura asignatura;
 
+    @Min(1900)
+    @Max(2200)
     private Integer anio;
 
     @OneToMany(mappedBy = "horarioAsignatura")
-    private List<HorarioDias> dias;
+    private List<HorarioDias> horarioDias;
 
 }

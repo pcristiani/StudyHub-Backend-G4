@@ -16,24 +16,5 @@ public interface HorarioAsignaturaRepo extends JpaRepository<HorarioAsignatura, 
 
     Collection<HorarioAsignatura> findByAsignatura(Asignatura asig);
 
-    /*
-    @Query("SELECT DISTINCT ha FROM HorarioAsignatura ha " +
-            "JOIN ha.dias hd " +
-            "JOIN DocenteHorarioAsignatura dha ON ha = dha.horarioAsignatura " +
-            "WHERE dha.docente.nombre = :docenteNombre " +
-            "AND ha.anio = :anio " +
-            "AND hd.idDia IN :dias " +
-            "AND ha.asignatura.idAsignatura = :idAsignatura")
-    List<HorarioAsignatura> findHorarioAsignaturasByDocenteAndAnioAndDiasAndAsignaturaId(
-            @Param("idAsignatura") Integer idAsignatura,
-            @Param("docenteNombre") String docenteNombre,
-            @Param("anio") Integer anio,
-            @Param("dias") List<Integer> dias);
-
-     */
-
-
-
-
 
 }
