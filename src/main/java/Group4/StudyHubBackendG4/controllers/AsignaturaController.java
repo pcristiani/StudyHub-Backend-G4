@@ -1,7 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionCarrera;
+import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import jakarta.validation.Valid;
@@ -51,7 +51,7 @@ public class AsignaturaController {
 
     @PostMapping("/api/asignatura/inscripcionAsignatura")
     @PreAuthorize("hasRole('ROLE_E') or hasRole('ROLE_A')")
-    public ResponseEntity<?> inscripcionAsignatura(@Valid @RequestBody DtNuevaInscripcionCarrera inscripcion) {
+    public ResponseEntity<?> inscripcionAsignatura(@Valid @RequestBody DtNuevaInscripcionAsignatura inscripcion) {
         String message = asignaturaService.validateInscripcionAsignatura(inscripcion);
         return message == null
                 ? asignaturaService.inscripcionAsignatura(inscripcion)

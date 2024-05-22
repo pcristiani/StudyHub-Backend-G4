@@ -14,7 +14,7 @@ public class Previaturas {
     private Integer idPrevAsig;
     @ManyToOne
     @JoinColumn(name = "idAsignatura", nullable = false)
-    private Asignatura asignatura;      //Éstos deben ser ids!!!!
+    private Asignatura asignatura;
     @ManyToOne
     @JoinColumn(name = "idPrevia", nullable = false)
     private Asignatura previa;
