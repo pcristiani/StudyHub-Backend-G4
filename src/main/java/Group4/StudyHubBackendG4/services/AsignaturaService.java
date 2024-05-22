@@ -3,7 +3,6 @@ package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
@@ -34,10 +33,10 @@ public class AsignaturaService {
     private DocenteRepo docenteRepo;
 
     @Autowired
-    private DocenteAsignaturaRepo docenteAsignaturaRepo;
+    private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @Autowired
-    private HorarioAsignaturaRepo horarioAsignaturaRepo;
+    private DocenteAsignaturaRepo docenteAsignaturaRepo;
 
     @Autowired
     private AsignaturaConverter asignaturaConverter;
@@ -166,8 +165,12 @@ public class AsignaturaService {
         return false;
     }
 
-    public ResponseEntity<?> registroHorarios(Integer idAsignatura, List<DtNuevoHorarioAsignatura> listHorarios) {
-        //TODO: Impl
-        return null;
+    /*No funca
+    public List<HorarioAsignatura> findHorarioAsignaturasByDocenteAndAnioAndDias(Integer idAsignatura, String docenteNombre,
+                                                                                 Integer anio,
+                                                                                 List<Integer> dias) {
+        return horarioAsignaturaRepo.findHorarioAsignaturasByDocenteAndAnioAndDiasAndAsignaturaId(idAsignatura, docenteNombre, anio, dias);
     }
+
+     */
 }

@@ -21,7 +21,7 @@ public class JwtUserDetailsUtil implements UserDetailsService {
     }
 
     public UserDetails loadUserByCedula(String cedula) throws UsernameNotFoundException {
-        Usuario usuario = usuarioService.getUserByUsername(cedula);
+        Usuario usuario = usuarioService.getUsuarioByUsername(cedula);
 
         if (usuario == null) {
             throw new UsernameNotFoundException("No existe un usuario registrado con la cedula: " + cedula);

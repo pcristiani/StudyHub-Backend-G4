@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -49,7 +48,11 @@ public class UsuarioService {
     private DocenteRepo docenteRepo;
 
     @Autowired
+    private DocenteAsignaturaRepo docenteAsignaturaRepo;
+
+    @Autowired
     private CarreraCoordinadorRepo carreraCoordinadorRepo;
+
     @Autowired
     private CarreraService carreraService;
 
@@ -59,30 +62,36 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/getAllDocentes")
     public List<DtDocente> getDocentes() {
         return docenteRepo.findAll().stream()
                 .map(docenteConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<DtUsuario> getUserById(Integer id) {
+    public List<DtDocente> getDocentesByAsignaturaId(Integer asignaturaId) {
+        List<Docente> docenteAsignaturas = docenteAsignaturaRepo.findDocentesByAsignaturaId(asignaturaId);
+        return docenteAsignaturas.stream()
+                .map(docenteConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public ResponseEntity<DtUsuario> getUsuarioById(Integer id) {
         return usuarioRepo.findById(id)
                 .map(usuarioConverter::convertToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }
 
-    public Usuario getUserByUsername(String username) {
+    public Usuario getUsuarioByUsername(String username) {
         return usuarioRepo.findByCedula(username);
     }
 
-    public Usuario getUserByJwt(String jwt) {
+    public Usuario getUsuarioByJwt(String jwt) {
         UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
         return usuarioTr != null ? usuarioTr.getUsuario() : null;
     }
 
-    public Usuario getUserByCedula(String cedula) {
+    public Usuario getUsuarioByCedula(String cedula) {
         return usuarioRepo.findByCedula(cedula);
     }
 

@@ -1,8 +1,8 @@
 package Group4.StudyHubBackendG4.controllers;
 
-import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
+import Group4.StudyHubBackendG4.repositories.HorarioAsignaturaRepo;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,9 @@ public class AsignaturaController {
 
     @Autowired
     private AsignaturaService asignaturaService;
+
+    @Autowired
+    private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @GetMapping("/api/asignatura/getAsignaturas")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
@@ -43,11 +46,22 @@ public class AsignaturaController {
         return asignaturaService.altaAsignatura(dtNuevaAsignatura);
     }
 
-    @PostMapping("/api/asignatura/registroHorarios/{id}")
+
+    @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
     public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody List<DtNuevoHorarioAsignatura> listHorarios) {
-        return asignaturaService.registroHorarios(idAsignatura,listHorarios);
+        //return asignaturaService.registroHorarios(idAsignatura,listHorarios);
+        //TODO: Impl
+        return null;
     }
 
+
+   /* Test
+    @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}/horarios")
+    public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @RequestParam String docenteNombre,@RequestParam Integer anio, @Valid @RequestBody List<Integer> listHorarios) {
+        return ResponseEntity.ok(asignaturaService.findHorarioAsignaturasByDocenteAndAnioAndDias(idAsignatura, docenteNombre, anio, listHorarios));
+    }
+
+     */
 
 }
