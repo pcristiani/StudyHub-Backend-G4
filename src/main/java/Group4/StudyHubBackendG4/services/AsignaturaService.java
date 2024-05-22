@@ -2,12 +2,10 @@ package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionCarrera;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
 import Group4.StudyHubBackendG4.persistence.*;
-import Group4.StudyHubBackendG4.repositories.AsignaturaRepo;
-import Group4.StudyHubBackendG4.repositories.CarreraRepo;
-import Group4.StudyHubBackendG4.repositories.HorarioAsignaturaRepo;
-import Group4.StudyHubBackendG4.repositories.PreviaturasRepo;
+import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
 import Group4.StudyHubBackendG4.utils.converters.HorarioAsignaturaConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,8 @@ public class AsignaturaService {
 
     @Autowired
     private PreviaturasRepo previaturasRepo;
-
+    @Autowired
+    private UsuarioRepo usuarioRepo;
     @Autowired
     private CarreraRepo carreraRepo;
     @Autowired
@@ -144,5 +143,36 @@ public class AsignaturaService {
     public ResponseEntity<?> registroHorarios(Integer idAsignatura, List<DtNuevoHorarioAsignatura> listHorarios) {
         //TODO: Impl
         return null;
+    }
+
+    public String validateInscripcionAsignatura(DtNuevaInscripcionCarrera inscripcion) {
+        Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
+        HorarioAsignatura horario = horarioAsignaturaRepo.findById(inscripcion.getIdHorario()).orElse(null);
+        Usuario usuario = usuarioRepo.findById(inscripcion.getIdEstudiante()).orElse(null);
+
+        //Validaciones basicas
+        if (asignatura == null) {
+           return "La asignatura no existe";
+        }
+        if (horario == null) {
+            return "El horario no existe";
+        }
+        if (usuario == null) {
+            return "El usuario no existe";
+        }
+        if (!usuario.getRol().equals("E")) {
+            return "El usuario no es un estudiante";
+        }
+        if (horario.getAsignatura().getIdAsignatura() != asignatura.getIdAsignatura()) {
+            return "El horario no pertenece a la asignatura seleccionada";
+        }
+
+        // TODO: Realizar inscripcion
+        return null;
+    }
+
+    public ResponseEntity<?> inscripcionAsignatura(DtNuevaInscripcionCarrera inscripcion) {
+        // TODO: Realizar inscripcion
+        return ResponseEntity.ok().body("Se realizó la inscripcion a la asignatura");
     }
 }
