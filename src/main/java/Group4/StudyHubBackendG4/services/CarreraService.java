@@ -72,6 +72,17 @@ public class CarreraService {
                 .collect(Collectors.toList());
     }
 
+    public Object getCarrerasInscripto(Integer id) {
+        Usuario user = usuarioRepo.findById(id).orElse(null);
+        return user != null
+            ? inscripcionCarreraRepo.findCarrerasInscripto(user).stream()
+                .map(InscripcionCarrera::getCarrera)
+                .distinct()
+                .map(carreraConverter::convertToDto)
+                .collect(Collectors.toList())
+            : null;
+    }
+
 
     public ResponseEntity<String> nuevaCarrera(DtNuevaCarrera dtNuevaCarrera) {
 
