@@ -2,13 +2,14 @@ package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
-import Group4.StudyHubBackendG4.persistence.Asignatura;
-import Group4.StudyHubBackendG4.persistence.Carrera;
-import Group4.StudyHubBackendG4.persistence.Previaturas;
+import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
+import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.AsignaturaRepo;
 import Group4.StudyHubBackendG4.repositories.CarreraRepo;
+import Group4.StudyHubBackendG4.repositories.HorarioAsignaturaRepo;
 import Group4.StudyHubBackendG4.repositories.PreviaturasRepo;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
+import Group4.StudyHubBackendG4.utils.converters.HorarioAsignaturaConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,9 +30,14 @@ public class AsignaturaService {
 
     @Autowired
     private CarreraRepo carreraRepo;
+    @Autowired
+    private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @Autowired
     private AsignaturaConverter asignaturaConverter;
+
+    @Autowired
+    private HorarioAsignaturaConverter horarioAsignaturaConverter;
 
     public ResponseEntity<?> getAsignaturas() {
         return ResponseEntity.ok().body(asignaturaRepo.findAll());
@@ -47,6 +53,15 @@ public class AsignaturaService {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtAsignaturas);
+    }
+
+    public List<DtHorarioAsignatura> getHorarios(Integer id) {
+        Asignatura asig = asignaturaRepo.findById(id).orElse(null);
+        return asig == null ? null :
+        horarioAsignaturaRepo.findByAsignatura(asig)
+                .stream()
+                .map(horarioAsignaturaConverter::convertToDto)
+                .toList();
     }
 
     public ResponseEntity<?> altaAsignatura(DtAsignatura dtAsignatura) {
@@ -126,7 +141,7 @@ public class AsignaturaService {
         return false;
     }
 
-    public ResponseEntity<?> registroHorarios(Integer idAsignatura, List<DtHorarioAsignatura> listHorarios) {
+    public ResponseEntity<?> registroHorarios(Integer idAsignatura, List<DtNuevoHorarioAsignatura> listHorarios) {
         //TODO: Impl
         return null;
     }
