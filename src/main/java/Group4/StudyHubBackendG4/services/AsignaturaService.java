@@ -22,7 +22,6 @@ public class AsignaturaService {
 
     @Autowired
     private AsignaturaRepo asignaturaRepo;
-
     @Autowired
     private PreviaturasRepo previaturasRepo;
     @Autowired
@@ -35,6 +34,8 @@ public class AsignaturaService {
     private EstudianteCursadaRepo estudianteCursadaRepo;
     @Autowired
     private CursadaRepo cursadaRepo;
+    @Autowired
+    private InscripcionCarreraRepo inscripcionCarreraRepo;
 
     @Autowired
     private AsignaturaConverter asignaturaConverter;
@@ -171,7 +172,12 @@ public class AsignaturaService {
         if (horario.getAsignatura().getIdAsignatura() != asignatura.getIdAsignatura()) {
             return "El horario no pertenece a la asignatura seleccionada";
         }
+        Carrera carrera = asignatura.getCarrera();
+        InscripcionCarrera inscripcionCarrera = inscripcionCarreraRepo.findByUsuarioAndCarreraAndActivaAndValidada(usuario,carrera,true,true).orElse(null);
 
+        if (inscripcionCarrera == null) {
+            return "El usuario no está inscripto en la carrera correspondiente a la asignatura";
+        }
         // TODO: Realizar validacion ya cursada
         List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
         List<Cursada> aprobadasCursadas = listCursadas.stream()
