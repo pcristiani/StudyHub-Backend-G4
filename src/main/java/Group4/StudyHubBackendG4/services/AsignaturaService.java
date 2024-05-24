@@ -175,15 +175,25 @@ public class AsignaturaService {
         // TODO: Realizar validacion ya cursada
         List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
         List<Cursada> aprobadasCursadas = listCursadas.stream()
-                .map(EstudianteCursada::getCursada)           // Transform EstudianteCursada to Cursada
-                .filter(cursada -> "APROBADA".equals(cursada.getResultado())) // Filter by resultado
+                .map(EstudianteCursada::getCursada)
+                .filter(cursada -> "APROBADA".equals(cursada.getResultado()))
                 .toList();
 
         if(!aprobadasCursadas.isEmpty()){
             return  "La asignatura ya fue aprobada!";
         }
 
-        // TODO: Realizar validacion previas
+        // Realizar validacion inscripcion pendiente
+        List<Cursada> inscripcionPendiente = listCursadas.stream()
+                .map(EstudianteCursada::getCursada)
+                .filter(cursada -> "PENDIENTE".equals(cursada.getResultado()))
+                .toList();
+
+        if(!inscripcionPendiente.isEmpty()){
+            return  "Tiene una inscripcion pendiente.";
+        }
+
+        // Realizar validacion previas
         List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
         List<Asignatura> asignaturasPrevias = previas.stream()
                 .map(Previaturas::getPrevia)
@@ -220,7 +230,6 @@ public class AsignaturaService {
         estudianteCursada.setCursada(cursada);
         estudianteCursada.setUsuario(user);
         estudianteCursadaRepo.save(estudianteCursada);
-
 
         return ResponseEntity.ok().body("Se realizó la inscripcion a la asignatura");
     }
