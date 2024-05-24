@@ -29,7 +29,7 @@ public class AsignaturaController {
     @GetMapping("/api/asignatura/getAsignaturasDeCarrera/{id}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasDeCarrera(@PathVariable Integer idCarrera) {
-        return asignaturaService.getAsignaturasDeCarrera(idCarrera);
+        return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarrera(idCarrera));
     }
 
     @PostMapping("/api/asignatura/getHorarios/{id}")

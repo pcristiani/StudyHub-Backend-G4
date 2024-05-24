@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +57,7 @@ public class AsignaturaService {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<List<DtAsignatura>> getAsignaturasDeCarrera(Integer idCarrera) {
+    public List<DtAsignatura> getAsignaturasDeCarrera(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera)
                 .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
 
@@ -65,7 +66,7 @@ public class AsignaturaService {
                 .map(asignaturaConverter::convertToDto)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(dtAsignaturas);
+        return dtAsignaturas;
     }
 
     public List<DtHorarioAsignatura> getHorarios(Integer id) {
@@ -77,54 +78,85 @@ public class AsignaturaService {
                 .toList();
     }
 
-    @Transactional
     public ResponseEntity<?> altaAsignatura(DtNuevaAsignatura dtNuevaAsignatura) {
+        // Validate Carrera existence
         Carrera carrera = carreraRepo.findById(dtNuevaAsignatura.getIdCarrera()).orElse(null);
-
-        if(carrera == null){
+        if (carrera == null) {
             return ResponseEntity.badRequest().body("Carrera no encontrada.");
         }
 
+        // Validate Docentes
         List<Integer> idDocentes = dtNuevaAsignatura.getIdDocentes();
         if (idDocentes == null || idDocentes.isEmpty()) {
             return ResponseEntity.badRequest().body("Ingrese al menos un docente.");
         }
 
-        List<Docente> docentes = dtNuevaAsignatura.getIdDocentes().stream()
+        List<Docente> docentes = idDocentes.stream()
                 .map(docenteRepo::findById)
                 .map(optionalDocente -> optionalDocente.orElse(null))
-                .toList();
+                .collect(Collectors.toList());
 
-        if(asignaturaRepo.existsByNombreAndCarrera(dtNuevaAsignatura.getNombre(), carrera)){
+        // Check if all docentes were found
+        if (docentes.contains(null)) {
+            return ResponseEntity.badRequest().body("Uno o más docentes no encontrados.");
+        }
+
+        // Validate Asignatura uniqueness
+        if (asignaturaRepo.existsByNombreAndCarrera(dtNuevaAsignatura.getNombre(), carrera)) {
             return ResponseEntity.badRequest().body("La asignatura ya existe.");
         }
 
-        if(this.validarCircularidad(dtNuevaAsignatura.getPreviaturas())){
+        // Validate Previaturas for circularity
+        if (this.validarCircularidad(dtNuevaAsignatura.getPreviaturas())) {
             return ResponseEntity.badRequest().body("Existen circularidades en las previaturas seleccionadas.");
         }
 
+        // Convert and prepare Asignatura entity
         DtAsignatura dtAsignatura = dtNuevaAsignatura.dtAsignaturaFromDtNuevaAsignatura(dtNuevaAsignatura);
         Asignatura asignatura = asignaturaConverter.convertToEntity(dtAsignatura);
 
-        asignaturaRepo.save(asignatura);
-
-        docentes.forEach(docente -> {
-                    DocenteAsignatura da = new DocenteAsignatura();
-                    da.setDocente(docente);
-                    da.setAsignatura(asignatura);
-                    docenteAsignaturaRepo.save(da);
-                });
-
+        // Prepare and validate Previaturas
         List<Integer> idsPreviaturas = dtAsignatura.getPreviaturas();
+        List<Previaturas> previaturas = new ArrayList<>();
         if (idsPreviaturas != null && !idsPreviaturas.isEmpty()) {
             for (Integer idPrevia : idsPreviaturas) {
-                Asignatura previaAsignatura = asignaturaRepo.findById(idPrevia)
-                        .orElseThrow(() -> new RuntimeException("Previa asignatura no encontrada"));
+                Asignatura previaAsignatura = asignaturaRepo.findById(idPrevia).orElse(null);
+                if (previaAsignatura == null) {
+                    return ResponseEntity.badRequest().body("Previa asignatura no encontrada");
+                }
+
+                // Validation if Previaturas belong to the same Carrera
+                Boolean previaturasPertenecenACarrera = this.getAsignaturasDeCarrera(carrera.getIdCarrera())
+                        .stream()
+                        .map(asignaturaConverter::convertToEntity)
+                        .toList()
+                        .contains(previaAsignatura);
+
+                if (!previaturasPertenecenACarrera) {
+                    return ResponseEntity.badRequest().body("Todas las previaturas deben pertenecer a la misma carrera.");
+                }
+
                 Previaturas previatura = new Previaturas();
                 previatura.setAsignatura(asignatura);
                 previatura.setPrevia(previaAsignatura);
-                previaturasRepo.save(previatura);
+                previaturas.add(previatura);
             }
+        }
+
+        // Save Asignatura
+        asignaturaRepo.save(asignatura);
+
+        // Save DocenteAsignatura
+        for (Docente docente : docentes) {
+            DocenteAsignatura da = new DocenteAsignatura();
+            da.setDocente(docente);
+            da.setAsignatura(asignatura);
+            docenteAsignaturaRepo.save(da);
+        }
+
+        // Save Previaturas
+        for (Previaturas previatura : previaturas) {
+            previaturasRepo.save(previatura);
         }
 
         return ResponseEntity.ok().body("Asignatura creada exitosamente.");
@@ -170,8 +202,7 @@ public class AsignaturaService {
         stack.remove(idAsignatura);
         return false;
     }
-
-    @Transactional
+    
     public ResponseEntity<?> registroHorarios(Integer idAsignatura, DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
         try {
             Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
@@ -181,10 +212,28 @@ public class AsignaturaService {
                     .orElseThrow(() -> new IllegalArgumentException("Invalid idDocente"));
 
             // Obtener horarios para ese docente y ese anio
-            List<HorarioDias> existingHorarioDias = getExistingHorarioDiasForDocenteAndAnio(docente, dtNuevoHorarioAsignatura.getAnio());
+            List<HorarioDias> existingHorarioDias = docenteHorarioAsignaturaRepo.findHorarioDiasByDocenteIdAndAnio(docente.getIdDocente(), dtNuevoHorarioAsignatura.getAnio());
 
             // Validate for overlapping schedules
-            validateNoOverlappingSchedules(existingHorarioDias, dtNuevoHorarioAsignatura.getDtHorarioDias());
+            for (DtHorarioDias newHorarioDia : dtNuevoHorarioAsignatura.getDtHorarioDias()) {
+                DiaSemana diaSemana = newHorarioDia.getDiaSemana();
+                Integer horaInicio = newHorarioDia.getHoraInicio();
+                Integer horaFin = newHorarioDia.getHoraFin();
+
+                /*if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
+                    throw new IllegalArgumentException("Invalid hours: horaInicio should be less than horaFin and between 0 and 23");
+                }
+
+                 */
+
+                for (HorarioDias existingHorarioDia : existingHorarioDias) {
+                    if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
+                        if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
+                            return ResponseEntity.badRequest().body("Overlapping schedule detected for " + diaSemana);
+                        }
+                    }
+                }
+            }
 
             // Create and save HorarioAsignatura
             HorarioAsignatura horarioAsignatura = createAndSaveHorarioAsignatura(asignatura, dtNuevoHorarioAsignatura.getAnio());
@@ -198,31 +247,6 @@ public class AsignaturaService {
             return ResponseEntity.ok("Horarios registered successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    private List<HorarioDias> getExistingHorarioDiasForDocenteAndAnio(Docente docente, Integer anio) {
-        return docenteHorarioAsignaturaRepo.findHorarioDiasByDocenteIdAndAnio(docente.getIdDocente(), anio);
-    }
-
-
-    private void validateNoOverlappingSchedules(List<HorarioDias> existingHorarioDias, List<DtHorarioDias> newHorarioDias) {
-        for (DtHorarioDias newHorarioDia : newHorarioDias) {
-            DiaSemana diaSemana = newHorarioDia.getDiaSemana();
-            Integer horaInicio = newHorarioDia.getHoraInicio();
-            Integer horaFin = newHorarioDia.getHoraFin();
-
-            if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
-                throw new IllegalArgumentException("Invalid hours: horaInicio should be less than horaFin and between 0 and 23");
-            }
-
-            for (HorarioDias existingHorarioDia : existingHorarioDias) {
-                if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
-                    if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
-                        throw new IllegalArgumentException("Overlapping schedule detected for " + diaSemana);
-                    }
-                }
-            }
         }
     }
 

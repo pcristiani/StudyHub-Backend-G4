@@ -16,13 +16,9 @@ public class DtHorarioDias {
     private DiaSemana diaSemana;
 
     @NotNull
-    @Min(0)
-    @Max(23)
     private Integer horaInicio;
 
     @NotNull
-    @Min(0)
-    @Max(23)
     private Integer horaFin;
 
     public DiaSemana getDiaSemana() {

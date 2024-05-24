@@ -19,12 +19,8 @@ public class HorarioDias {
     @Enumerated(EnumType.STRING)
     private DiaSemana diaSemana;
 
-    @Min(0)
-    @Max(23)
     private Integer horaInicio;
 
-    @Min(0)
-    @Max(23)
     private Integer horaFin;
 
     @ManyToOne
