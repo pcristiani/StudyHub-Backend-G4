@@ -205,51 +205,47 @@ public class AsignaturaService {
     }
 
     public ResponseEntity<?> registroHorarios(Integer idAsignatura, DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
-        try {
-            Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid idAsignatura"));
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
+                .orElse(null);
 
-            Docente docente = docenteRepo.findById(dtNuevoHorarioAsignatura.getIdDocente())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid idDocente"));
+        if (asignatura == null) {
+            return ResponseEntity.badRequest().body("idAsignatura invalido");
+        }
 
-            // Obtener horarios para ese docente y ese anio
-            List<HorarioDias> existingHorarioDias = docenteHorarioAsignaturaRepo.findHorarioDiasByDocenteIdAndAnio(docente.getIdDocente(), dtNuevoHorarioAsignatura.getAnio());
+        Docente docente = docenteRepo.findById(dtNuevoHorarioAsignatura.getIdDocente())
+                .orElse(null);
 
-            // Validate for overlapping schedules
-            for (DtHorarioDias newHorarioDia : dtNuevoHorarioAsignatura.getDtHorarioDias()) {
-                DiaSemana diaSemana = newHorarioDia.getDiaSemana();
-                Integer horaInicio = newHorarioDia.getHoraInicio();
-                Integer horaFin = newHorarioDia.getHoraFin();
+        if (docente == null) {
+            return ResponseEntity.badRequest().body("idDocente invalido");
+        }
 
-                /*if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
-                    throw new IllegalArgumentException("Invalid hours: horaInicio should be less than horaFin and between 0 and 23");
-                }
+        List<HorarioDias> existingHorarioDias = docenteHorarioAsignaturaRepo.findHorarioDiasByDocenteIdAndAnio(docente.getIdDocente(), dtNuevoHorarioAsignatura.getAnio());
 
-                 */
+        for (DtHorarioDias newHorarioDia : dtNuevoHorarioAsignatura.getDtHorarioDias()) {
+            DiaSemana diaSemana = newHorarioDia.getDiaSemana();
+            Integer horaInicio = newHorarioDia.getHoraInicio();
+            Integer horaFin = newHorarioDia.getHoraFin();
 
-                for (HorarioDias existingHorarioDia : existingHorarioDias) {
-                    if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
-                        if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
-                            return ResponseEntity.badRequest().body("Overlapping schedule detected for " + diaSemana);
-                        }
+            if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
+                return ResponseEntity.badRequest().body("horaInicio debe ser menor a horaFin, y tener un valor entre 0-23");
+            }
+
+            for (HorarioDias existingHorarioDia : existingHorarioDias) {
+                if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
+                    if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
+                        return ResponseEntity.badRequest().body("Horarios superpuestos detectados para el dia " + diaSemana);
                     }
                 }
             }
-
-            // Create and save HorarioAsignatura
-            HorarioAsignatura horarioAsignatura = createAndSaveHorarioAsignatura(asignatura, dtNuevoHorarioAsignatura.getAnio());
-
-            // Create and save HorarioDias
-            createAndSaveHorarioDias(horarioAsignatura, dtNuevoHorarioAsignatura.getDtHorarioDias());
-
-            // Create and save DocenteHorarioAsignatura
-            createAndSaveDocenteHorarioAsignatura(docente, horarioAsignatura);
-
-            return ResponseEntity.ok("Horarios registered successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
+
+        HorarioAsignatura horarioAsignatura = createAndSaveHorarioAsignatura(asignatura, dtNuevoHorarioAsignatura.getAnio());
+        createAndSaveHorarioDias(horarioAsignatura, dtNuevoHorarioAsignatura.getDtHorarioDias());
+        createAndSaveDocenteHorarioAsignatura(docente, horarioAsignatura);
+
+        return ResponseEntity.ok("Horarios registered successfully");
     }
+
 
     public String validateInscripcionAsignatura(DtNuevaInscripcionAsignatura inscripcion) {
         Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
