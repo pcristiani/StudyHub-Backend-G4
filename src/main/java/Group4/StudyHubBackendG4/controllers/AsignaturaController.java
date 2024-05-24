@@ -1,5 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
+import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
 import Group4.StudyHubBackendG4.repositories.HorarioAsignaturaRepo;
@@ -52,5 +54,16 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.registroHorarios(idAsignatura,dtNuevoHorarioAsignatura));
 
     }
+    @PostMapping("/api/asignatura/inscripcionAsignatura")
+    @PreAuthorize("hasRole('ROLE_E') or hasRole('ROLE_A')")
+    public ResponseEntity<?> inscripcionAsignatura(@Valid @RequestBody DtNuevaInscripcionAsignatura inscripcion) {
+        String message = asignaturaService.validateInscripcionAsignatura(inscripcion);
+        return message == null
+                ? asignaturaService.inscripcionAsignatura(inscripcion)
+                : ResponseEntity.badRequest().body(message);
+
+
+    }
+
 
 }

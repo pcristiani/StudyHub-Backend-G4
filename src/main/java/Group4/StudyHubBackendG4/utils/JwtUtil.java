@@ -39,10 +39,6 @@ public class JwtUtil {
         claims.put("id", usuario.getIdUsuario());
         claims.put("cedula", usuario.getCedula());
         claims.put("rol", usuario.getRol());
-        claims.put("nombre", usuario.getNombre());
-        claims.put("apellido", usuario.getApellido());
-        claims.put("email", usuario.getEmail());
-        claims.put("fechaNacimiento", usuario.getFechaNacimiento());
 
         long expirationTime = 1000L * 60 * 60 * 24 * 365;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
@@ -56,20 +52,6 @@ public class JwtUtil {
                 .compact();
 
         return jwtToken;
-    }
-
-    public Usuario validateJwt(String jwtToken) {
-        Usuario usuario = new Usuario();
-        Map<String, Object> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtToken).getBody();
-
-        usuario.setCedula((String) claims.get("cedula"));
-        usuario.setEmail((String) claims.get("email"));
-        usuario.setNombre((String) claims.get("nombre"));
-        usuario.setApellido((String) claims.get("apellido"));
-        usuario.setFechaNacimiento((String) claims.get("fechaNacimiento"));
-        usuario.setRol((String) claims.get("rol"));
-
-        return usuario;
     }
 
     public String getRoleFromToken(String token) {
@@ -96,7 +78,7 @@ public class JwtUtil {
         return (cedula.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }

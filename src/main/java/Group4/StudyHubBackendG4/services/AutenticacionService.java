@@ -43,10 +43,6 @@ public class AutenticacionService {
             claims.put("id", usuario.getIdUsuario());
             claims.put("cedula", usuario.getCedula());
             claims.put("rol", usuario.getRol());
-            claims.put("nombre", usuario.getNombre());
-            claims.put("apellido", usuario.getApellido());
-            claims.put("email", usuario.getEmail());
-            claims.put("fechaNacimiento", usuario.getFechaNacimiento());
 
             long expirationTime = 1000L * 60 * 60 * 24 * 365;
             Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);

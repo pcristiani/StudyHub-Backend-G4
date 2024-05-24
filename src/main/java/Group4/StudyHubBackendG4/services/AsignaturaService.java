@@ -9,7 +9,6 @@ import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,10 +21,10 @@ public class AsignaturaService {
 
     @Autowired
     private AsignaturaRepo asignaturaRepo;
-
     @Autowired
     private PreviaturasRepo previaturasRepo;
-
+    @Autowired
+    private UsuarioRepo usuarioRepo;
     @Autowired
     private CarreraRepo carreraRepo;
 
@@ -45,6 +44,15 @@ public class AsignaturaService {
     private DocenteHorarioAsignaturaRepo docenteHorarioAsignaturaRepo;
 
     @Autowired
+    private EstudianteCursadaRepo estudianteCursadaRepo;
+
+    @Autowired
+    private CursadaRepo cursadaRepo;
+
+    @Autowired
+    private InscripcionCarreraRepo inscripcionCarreraRepo;
+
+    @Autowired
     private AsignaturaConverter asignaturaConverter;
 
     @Autowired
@@ -61,12 +69,10 @@ public class AsignaturaService {
         Carrera carrera = carreraRepo.findById(idCarrera)
                 .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
 
-        List<DtAsignatura> dtAsignaturas = asignaturaRepo.findByCarrera(carrera)
+        return asignaturaRepo.findByCarrera(carrera)
                 .stream()
                 .map(asignaturaConverter::convertToDto)
                 .collect(Collectors.toList());
-
-        return dtAsignaturas;
     }
 
     public List<DtHorarioAsignatura> getHorarios(Integer id) {
@@ -116,7 +122,7 @@ public class AsignaturaService {
         Asignatura asignatura = asignaturaConverter.convertToEntity(dtAsignatura);
 
         // Prepare and validate Previaturas
-        List<Integer> idsPreviaturas = dtAsignatura.getPreviaturas();
+        List<Integer> idsPreviaturas = dtNuevaAsignatura.getPreviaturas();
         List<Previaturas> previaturas = new ArrayList<>();
         if (idsPreviaturas != null && !idsPreviaturas.isEmpty()) {
             for (Integer idPrevia : idsPreviaturas) {
@@ -125,14 +131,8 @@ public class AsignaturaService {
                     return ResponseEntity.badRequest().body("Previa asignatura no encontrada");
                 }
 
-                // Validation if Previaturas belong to the same Carrera
-                Boolean previaturasPertenecenACarrera = this.getAsignaturasDeCarrera(carrera.getIdCarrera())
-                        .stream()
-                        .map(asignaturaConverter::convertToEntity)
-                        .toList()
-                        .contains(previaAsignatura);
-
-                if (!previaturasPertenecenACarrera) {
+                // Validate if Previaturas belong to the same Carrera
+                if (!previaAsignatura.getCarrera().equals(carrera)) {
                     return ResponseEntity.badRequest().body("Todas las previaturas deben pertenecer a la misma carrera.");
                 }
 
@@ -192,7 +192,8 @@ public class AsignaturaService {
         visitado.add(idAsignatura);
         stack.add(idAsignatura);
 
-        List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignaturaRepo.findById(idAsignatura));
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+        List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignatura);
         for (Previaturas previatura : previaturas) {
             if (esCiclico(previatura.getPrevia().getIdAsignatura(), visitado, stack)) {
                 return true;
@@ -202,7 +203,7 @@ public class AsignaturaService {
         stack.remove(idAsignatura);
         return false;
     }
-    
+
     public ResponseEntity<?> registroHorarios(Integer idAsignatura, DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
         try {
             Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
@@ -248,6 +249,95 @@ public class AsignaturaService {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    public String validateInscripcionAsignatura(DtNuevaInscripcionAsignatura inscripcion) {
+        Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
+        HorarioAsignatura horario = horarioAsignaturaRepo.findById(inscripcion.getIdHorario()).orElse(null);
+        Usuario usuario = usuarioRepo.findById(inscripcion.getIdEstudiante()).orElse(null);
+
+        //Validaciones basicas
+        if (asignatura == null) {
+           return "La asignatura no existe";
+        }
+        if (horario == null) {
+            return "El horario no existe";
+        }
+        if (usuario == null) {
+            return "El usuario no existe";
+        }
+        if (!usuario.getRol().equals("E")) {
+            return "El usuario no es un estudiante";
+        }
+        if (horario.getAsignatura().getIdAsignatura() != asignatura.getIdAsignatura()) {
+            return "El horario no pertenece a la asignatura seleccionada";
+        }
+        Carrera carrera = asignatura.getCarrera();
+        InscripcionCarrera inscripcionCarrera = inscripcionCarreraRepo.findByUsuarioAndCarreraAndActivaAndValidada(usuario,carrera,true,true).orElse(null);
+
+        if (inscripcionCarrera == null) {
+            return "El usuario no está inscripto en la carrera correspondiente a la asignatura";
+        }
+        // TODO: Realizar validacion ya cursada
+        List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
+        List<Cursada> aprobadasCursadas = listCursadas.stream()
+                .map(EstudianteCursada::getCursada)
+                .filter(cursada -> "APROBADA".equals(cursada.getResultado()))
+                .toList();
+
+        if(!aprobadasCursadas.isEmpty()){
+            return  "La asignatura ya fue aprobada!";
+        }
+
+        // Realizar validacion inscripcion pendiente
+        List<Cursada> inscripcionPendiente = listCursadas.stream()
+                .map(EstudianteCursada::getCursada)
+                .filter(cursada -> "PENDIENTE".equals(cursada.getResultado()))
+                .toList();
+
+        if(!inscripcionPendiente.isEmpty()){
+            return  "Tiene una inscripcion pendiente.";
+        }
+
+        // Realizar validacion previas
+        List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
+        List<Asignatura> asignaturasPrevias = previas.stream()
+                .map(Previaturas::getPrevia)
+                .toList();
+
+        // Para cada previa obtengo todas las cursadas y valido si alguna de ellas fue aprobada
+        boolean previasAprobadas = asignaturasPrevias.stream()
+                .allMatch(previa -> {
+                    List<EstudianteCursada> cursadasPrevia = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, previa);
+                    return cursadasPrevia.stream()
+                            .map(EstudianteCursada::getCursada)
+                            .anyMatch(cursada -> cursada.getResultado().equals("APROBADA"));
+                });
+
+        if (!previasAprobadas) {
+            return "No se han aprobado todas las asignaturas previas requeridas.";
+        }
+        return null;
+    }
+
+    public ResponseEntity<?> inscripcionAsignatura(DtNuevaInscripcionAsignatura inscripcion) {
+        // TODO: Realizar inscripcion
+        Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
+        HorarioAsignatura horario = horarioAsignaturaRepo.findById(inscripcion.getIdHorario()).orElse(null);
+        Usuario user = usuarioRepo.findById(inscripcion.getIdEstudiante()).orElse(null);
+
+        Cursada cursada = new Cursada();
+        cursada.setAsignatura(asignatura);
+        cursada.setHorarioAsignatura(horario);
+        cursada.setResultado("PENDIENTE");
+        cursadaRepo.save(cursada);
+
+        EstudianteCursada estudianteCursada = new EstudianteCursada();
+        estudianteCursada.setCursada(cursada);
+        estudianteCursada.setUsuario(user);
+        estudianteCursadaRepo.save(estudianteCursada);
+
+        return ResponseEntity.ok().body("Se realizó la inscripcion a la asignatura");
     }
 
     private HorarioAsignatura createAndSaveHorarioAsignatura(Asignatura asignatura, Integer anio) {
