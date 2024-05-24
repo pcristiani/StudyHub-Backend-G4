@@ -2,11 +2,12 @@ package Group4.StudyHubBackendG4.datatypes;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DtNuevoHorarioAsignatura {
+    private Integer idDocente;
     private Integer anio;
-    private DtDocente docente;
-    private DtHorarioDias dias;
-    private Integer horaInicio;
-    private Integer horaFin;
+    private List<DtHorarioDias> dtHorarioDias;     //Array de Integers, ej [2, 4]
+
 }

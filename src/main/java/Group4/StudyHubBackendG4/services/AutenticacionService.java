@@ -64,7 +64,7 @@ public class AutenticacionService {
 
     @Transactional
     public void logoutUser(String jwt) {
-        Usuario usuario = usuarioService.getUserByJwt(jwt);
+        Usuario usuario = usuarioService.getUsuarioByJwt(jwt);
         usuarioService.actualizarJwt(usuario, null);
     }
 }

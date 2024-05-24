@@ -4,6 +4,7 @@ import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
+import Group4.StudyHubBackendG4.repositories.HorarioAsignaturaRepo;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +12,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class AsignaturaController {
 
     @Autowired
     private AsignaturaService asignaturaService;
+
+    @Autowired
+    private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @GetMapping("/api/asignatura/getAsignaturas")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
@@ -29,7 +31,7 @@ public class AsignaturaController {
     @GetMapping("/api/asignatura/getAsignaturasDeCarrera/{id}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasDeCarrera(@PathVariable Integer idCarrera) {
-        return asignaturaService.getAsignaturasDeCarrera(idCarrera);
+        return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarrera(idCarrera));
     }
 
     @PostMapping("/api/asignatura/getHorarios/{id}")
@@ -44,12 +46,14 @@ public class AsignaturaController {
         return asignaturaService.altaAsignatura(dtNuevaAsignatura);
     }
 
-    @PostMapping("/api/asignatura/registroHorarios/{id}")
-    @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
-    public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody List<DtNuevoHorarioAsignatura> listHorarios) {
-        return asignaturaService.registroHorarios(idAsignatura,listHorarios);
-    }
 
+    @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}")
+    @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
+    public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
+        //TODO: Impl
+        return ResponseEntity.ok(asignaturaService.registroHorarios(idAsignatura,dtNuevoHorarioAsignatura));
+
+    }
     @PostMapping("/api/asignatura/inscripcionAsignatura")
     @PreAuthorize("hasRole('ROLE_E') or hasRole('ROLE_A')")
     public ResponseEntity<?> inscripcionAsignatura(@Valid @RequestBody DtNuevaInscripcionAsignatura inscripcion) {

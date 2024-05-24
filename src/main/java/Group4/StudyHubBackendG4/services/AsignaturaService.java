@@ -1,19 +1,16 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
 import Group4.StudyHubBackendG4.utils.converters.HorarioAsignaturaConverter;
+import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,14 +32,23 @@ public class AsignaturaService {
     private DocenteRepo docenteRepo;
 
     @Autowired
+    private HorarioAsignaturaRepo horarioAsignaturaRepo;
+
+    @Autowired
+    private HorarioDiasRepo horarioDiasRepo;
+
+    @Autowired
     private DocenteAsignaturaRepo docenteAsignaturaRepo;
 
     @Autowired
-    private HorarioAsignaturaRepo horarioAsignaturaRepo;
+    private DocenteHorarioAsignaturaRepo docenteHorarioAsignaturaRepo;
+
     @Autowired
     private EstudianteCursadaRepo estudianteCursadaRepo;
+
     @Autowired
     private CursadaRepo cursadaRepo;
+
     @Autowired
     private InscripcionCarreraRepo inscripcionCarreraRepo;
 
@@ -59,16 +65,14 @@ public class AsignaturaService {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<List<DtAsignatura>> getAsignaturasDeCarrera(Integer idCarrera) {
+    public List<DtAsignatura> getAsignaturasDeCarrera(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera)
                 .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
 
-        List<DtAsignatura> dtAsignaturas = asignaturaRepo.findByCarrera(carrera)
+        return asignaturaRepo.findByCarrera(carrera)
                 .stream()
                 .map(asignaturaConverter::convertToDto)
                 .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtAsignaturas);
     }
 
     public List<DtHorarioAsignatura> getHorarios(Integer id) {
@@ -80,59 +84,85 @@ public class AsignaturaService {
                 .toList();
     }
 
-    @Transactional
     public ResponseEntity<?> altaAsignatura(DtNuevaAsignatura dtNuevaAsignatura) {
+        // Validate Carrera existence
         Carrera carrera = carreraRepo.findById(dtNuevaAsignatura.getIdCarrera()).orElse(null);
-
-        if(carrera == null){
+        if (carrera == null) {
             return ResponseEntity.badRequest().body("Carrera no encontrada.");
         }
 
+        // Validate Docentes
         List<Integer> idDocentes = dtNuevaAsignatura.getIdDocentes();
         if (idDocentes == null || idDocentes.isEmpty()) {
             return ResponseEntity.badRequest().body("Ingrese al menos un docente.");
         }
 
-        List<Docente> docentes = dtNuevaAsignatura.getIdDocentes().stream()
+        List<Docente> docentes = idDocentes.stream()
                 .map(docenteRepo::findById)
                 .map(optionalDocente -> optionalDocente.orElse(null))
-                .toList();
+                .collect(Collectors.toList());
 
-        if(asignaturaRepo.existsByNombreAndCarrera(dtNuevaAsignatura.getNombre(), carrera)){
+        // Check if all docentes were found
+        if (docentes.contains(null)) {
+            return ResponseEntity.badRequest().body("Uno o más docentes no encontrados.");
+        }
+
+        // Validate Asignatura uniqueness
+        if (asignaturaRepo.existsByNombreAndCarrera(dtNuevaAsignatura.getNombre(), carrera)) {
             return ResponseEntity.badRequest().body("La asignatura ya existe.");
         }
 
-        if(this.validarCircularidad(dtNuevaAsignatura.getPreviaturas())){
+        // Validate Previaturas for circularity
+        if (this.validarCircularidad(dtNuevaAsignatura.getPreviaturas())) {
             return ResponseEntity.badRequest().body("Existen circularidades en las previaturas seleccionadas.");
         }
 
+        // Convert and prepare Asignatura entity
         DtAsignatura dtAsignatura = dtNuevaAsignatura.dtAsignaturaFromDtNuevaAsignatura(dtNuevaAsignatura);
         Asignatura asignatura = asignaturaConverter.convertToEntity(dtAsignatura);
 
-        asignaturaRepo.save(asignatura);
-
-        docentes.forEach(docente -> {
-                    DocenteAsignatura da = new DocenteAsignatura();
-                    da.setDocente(docente);
-                    da.setAsignatura(asignatura);
-                    docenteAsignaturaRepo.save(da);
-                });
-
-        List<Integer> idsPreviaturas = dtAsignatura.getPreviaturas();
+        // Prepare and validate Previaturas
+        List<Integer> idsPreviaturas = dtNuevaAsignatura.getPreviaturas();
+        List<Previaturas> previaturas = new ArrayList<>();
         if (idsPreviaturas != null && !idsPreviaturas.isEmpty()) {
             for (Integer idPrevia : idsPreviaturas) {
-                Asignatura previaAsignatura = asignaturaRepo.findById(idPrevia)
-                        .orElseThrow(() -> new RuntimeException("Previa asignatura no encontrada"));
+                Asignatura previaAsignatura = asignaturaRepo.findById(idPrevia).orElse(null);
+                if (previaAsignatura == null) {
+                    return ResponseEntity.badRequest().body("Previa asignatura no encontrada");
+                }
+
+                // Validate if Previaturas belong to the same Carrera
+                if (!previaAsignatura.getCarrera().equals(carrera)) {
+                    return ResponseEntity.badRequest().body("Todas las previaturas deben pertenecer a la misma carrera.");
+                }
+
                 Previaturas previatura = new Previaturas();
                 previatura.setAsignatura(asignatura);
                 previatura.setPrevia(previaAsignatura);
-                previaturasRepo.save(previatura);
+                previaturas.add(previatura);
             }
+        }
+
+        // Save Asignatura
+        asignaturaRepo.save(asignatura);
+
+        // Save DocenteAsignatura
+        for (Docente docente : docentes) {
+            DocenteAsignatura da = new DocenteAsignatura();
+            da.setDocente(docente);
+            da.setAsignatura(asignatura);
+            docenteAsignaturaRepo.save(da);
+        }
+
+        // Save Previaturas
+        for (Previaturas previatura : previaturas) {
+            previaturasRepo.save(previatura);
         }
 
         return ResponseEntity.ok().body("Asignatura creada exitosamente.");
     }
 
+    //TODO: Contemplar con las previaturas ya existentes en la BD
     private Boolean validarCircularidad(List<Integer> idsPreviaturas) {
         if (idsPreviaturas == null || idsPreviaturas.isEmpty()) {
             return false;
@@ -174,10 +204,48 @@ public class AsignaturaService {
         return false;
     }
 
-    public ResponseEntity<?> registroHorarios(Integer idAsignatura, List<DtNuevoHorarioAsignatura> listHorarios) {
-        //TODO: Impl
-        return null;
+    public ResponseEntity<?> registroHorarios(Integer idAsignatura, DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
+                .orElse(null);
+
+        if (asignatura == null) {
+            return ResponseEntity.badRequest().body("idAsignatura invalido");
+        }
+
+        Docente docente = docenteRepo.findById(dtNuevoHorarioAsignatura.getIdDocente())
+                .orElse(null);
+
+        if (docente == null) {
+            return ResponseEntity.badRequest().body("idDocente invalido");
+        }
+
+        List<HorarioDias> existingHorarioDias = docenteHorarioAsignaturaRepo.findHorarioDiasByDocenteIdAndAnio(docente.getIdDocente(), dtNuevoHorarioAsignatura.getAnio());
+
+        for (DtHorarioDias newHorarioDia : dtNuevoHorarioAsignatura.getDtHorarioDias()) {
+            DiaSemana diaSemana = newHorarioDia.getDiaSemana();
+            Integer horaInicio = newHorarioDia.getHoraInicio();
+            Integer horaFin = newHorarioDia.getHoraFin();
+
+            if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
+                return ResponseEntity.badRequest().body("horaInicio debe ser menor a horaFin, y tener un valor entre 0-23");
+            }
+
+            for (HorarioDias existingHorarioDia : existingHorarioDias) {
+                if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
+                    if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
+                        return ResponseEntity.badRequest().body("Horarios superpuestos detectados para el dia " + diaSemana);
+                    }
+                }
+            }
+        }
+
+        HorarioAsignatura horarioAsignatura = createAndSaveHorarioAsignatura(asignatura, dtNuevoHorarioAsignatura.getAnio());
+        createAndSaveHorarioDias(horarioAsignatura, dtNuevoHorarioAsignatura.getDtHorarioDias());
+        createAndSaveDocenteHorarioAsignatura(docente, horarioAsignatura);
+
+        return ResponseEntity.ok("Horarios registered successfully");
     }
+
 
     public String validateInscripcionAsignatura(DtNuevaInscripcionAsignatura inscripcion) {
         Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
@@ -267,4 +335,30 @@ public class AsignaturaService {
 
         return ResponseEntity.ok().body("Se realizó la inscripcion a la asignatura");
     }
+
+    private HorarioAsignatura createAndSaveHorarioAsignatura(Asignatura asignatura, Integer anio) {
+        HorarioAsignatura horarioAsignatura = new HorarioAsignatura();
+        horarioAsignatura.setAsignatura(asignatura);
+        horarioAsignatura.setAnio(anio);
+        return horarioAsignaturaRepo.save(horarioAsignatura);
+    }
+
+    private void createAndSaveHorarioDias(HorarioAsignatura horarioAsignatura, List<DtHorarioDias> dtHorarioDiasList) {
+        for (DtHorarioDias dtHorarioDias : dtHorarioDiasList) {
+            HorarioDias horarioDias = new HorarioDias();
+            horarioDias.setDiaSemana(dtHorarioDias.getDiaSemana());
+            horarioDias.setHoraInicio(dtHorarioDias.getHoraInicio());
+            horarioDias.setHoraFin(dtHorarioDias.getHoraFin());
+            horarioDias.setHorarioAsignatura(horarioAsignatura);
+            horarioDiasRepo.save(horarioDias);
+        }
+    }
+
+    private void createAndSaveDocenteHorarioAsignatura(Docente docente, HorarioAsignatura horarioAsignatura) {
+        DocenteHorarioAsignatura docenteHorarioAsignatura = new DocenteHorarioAsignatura();
+        docenteHorarioAsignatura.setDocente(docente);
+        docenteHorarioAsignatura.setHorarioAsignatura(horarioAsignatura);
+        docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
+    }
+
 }
