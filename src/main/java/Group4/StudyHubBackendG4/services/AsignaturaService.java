@@ -2,6 +2,7 @@ package Group4.StudyHubBackendG4.services;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
 import Group4.StudyHubBackendG4.persistence.*;
@@ -23,10 +24,10 @@ public class AsignaturaService {
 
     @Autowired
     private AsignaturaRepo asignaturaRepo;
-
     @Autowired
     private PreviaturasRepo previaturasRepo;
-
+    @Autowired
+    private UsuarioRepo usuarioRepo;
     @Autowired
     private CarreraRepo carreraRepo;
 
@@ -38,6 +39,12 @@ public class AsignaturaService {
 
     @Autowired
     private HorarioAsignaturaRepo horarioAsignaturaRepo;
+    @Autowired
+    private EstudianteCursadaRepo estudianteCursadaRepo;
+    @Autowired
+    private CursadaRepo cursadaRepo;
+    @Autowired
+    private InscripcionCarreraRepo inscripcionCarreraRepo;
 
     @Autowired
     private AsignaturaConverter asignaturaConverter;
@@ -155,7 +162,8 @@ public class AsignaturaService {
         visitado.add(idAsignatura);
         stack.add(idAsignatura);
 
-        List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignaturaRepo.findById(idAsignatura));
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+        List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignatura);
         for (Previaturas previatura : previaturas) {
             if (esCiclico(previatura.getPrevia().getIdAsignatura(), visitado, stack)) {
                 return true;
@@ -169,5 +177,94 @@ public class AsignaturaService {
     public ResponseEntity<?> registroHorarios(Integer idAsignatura, List<DtNuevoHorarioAsignatura> listHorarios) {
         //TODO: Impl
         return null;
+    }
+
+    public String validateInscripcionAsignatura(DtNuevaInscripcionAsignatura inscripcion) {
+        Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
+        HorarioAsignatura horario = horarioAsignaturaRepo.findById(inscripcion.getIdHorario()).orElse(null);
+        Usuario usuario = usuarioRepo.findById(inscripcion.getIdEstudiante()).orElse(null);
+
+        //Validaciones basicas
+        if (asignatura == null) {
+           return "La asignatura no existe";
+        }
+        if (horario == null) {
+            return "El horario no existe";
+        }
+        if (usuario == null) {
+            return "El usuario no existe";
+        }
+        if (!usuario.getRol().equals("E")) {
+            return "El usuario no es un estudiante";
+        }
+        if (horario.getAsignatura().getIdAsignatura() != asignatura.getIdAsignatura()) {
+            return "El horario no pertenece a la asignatura seleccionada";
+        }
+        Carrera carrera = asignatura.getCarrera();
+        InscripcionCarrera inscripcionCarrera = inscripcionCarreraRepo.findByUsuarioAndCarreraAndActivaAndValidada(usuario,carrera,true,true).orElse(null);
+
+        if (inscripcionCarrera == null) {
+            return "El usuario no está inscripto en la carrera correspondiente a la asignatura";
+        }
+        // TODO: Realizar validacion ya cursada
+        List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
+        List<Cursada> aprobadasCursadas = listCursadas.stream()
+                .map(EstudianteCursada::getCursada)
+                .filter(cursada -> "APROBADA".equals(cursada.getResultado()))
+                .toList();
+
+        if(!aprobadasCursadas.isEmpty()){
+            return  "La asignatura ya fue aprobada!";
+        }
+
+        // Realizar validacion inscripcion pendiente
+        List<Cursada> inscripcionPendiente = listCursadas.stream()
+                .map(EstudianteCursada::getCursada)
+                .filter(cursada -> "PENDIENTE".equals(cursada.getResultado()))
+                .toList();
+
+        if(!inscripcionPendiente.isEmpty()){
+            return  "Tiene una inscripcion pendiente.";
+        }
+
+        // Realizar validacion previas
+        List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
+        List<Asignatura> asignaturasPrevias = previas.stream()
+                .map(Previaturas::getPrevia)
+                .toList();
+
+        // Para cada previa obtengo todas las cursadas y valido si alguna de ellas fue aprobada
+        boolean previasAprobadas = asignaturasPrevias.stream()
+                .allMatch(previa -> {
+                    List<EstudianteCursada> cursadasPrevia = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, previa);
+                    return cursadasPrevia.stream()
+                            .map(EstudianteCursada::getCursada)
+                            .anyMatch(cursada -> cursada.getResultado().equals("APROBADA"));
+                });
+
+        if (!previasAprobadas) {
+            return "No se han aprobado todas las asignaturas previas requeridas.";
+        }
+        return null;
+    }
+
+    public ResponseEntity<?> inscripcionAsignatura(DtNuevaInscripcionAsignatura inscripcion) {
+        // TODO: Realizar inscripcion
+        Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
+        HorarioAsignatura horario = horarioAsignaturaRepo.findById(inscripcion.getIdHorario()).orElse(null);
+        Usuario user = usuarioRepo.findById(inscripcion.getIdEstudiante()).orElse(null);
+
+        Cursada cursada = new Cursada();
+        cursada.setAsignatura(asignatura);
+        cursada.setHorarioAsignatura(horario);
+        cursada.setResultado("PENDIENTE");
+        cursadaRepo.save(cursada);
+
+        EstudianteCursada estudianteCursada = new EstudianteCursada();
+        estudianteCursada.setCursada(cursada);
+        estudianteCursada.setUsuario(user);
+        estudianteCursadaRepo.save(estudianteCursada);
+
+        return ResponseEntity.ok().body("Se realizó la inscripcion a la asignatura");
     }
 }
