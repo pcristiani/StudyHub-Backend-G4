@@ -19,6 +19,8 @@ public class DtAsignatura {
     private String departamento;
     private Boolean activa;
     private List<Integer> previaturas;
+
+    
 }
 
 

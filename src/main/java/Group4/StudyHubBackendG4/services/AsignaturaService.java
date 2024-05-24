@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtHorarioAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
@@ -11,6 +12,7 @@ import Group4.StudyHubBackendG4.utils.converters.HorarioAsignaturaConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +30,13 @@ public class AsignaturaService {
     private UsuarioRepo usuarioRepo;
     @Autowired
     private CarreraRepo carreraRepo;
+
+    @Autowired
+    private DocenteRepo docenteRepo;
+
+    @Autowired
+    private DocenteAsignaturaRepo docenteAsignaturaRepo;
+
     @Autowired
     private HorarioAsignaturaRepo horarioAsignaturaRepo;
     @Autowired
@@ -43,8 +52,11 @@ public class AsignaturaService {
     @Autowired
     private HorarioAsignaturaConverter horarioAsignaturaConverter;
 
-    public ResponseEntity<?> getAsignaturas() {
-        return ResponseEntity.ok().body(asignaturaRepo.findAll());
+    public List<DtAsignatura> getAsignaturas() {
+        return asignaturaRepo.findAll()
+                .stream()
+                .map(asignaturaConverter::convertToDto)
+                .collect(Collectors.toList());
     }
 
     public ResponseEntity<List<DtAsignatura>> getAsignaturasDeCarrera(Integer idCarrera) {
@@ -68,26 +80,43 @@ public class AsignaturaService {
                 .toList();
     }
 
-    public ResponseEntity<?> altaAsignatura(DtAsignatura dtAsignatura) {
-        Carrera carrera = carreraRepo.findById(dtAsignatura.getIdCarrera()).orElse(null);
+    @Transactional
+    public ResponseEntity<?> altaAsignatura(DtNuevaAsignatura dtNuevaAsignatura) {
+        Carrera carrera = carreraRepo.findById(dtNuevaAsignatura.getIdCarrera()).orElse(null);
 
         if(carrera == null){
             return ResponseEntity.badRequest().body("Carrera no encontrada.");
         }
-        if(asignaturaRepo.existsByNombreAndCarrera(dtAsignatura.getNombre(), carrera)){
+
+        List<Integer> idDocentes = dtNuevaAsignatura.getIdDocentes();
+        if (idDocentes == null || idDocentes.isEmpty()) {
+            return ResponseEntity.badRequest().body("Ingrese al menos un docente.");
+        }
+
+        List<Docente> docentes = dtNuevaAsignatura.getIdDocentes().stream()
+                .map(docenteRepo::findById)
+                .map(optionalDocente -> optionalDocente.orElse(null))
+                .toList();
+
+        if(asignaturaRepo.existsByNombreAndCarrera(dtNuevaAsignatura.getNombre(), carrera)){
             return ResponseEntity.badRequest().body("La asignatura ya existe.");
         }
 
-        if(asignaturaRepo.existsByNombreAndCarrera(dtAsignatura.getNombre(), carrera)){
-            return ResponseEntity.badRequest().body("La asignatura ya existe.");
-        }
-
-        if(this.validarCircularidad(dtAsignatura)){
+        if(this.validarCircularidad(dtNuevaAsignatura.getPreviaturas())){
             return ResponseEntity.badRequest().body("Existen circularidades en las previaturas seleccionadas.");
         }
 
+        DtAsignatura dtAsignatura = dtNuevaAsignatura.dtAsignaturaFromDtNuevaAsignatura(dtNuevaAsignatura);
         Asignatura asignatura = asignaturaConverter.convertToEntity(dtAsignatura);
+
         asignaturaRepo.save(asignatura);
+
+        docentes.forEach(docente -> {
+                    DocenteAsignatura da = new DocenteAsignatura();
+                    da.setDocente(docente);
+                    da.setAsignatura(asignatura);
+                    docenteAsignaturaRepo.save(da);
+                });
 
         List<Integer> idsPreviaturas = dtAsignatura.getPreviaturas();
         if (idsPreviaturas != null && !idsPreviaturas.isEmpty()) {
@@ -104,8 +133,7 @@ public class AsignaturaService {
         return ResponseEntity.ok().body("Asignatura creada exitosamente.");
     }
 
-    private Boolean validarCircularidad(DtAsignatura dtAsignatura) {
-        List<Integer> idsPreviaturas = dtAsignatura.getPreviaturas();
+    private Boolean validarCircularidad(List<Integer> idsPreviaturas) {
         if (idsPreviaturas == null || idsPreviaturas.isEmpty()) {
             return false;
         }

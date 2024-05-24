@@ -2,6 +2,7 @@ package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
+import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class AsignaturaController {
     @GetMapping("/api/asignatura/getAsignaturas")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturas() {
-        return asignaturaService.getAsignaturas();
+        return ResponseEntity.ok(asignaturaService.getAsignaturas());
     }
 
     @GetMapping("/api/asignatura/getAsignaturasDeCarrera/{id}")
@@ -39,8 +40,8 @@ public class AsignaturaController {
 
     @PostMapping("/api/asignatura/altaAsignatura")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A')")
-    public ResponseEntity<?> altaAsignatura(@Valid @RequestBody DtAsignatura dtAsignatura) {
-        return asignaturaService.altaAsignatura(dtAsignatura);
+    public ResponseEntity<?> altaAsignatura(@Valid @RequestBody DtNuevaAsignatura dtNuevaAsignatura) {
+        return asignaturaService.altaAsignatura(dtNuevaAsignatura);
     }
 
     @PostMapping("/api/asignatura/registroHorarios/{id}")

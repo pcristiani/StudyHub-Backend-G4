@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
+import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
@@ -52,6 +53,8 @@ public class UsuarioService {
     private CarreraCoordinadorRepo carreraCoordinadorRepo;
     @Autowired
     private CarreraService carreraService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public List<DtUsuario> getUsuarios() {
         return usuarioRepo.findAll().stream()
@@ -117,6 +120,19 @@ public class UsuarioService {
             Usuario aux = userOptional.get();
 
             if (Objects.equals(dtUsuario.getCedula(), aux.getCedula()) || (!Objects.equals(dtUsuario.getCedula(), aux.getCedula()) && !usuarioRepo.existsByCedula(dtUsuario.getCedula()))) {
+
+                //Si se modifica la cedula, hay que eliminar el jwt para que el usuario vuelva a loguearse.
+                if (!aux.getCedula().equals(dtUsuario.getCedula())) {
+                    UsuarioTR usuarioTr = usuarioTrRepo.findByUsuario(aux);
+                    String jwt = usuarioTr.getJwt();
+
+                    if(jwtUtil.isTokenExpired(jwt)){
+                        usuarioTrRepo.delete(usuarioTr);
+                    } else {
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede modificar la cedula porque el usuario tiene una sesion activa.");
+                    }
+                }
+
                 aux.setNombre(dtUsuario.getNombre() == null || dtUsuario.getNombre().isEmpty() ? aux.getNombre() : dtUsuario.getNombre());
                 aux.setApellido(dtUsuario.getApellido() == null || dtUsuario.getApellido().isEmpty() ? aux.getApellido() : dtUsuario.getApellido());
                 aux.setFechaNacimiento(dtUsuario.getFechaNacimiento() == null || dtUsuario.getFechaNacimiento().isEmpty() ? aux.getFechaNacimiento() : dtUsuario.getFechaNacimiento());
