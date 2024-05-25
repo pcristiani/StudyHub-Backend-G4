@@ -42,7 +42,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (!path.startsWith("/aapi/")) {
+        if (!path.startsWith("/api/")) {
             chain.doFilter(request, response);
             return;
         }
