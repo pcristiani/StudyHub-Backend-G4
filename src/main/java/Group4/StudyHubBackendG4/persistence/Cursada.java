@@ -18,4 +18,6 @@ public class Cursada {
     @ManyToOne
     @JoinColumn(name = "idHorarioAsignatura", nullable = false)
     private HorarioAsignatura horarioAsignatura;
+
+    private String resultado;
 }

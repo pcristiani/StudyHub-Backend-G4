@@ -17,6 +17,7 @@ public class UsuarioTR {
     @OneToOne
     @JoinColumn(name = "idUsuario", nullable = false)
     private Usuario usuario;
+    @Column(columnDefinition = "TEXT")
     private String jwt;
     private String tokenReseteoContrasenia;
 

@@ -10,5 +10,5 @@ import java.util.Optional;
 
 @Repository
 public interface PreviaturasRepo extends JpaRepository<Previaturas, Integer> {
-    List<Previaturas> findByAsignatura(Optional<Asignatura> asignatura);
+    List<Previaturas> findByAsignatura(Asignatura asignatura);
 }

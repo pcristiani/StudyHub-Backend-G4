@@ -2,9 +2,16 @@ package Group4.StudyHubBackendG4.datatypes;
 
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class DtFecha {
     private Integer anio;
     private Integer mes;
     private Integer dia;
+
+    public LocalDate convertToLocalDate() {
+        return LocalDate.of(anio, mes, dia);
+    }
+
 }
