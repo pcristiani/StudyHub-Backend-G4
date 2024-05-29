@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class DtHorarioAsignatura {
+    private Integer idHorarioAsignatura;
+    private Integer idAsignatura;
     private Integer anio;
-    private DtDocente docente;
-    private DtHorarioDias dias;
     private Integer horaInicio;
     private Integer horaFin;
 }

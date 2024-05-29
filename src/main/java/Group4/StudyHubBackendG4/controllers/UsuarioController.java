@@ -36,7 +36,13 @@ public class UsuarioController {
     @GetMapping("/api/usuario/getUsuario/{id}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getUsuariosById(@PathVariable Integer id) {
-        return usuarioService.getUserById(id);
+        return usuarioService.getUsuarioById(id);
+    }
+
+    @GetMapping("/api/usuario/getDocentesByAsignaturaId/{id}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getDocentesByAsignaturaId(@PathVariable Integer id) {
+        return ResponseEntity.ok().body(usuarioService.getDocentesByAsignaturaId(id));
     }
 
     @GetMapping("/api/usuario/getEstudiantesPendientes")

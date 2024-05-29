@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
+import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -49,9 +49,15 @@ public class UsuarioService {
     private DocenteRepo docenteRepo;
 
     @Autowired
+    private DocenteAsignaturaRepo docenteAsignaturaRepo;
+
+    @Autowired
     private CarreraCoordinadorRepo carreraCoordinadorRepo;
+
     @Autowired
     private CarreraService carreraService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public List<DtUsuario> getUsuarios() {
         return usuarioRepo.findAll().stream()
@@ -59,30 +65,36 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/getAllDocentes")
     public List<DtDocente> getDocentes() {
         return docenteRepo.findAll().stream()
                 .map(docenteConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<DtUsuario> getUserById(Integer id) {
+    public List<DtDocente> getDocentesByAsignaturaId(Integer asignaturaId) {
+        List<Docente> docenteAsignaturas = docenteAsignaturaRepo.findDocentesByAsignaturaId(asignaturaId);
+        return docenteAsignaturas.stream()
+                .map(docenteConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public ResponseEntity<DtUsuario> getUsuarioById(Integer id) {
         return usuarioRepo.findById(id)
                 .map(usuarioConverter::convertToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }
 
-    public Usuario getUserByUsername(String username) {
+    public Usuario getUsuarioByUsername(String username) {
         return usuarioRepo.findByCedula(username);
     }
 
-    public Usuario getUserByJwt(String jwt) {
+    public Usuario getUsuarioByJwt(String jwt) {
         UsuarioTR usuarioTr = usuarioTrRepo.findByJwt(jwt);
         return usuarioTr != null ? usuarioTr.getUsuario() : null;
     }
 
-    public Usuario getUserByCedula(String cedula) {
+    public Usuario getUsuarioByCedula(String cedula) {
         return usuarioRepo.findByCedula(cedula);
     }
 
@@ -117,6 +129,19 @@ public class UsuarioService {
             Usuario aux = userOptional.get();
 
             if (Objects.equals(dtUsuario.getCedula(), aux.getCedula()) || (!Objects.equals(dtUsuario.getCedula(), aux.getCedula()) && !usuarioRepo.existsByCedula(dtUsuario.getCedula()))) {
+
+                //Si se modifica la cedula, hay que eliminar el jwt para que el usuario vuelva a loguearse.
+                if (!aux.getCedula().equals(dtUsuario.getCedula())) {
+                    UsuarioTR usuarioTr = usuarioTrRepo.findByUsuario(aux);
+                    String jwt = usuarioTr.getJwt();
+
+                    if(jwtUtil.isTokenExpired(jwt)){
+                        usuarioTrRepo.delete(usuarioTr);
+                    } else {
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede modificar la cedula porque el usuario tiene una sesion activa.");
+                    }
+                }
+
                 aux.setNombre(dtUsuario.getNombre() == null || dtUsuario.getNombre().isEmpty() ? aux.getNombre() : dtUsuario.getNombre());
                 aux.setApellido(dtUsuario.getApellido() == null || dtUsuario.getApellido().isEmpty() ? aux.getApellido() : dtUsuario.getApellido());
                 aux.setFechaNacimiento(dtUsuario.getFechaNacimiento() == null || dtUsuario.getFechaNacimiento().isEmpty() ? aux.getFechaNacimiento() : dtUsuario.getFechaNacimiento());
