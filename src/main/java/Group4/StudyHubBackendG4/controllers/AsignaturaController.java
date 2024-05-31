@@ -34,7 +34,19 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarrera(idCarrera));
     }
 
-    @PostMapping("/api/asignatura/getHorarios/{id}")
+    @GetMapping("/api/asignatura/getAsignaturasAprobadas/{idEstudiante}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasAprobadas(@PathVariable Integer idEstudiante) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasAprobadas(idEstudiante));
+    }
+
+    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasNoAprobadas(@PathVariable Integer idEstudiante) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasNoAprobadas(idEstudiante));
+    }
+
+    @PostMapping("/api/asignatura/getHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getHorarios(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok(asignaturaService.getHorarios(idAsignatura));
@@ -64,6 +76,4 @@ public class AsignaturaController {
 
 
     }
-
-
 }

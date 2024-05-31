@@ -75,6 +75,22 @@ public class AsignaturaService {
                 .collect(Collectors.toList());
     }
 
+    public List<DtAsignatura> getAsignaturasAprobadas(Integer idEstudiante) {
+        Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
+        return estudianteCursadaRepo.findAprobadasByEstudiante(user)
+                .stream()
+                .map(asignaturaConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<DtAsignatura> getAsignaturasNoAprobadas(Integer idEstudiante) {
+        Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
+        return estudianteCursadaRepo.findNoAprobadasByEstudiante(user)
+                .stream()
+                .map(asignaturaConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     public List<DtHorarioAsignatura> getHorarios(Integer id) {
         Asignatura asig = asignaturaRepo.findById(id).orElse(null);
         return asig == null ? null :
@@ -360,5 +376,4 @@ public class AsignaturaService {
         docenteHorarioAsignatura.setHorarioAsignatura(horarioAsignatura);
         docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
     }
-
 }
