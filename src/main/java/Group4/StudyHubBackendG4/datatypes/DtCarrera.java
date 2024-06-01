@@ -11,5 +11,7 @@ public class DtCarrera {
     private Integer idCarrera;
     private String nombre;
     private String descripcion;
+    private String requisitos;
+    private Integer duracion;
     private Boolean activa;
 }

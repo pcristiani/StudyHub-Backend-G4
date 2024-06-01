@@ -18,7 +18,6 @@ public class AsignaturaController {
 
     @Autowired
     private AsignaturaService asignaturaService;
-
     @Autowired
     private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
@@ -34,7 +33,25 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarrera(idCarrera));
     }
 
-    @GetMapping("/api/asignatura/getHorarios/{idAsignatura}")
+    @GetMapping("/api/asignatura/getAsignaturasDeCarreraConExamen/{idCarrera}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasDeCarreraConExamen(@PathVariable Integer idCarrera) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarreraConExamen(idCarrera));
+    }
+
+    @GetMapping("/api/asignatura/getAsignaturasAprobadas/{idEstudiante}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasAprobadas(@PathVariable Integer idEstudiante) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasAprobadas(idEstudiante));
+    }
+
+    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasNoAprobadas(@PathVariable Integer idEstudiante) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasNoAprobadas(idEstudiante));
+    }
+
+    @PostMapping("/api/asignatura/getHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getHorarios(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok(asignaturaService.getHorarios(idAsignatura));
@@ -51,9 +68,10 @@ public class AsignaturaController {
     @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
     public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
         //TODO: Impl
-        return ResponseEntity.ok(asignaturaService.registroHorarios(idAsignatura,dtNuevoHorarioAsignatura));
+        return ResponseEntity.ok(asignaturaService.registroHorarios(idAsignatura, dtNuevoHorarioAsignatura));
 
     }
+
     @PostMapping("/api/asignatura/inscripcionAsignatura")
     @PreAuthorize("hasRole('ROLE_E') or hasRole('ROLE_A')")
     public ResponseEntity<?> inscripcionAsignatura(@Valid @RequestBody DtNuevaInscripcionAsignatura inscripcion) {
@@ -61,9 +79,11 @@ public class AsignaturaController {
         return message == null
                 ? asignaturaService.inscripcionAsignatura(inscripcion)
                 : ResponseEntity.badRequest().body(message);
-
-
     }
 
-
+    @PostMapping("/api/asignatura/registrarPreviaturas/{idAsignatura}")
+    @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
+    public ResponseEntity<?> registrarPreviaturas(@PathVariable Integer idAsignatura, @RequestBody List<Integer> previaturas) {
+        return ResponseEntity.ok(asignaturaService.registrarPreviaturas(idAsignatura, previaturas));
+    }
 }

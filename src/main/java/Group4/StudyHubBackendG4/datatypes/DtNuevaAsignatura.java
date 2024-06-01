@@ -16,6 +16,7 @@ public class DtNuevaAsignatura {
     private Integer creditos;
     private String descripcion;
     private String departamento;
+    private Boolean tieneExamen;
     private Boolean activa;
     private List<Integer> previaturas;
 
@@ -27,6 +28,7 @@ public class DtNuevaAsignatura {
                 dtNuevaAsignatura.getCreditos(),
                 dtNuevaAsignatura.getDescripcion(),
                 dtNuevaAsignatura.getDepartamento(),
+                dtNuevaAsignatura.getTieneExamen(),
                 dtNuevaAsignatura.getActiva(),
                 dtNuevaAsignatura.getPreviaturas());
     }
