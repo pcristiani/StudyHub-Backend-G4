@@ -18,12 +18,16 @@ public class Carrera {
     private Integer idCarrera;
     private String nombre;
     private String descripcion;
+    private String requisitos;
+    private Integer duracion;
     private Boolean activa;
 
     public Carrera CarreraFromDtNuevaCarrera(DtNuevaCarrera dtNuevaCarrera) {
         Carrera carrera = new Carrera();
         carrera.setNombre(dtNuevaCarrera.getNombre());
         carrera.setDescripcion(dtNuevaCarrera.getDescripcion());
+        carrera.setRequisitos(dtNuevaCarrera.getRequisitos());
+        carrera.setDuracion(dtNuevaCarrera.getDuracion());
         carrera.setActiva(true);
         return carrera;
     }

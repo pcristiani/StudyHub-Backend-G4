@@ -12,6 +12,9 @@ public class DtNuevaCarrera {
     @NotBlank(message = "Ingrese un nombre.")
     private String nombre;
 
-    @NotBlank(message = "Ingrese una descripcion.")
+    @NotBlank(message = "Ingrese una descripción.")
     private String descripcion;
+
+    private String requisitos;
+    private Integer duracion;
 }
