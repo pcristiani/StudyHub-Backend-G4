@@ -53,6 +53,12 @@ public class CarreraController {
     public ResponseEntity<?> getCarrerasConPeriodo() {
         return ResponseEntity.ok().body(carreraService.getCarrerasConPeriodo());
     }
+    @GetMapping("/api/carrera/getPeriodosDeCarrera/{idCarrera}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
+    public ResponseEntity<?> getPeriodosDeCarrera(@PathVariable Integer idCarrera) {
+        return ResponseEntity.ok().body(carreraService.getPeriodosDeCarrera(idCarrera));
+    }
+
 
     @PostMapping("/api/carrera/altaCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -20,5 +22,5 @@ public class Examen {
     @ManyToOne
     @JoinColumn(name = "idPeriodoExamen", nullable = false)
     private PeriodoExamen periodoExamen;
-    private Date fechaHora;
+    private LocalDateTime fechaHora;
 }

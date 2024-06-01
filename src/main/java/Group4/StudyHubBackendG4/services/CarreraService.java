@@ -61,7 +61,7 @@ public class CarreraService {
                 .map(carreraConverter::convertToDto)
                 .collect(Collectors.toList());
     }
-    public Object getInscriptosPendientes(Integer id) {
+    public List<DtUsuario> getInscriptosPendientes(Integer id) {
         Carrera carrera = carreraRepo.findById(id).orElse(null);
         return inscripcionCarreraRepo.findInscriptosPendientes(carrera).stream()
                 .map(InscripcionCarrera::getUsuario)
@@ -70,7 +70,7 @@ public class CarreraService {
                 .collect(Collectors.toList());
     }
 
-    public Object getCarrerasInscripto(Integer id) {
+    public List<DtCarrera> getCarrerasInscripto(Integer id) {
         Usuario user = usuarioRepo.findById(id).orElse(null);
         return user != null
             ? inscripcionCarreraRepo.findCarrerasInscripto(user).stream()
@@ -88,6 +88,14 @@ public class CarreraService {
                 .collect(Collectors.toList());
     }
 
+    public List<DtCarrera> getPeriodosDeCarrera(Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+        return periodoExamenRepo.findByCarrera(carrera)
+                .stream()
+                .map(PeriodoExamen::getCarrera)
+                .map(carreraConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
 
     public ResponseEntity<String> nuevaCarrera(DtNuevaCarrera dtNuevaCarrera) {
 

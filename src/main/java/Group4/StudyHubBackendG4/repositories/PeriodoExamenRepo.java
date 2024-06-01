@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -14,4 +15,6 @@ public interface PeriodoExamenRepo extends JpaRepository<PeriodoExamen, Integer>
     List<PeriodoExamen> findByCarreraAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(Carrera carrera, LocalDate fechaFin, LocalDate fechaInicio);
     @Query("SELECT DISTINCT pe.carrera FROM PeriodoExamen pe")
     List<Carrera> findDistinctCarreras();
+
+    List<PeriodoExamen> findByCarrera(Carrera carrera);
 }
