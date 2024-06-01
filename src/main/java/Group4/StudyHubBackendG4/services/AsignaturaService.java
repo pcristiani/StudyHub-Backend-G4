@@ -75,6 +75,16 @@ public class AsignaturaService {
                 .collect(Collectors.toList());
     }
 
+    public Object getAsignaturasDeCarreraConExamen(Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera)
+                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+
+        return asignaturaRepo.findByCarreraAndTieneExamen(carrera, true)
+                .stream()
+                .map(asignaturaConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     public List<DtAsignatura> getAsignaturasAprobadas(Integer idEstudiante) {
         Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
         return estudianteCursadaRepo.findAprobadasByEstudiante(user)

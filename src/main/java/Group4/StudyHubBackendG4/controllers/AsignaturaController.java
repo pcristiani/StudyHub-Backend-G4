@@ -34,6 +34,12 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarrera(idCarrera));
     }
 
+    @GetMapping("/api/asignatura/getAsignaturasDeCarreraConExamen/{id}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasDeCarreraConExamen(@PathVariable Integer idCarrera) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarreraConExamen(idCarrera));
+    }
+
     @GetMapping("/api/asignatura/getAsignaturasAprobadas/{idEstudiante}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasAprobadas(@PathVariable Integer idEstudiante) {

@@ -19,5 +19,6 @@ public class Asignatura {
     private Integer creditos;
     private String descripcion;
     private String departamento;
+    private Boolean tieneExamen;
     private Boolean activa;
 }

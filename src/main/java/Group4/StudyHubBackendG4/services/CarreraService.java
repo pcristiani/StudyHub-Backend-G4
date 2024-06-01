@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @Service
 public class CarreraService {
 
-    private String message = "";
-
     @Autowired
     private CarreraRepo carreraRepo;
 
@@ -81,6 +79,13 @@ public class CarreraService {
                 .map(carreraConverter::convertToDto)
                 .collect(Collectors.toList())
             : null;
+    }
+
+    public List<DtCarrera> getCarrerasConPeriodo() {
+        return periodoExamenRepo.findDistinctCarreras()
+                .stream()
+                .map(carreraConverter::convertToDto)
+                .collect(Collectors.toList());
     }
 
 
@@ -246,11 +251,14 @@ public class CarreraService {
             LocalDate fechaInicio = fechas.getInicio().convertToLocalDate();
             LocalDate fechaFin = fechas.getFin().convertToLocalDate();
 
-            Carrera carrera = carreraRepo.findById(idCarrera)
-                    .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+            Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+            if(carrera == null) {
+                return ResponseEntity.badRequest().body("La carrera no existe!");
+            }
 
-            if (!validatePeriodo(carrera, fechaInicio, fechaFin)) {
-                return ResponseEntity.badRequest().body(this.message);
+            String message = validatePeriodo(carrera, fechaInicio, fechaFin);
+            if (!message.isEmpty()) {
+                return ResponseEntity.badRequest().body(message);
             }
 
             // Crear y guardar el nuevo período
@@ -263,8 +271,7 @@ public class CarreraService {
 
             return ResponseEntity.ok("Período de examen añadido con éxito.");
         } catch (DateTimeException e) {
-            this.message = "Se ha ingresado una fecha invalida";
-            return ResponseEntity.badRequest().body(this.message);
+            return ResponseEntity.badRequest().body("Se ha ingresado una fecha invalida");
         }
     }
 
@@ -275,17 +282,11 @@ public class CarreraService {
         emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de validación a carrera", htmlContent);
     }
 
-    private boolean validatePeriodo(Carrera carrera, LocalDate fechaInicio, LocalDate fechaFin) {
+    private String validatePeriodo(Carrera carrera, LocalDate fechaInicio, LocalDate fechaFin) {
         if (fechaFin.isBefore(fechaInicio)) {
-            this.message = "La fecha de fin no puede ser antes de la fecha de inicio.";
-            return false;
+            return "La fecha de fin no puede ser antes de la fecha de inicio.";
         }
-
-        List<PeriodoExamen> periodosExistentes = periodoExamenRepo.findByCarreraAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
-                carrera, fechaFin, fechaInicio);
-        this.message = "El período ingresado se solapa con un período existente.";
-
-
-        return periodosExistentes.isEmpty();
+        return periodoExamenRepo.findByCarreraAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                carrera, fechaFin, fechaInicio).isEmpty() ? "" : "El período ingresado se solapa con un período existente.";
     }
 }
