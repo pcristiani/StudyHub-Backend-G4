@@ -80,7 +80,7 @@ public class AsignaturaService {
         return asig == null ? null :
         horarioAsignaturaRepo.findByAsignatura(asig)
                 .stream()
-                .map(horarioAsignaturaConverter::convertToDto)
+                .map(DtHorarioAsignatura::horarioAsignaturafromDtHorarioAsignatura)
                 .toList();
     }
 
@@ -223,19 +223,31 @@ public class AsignaturaService {
 
         for (DtHorarioDias newHorarioDia : dtNuevoHorarioAsignatura.getDtHorarioDias()) {
             DiaSemana diaSemana = newHorarioDia.getDiaSemana();
-            Integer horaInicio = newHorarioDia.getHoraInicio();
-            Integer horaFin = newHorarioDia.getHoraFin();
+            String horaInicioStr = newHorarioDia.getHoraInicio();
+            String horaFinStr = newHorarioDia.getHoraFin();
 
-            if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
-                return ResponseEntity.badRequest().body("horaInicio debe ser menor a horaFin, y tener un valor entre 0-23");
+            // Validar y convertir horaInicio y horaFin
+            if (!esHoraValida(horaInicioStr) || !esHoraValida(horaFinStr)) {
+                return ResponseEntity.badRequest().body("Formato de hora inválido. Use HH:mm");
             }
 
-            for (HorarioDias existingHorarioDia : existingHorarioDias) {
-                if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
-                    if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
-                        return ResponseEntity.badRequest().body("Horarios superpuestos detectados para el dia " + diaSemana);
-                    }
-                }
+            int horaInicio = convertirHora(horaInicioStr);
+            int horaFin = convertirHora(horaFinStr);
+
+            if (horaInicio >= horaFin) {
+                return ResponseEntity.badRequest().body("horaInicio debe ser menor a horaFin, y los valores deben ser válidos (por ejemplo, 10:30 para 10:30)");
+            }
+
+            boolean solapado = existingHorarioDias.stream()
+                    .filter(horario -> horario.getDiaSemana().equals(diaSemana))
+                    .anyMatch(existingHorarioDia -> {
+                        int existingHoraInicio = convertirHora(existingHorarioDia.getHoraInicio());
+                        int existingHoraFin = convertirHora(existingHorarioDia.getHoraFin());
+                        return horaInicio < existingHoraFin && horaFin > existingHoraInicio;
+                    });
+
+            if (solapado) {
+                return ResponseEntity.badRequest().body("Horarios superpuestos detectados para el dia " + diaSemana);
             }
         }
 
@@ -359,6 +371,29 @@ public class AsignaturaService {
         docenteHorarioAsignatura.setDocente(docente);
         docenteHorarioAsignatura.setHorarioAsignatura(horarioAsignatura);
         docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
+    }
+
+    private boolean esHoraValida(String horaStr) {
+        String[] partes = horaStr.split(":");
+        if (partes.length != 2) {
+            return false;
+        }
+
+        try {
+            int horas = Integer.parseInt(partes[0]);
+            int minutos = Integer.parseInt(partes[1]);
+
+            return horas >= 0 && horas <= 23 && minutos >= 0 && minutos <= 59;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private int convertirHora(String horaStr) {
+        String[] partes = horaStr.split(":");
+        int horas = Integer.parseInt(partes[0]);
+        int minutos = Integer.parseInt(partes[1]);
+        return horas * 60 + minutos;
     }
 
 }

@@ -28,13 +28,13 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturas());
     }
 
-    @GetMapping("/api/asignatura/getAsignaturasDeCarrera/{id}")
+    @GetMapping("/api/asignatura/getAsignaturasDeCarrera/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasDeCarrera(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarrera(idCarrera));
     }
 
-    @PostMapping("/api/asignatura/getHorarios/{id}")
+    @GetMapping("/api/asignatura/getHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getHorarios(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok(asignaturaService.getHorarios(idAsignatura));

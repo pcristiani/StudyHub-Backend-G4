@@ -2,8 +2,6 @@ package Group4.StudyHubBackendG4.persistence;
 
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,9 +17,9 @@ public class HorarioDias {
     @Enumerated(EnumType.STRING)
     private DiaSemana diaSemana;
 
-    private Integer horaInicio;
+    private String horaInicio;
 
-    private Integer horaFin;
+    private String horaFin;
 
     @ManyToOne
     @JoinColumn(name = "idHorarioAsignatura", nullable = false)
