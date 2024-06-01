@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class AsignaturaController {
@@ -79,7 +81,11 @@ public class AsignaturaController {
         return message == null
                 ? asignaturaService.inscripcionAsignatura(inscripcion)
                 : ResponseEntity.badRequest().body(message);
+    }
 
-
+    @PostMapping("/api/asignatura/registrarPreviaturas/{idAsignatura}")
+    @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
+    public ResponseEntity<?> registrarPreviaturas(@PathVariable Integer idAsignatura, @RequestBody List<Integer> previaturas) {
+        return ResponseEntity.ok(asignaturaService.registrarPreviaturas(idAsignatura, previaturas));
     }
 }

@@ -188,7 +188,7 @@ public class AsignaturaService {
         return ResponseEntity.ok().body("Asignatura creada exitosamente.");
     }
 
-    //TODO: Contemplar con las previaturas ya existentes en la BD
+
     private Boolean validarCircularidad(List<Integer> idsPreviaturas) {
         if (idsPreviaturas == null || idsPreviaturas.isEmpty()) {
             return false;
@@ -386,4 +386,104 @@ public class AsignaturaService {
         docenteHorarioAsignatura.setHorarioAsignatura(horarioAsignatura);
         docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
     }
+
+    public ResponseEntity<?> registrarPreviaturas(Integer idAsignatura, List<Integer> nuevasPrevias) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+        if (asignatura == null) {
+            return ResponseEntity.badRequest().body("Asignatura no encontrada.");
+        }
+
+        // Obtener previaturas existentes de la asignatura
+        List<Previaturas> previaturasAsignatura = previaturasRepo.findByAsignatura(asignatura);
+        Set<Integer> previasExistentes = previaturasAsignatura.stream()
+                .map(previatura -> previatura.getPrevia().getIdAsignatura())
+                .collect(Collectors.toSet());
+
+        // Agregar nuevas previaturas y evitar duplicados
+        Set<Integer> previasCompletas = new HashSet<>(previasExistentes);
+        previasCompletas.addAll(nuevasPrevias);
+
+        // Evitar que una asignatura se inscriba a sí misma
+        previasCompletas.add(idAsignatura);
+
+        List<Asignatura> previasAsignaturas = previasCompletas.stream()
+                .map(asignaturaRepo::findById)
+                .map(optionalAsignatura -> optionalAsignatura.orElse(null))
+                .collect(Collectors.toList());
+
+        if (previasAsignaturas.contains(null)) {
+            return ResponseEntity.badRequest().body("Una o más previas no encontradas.");
+        }
+
+        // Verificar la circularidad en todas las previaturas combinadas
+        boolean circularidad = validarCircularidadSimulada(idAsignatura, nuevasPrevias);
+        if (circularidad) {
+            return ResponseEntity.badRequest().body("Existen circularidades en las previaturas seleccionadas.");
+        }
+
+        // Guardar nuevas previaturas
+        for (Integer idPrevia : nuevasPrevias) {
+            Asignatura previa = asignaturaRepo.findById(idPrevia).orElse(null);
+            if (previa == null) {
+                return ResponseEntity.badRequest().body("Previa asignatura no encontrada.");
+            }
+
+            // Solo guardar las nuevas previaturas que no existen actualmente
+            if (!previasExistentes.contains(idPrevia)) {
+                Previaturas previatura = new Previaturas();
+                previatura.setAsignatura(asignatura);
+                previatura.setPrevia(previa);
+                previaturasRepo.save(previatura);
+            }
+        }
+
+        return ResponseEntity.ok().body("Previaturas registradas exitosamente.");
+    }
+
+    private boolean validarCircularidadSimulada(Integer idAsignatura, List<Integer> nuevasPrevias) {
+        Set<Integer> visitado = new HashSet<>();
+        Set<Integer> stack = new HashSet<>();
+
+        // Verificar todas las nuevas previas para detectar ciclos
+        for (Integer idPrevia : nuevasPrevias) {
+            if (esCiclicoSimulado(idAsignatura, idPrevia, visitado, stack)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean esCiclicoSimulado(Integer idAsignatura, Integer idPrevia, Set<Integer> visitado, Set<Integer> stack) {
+        if (stack.contains(idPrevia)) {
+            return true; // Ciclo detectado
+        }
+
+        if (visitado.contains(idPrevia)) {
+            return false;
+        }
+
+        visitado.add(idPrevia);
+        stack.add(idPrevia);
+
+        // Simular la existencia de la nueva previa
+        if (idPrevia.equals(idAsignatura)) {
+            return true; // Ciclo detectado con la asignatura principal
+        }
+
+        Asignatura asignatura = asignaturaRepo.findById(idPrevia).orElse(null);
+        if (asignatura != null) {
+            List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignatura);
+            for (Previaturas previatura : previaturas) {
+                if (esCiclicoSimulado(idAsignatura, previatura.getPrevia().getIdAsignatura(), visitado, stack)) {
+                    return true;
+                }
+            }
+        }
+
+        stack.remove(idPrevia);
+        return false;
+    }
+
+
 }
