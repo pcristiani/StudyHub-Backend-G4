@@ -65,24 +65,32 @@ public class AsignaturaService {
                 .collect(Collectors.toList());
     }
 
-    public List<DtAsignatura> getAsignaturasDeCarrera(Integer idCarrera) {
+    public ResponseEntity<?> getAsignaturasDeCarrera(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera)
-                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+                .orElse(null);
 
-        return asignaturaRepo.findByCarrera(carrera)
+        if (carrera == null){
+            return ResponseEntity.badRequest().body("Carrera no encontrada");
+        }
+
+        return ResponseEntity.ok().body(asignaturaRepo.findByCarrera(carrera)
                 .stream()
                 .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
-    public Object getAsignaturasDeCarreraConExamen(Integer idCarrera) {
+    public ResponseEntity<?> getAsignaturasDeCarreraConExamen(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera)
-                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+                .orElse(null);
 
-        return asignaturaRepo.findByCarreraAndTieneExamen(carrera, true)
+        if (carrera == null){
+            return ResponseEntity.badRequest().body("Carrera no encontrada");
+        }
+
+        return ResponseEntity.ok().body(asignaturaRepo.findByCarreraAndTieneExamen(carrera, true)
                 .stream()
                 .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     public List<DtAsignatura> getAsignaturasAprobadas(Integer idEstudiante) {
@@ -522,5 +530,21 @@ public class AsignaturaService {
         return false;
     }
 
+    public List<DtCursadaPendiente> getCursadasPendientesByAnioAndAsignatura(Integer anio, Integer idAsignatura) {
+        return cursadaRepo.findCursadasPendientesByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.PENDIENTE);
+    }
 
+    public ResponseEntity<?> modificarResultadoCursada(Integer idCursada, ResultadoAsignatura nuevoResultado) {
+        Cursada cursada = cursadaRepo.findById(idCursada)
+                .orElse(null) ;
+
+        if (cursada == null) {
+            return ResponseEntity.badRequest().body("No se encontró la cursada.");
+        }
+
+        cursada.setResultado(nuevoResultado);
+        cursadaRepo.save(cursada);
+
+        return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursada + " cambiado exitosamente a " + nuevoResultado);
+    }
 }
