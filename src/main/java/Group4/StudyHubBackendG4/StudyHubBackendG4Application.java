@@ -21,17 +21,7 @@ public class StudyHubBackendG4Application {
 
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(StudyHubBackendG4Application.class, args);
-
-		// Load the service account key from the resources folder
-		InputStream serviceAccountKey = StudyHubBackendG4Application.class.getClassLoader().getResourceAsStream("serviceAccountKey.json");
-		if (serviceAccountKey == null) {
-			throw new IOException("Service account key file not found");
-		}
-		FirebaseOptions options = new FirebaseOptions.Builder()
-				.setCredentials(GoogleCredentials.fromStream(serviceAccountKey))
-				.build();
-		FirebaseApp.initializeApp(options);
-
+		initializeFirebase();
 		abrirNavegadorConRuntime("http://localhost:8080/swagger-ui/index.html");
 	}
 
@@ -54,6 +44,17 @@ public class StudyHubBackendG4Application {
 		} catch (Exception e) {
 			System.err.println("ERROR AL ABRIR EL NAVEGADOR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		}
+	}
+
+	private static void initializeFirebase() throws IOException {
+		InputStream serviceAccountKey = StudyHubBackendG4Application.class.getClassLoader().getResourceAsStream("serviceAccountKey.json");
+		if (serviceAccountKey == null) {
+			throw new IOException("Service account key file not found");
+		}
+		FirebaseOptions options = new FirebaseOptions.Builder()
+				.setCredentials(GoogleCredentials.fromStream(serviceAccountKey))
+				.build();
+		FirebaseApp.initializeApp(options);
 	}
 }
 
