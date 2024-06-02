@@ -5,6 +5,7 @@ import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.CarreraConverter;
+import Group4.StudyHubBackendG4.utils.converters.PeriodoConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class CarreraService {
 
     @Autowired
     private PeriodoExamenRepo periodoExamenRepo;
+    @Autowired
+    private PeriodoConverter periodoConverter;
 
     public ResponseEntity<List<DtCarrera>> getCarreras() {
         return ResponseEntity.ok(carreraRepo.findAll()
@@ -88,12 +91,11 @@ public class CarreraService {
                 .collect(Collectors.toList());
     }
 
-    public List<DtCarrera> getPeriodosDeCarrera(Integer idCarrera) {
+    public List<DtPeriodoExamen> getPeriodosDeCarrera(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
         return periodoExamenRepo.findByCarrera(carrera)
                 .stream()
-                .map(PeriodoExamen::getCarrera)
-                .map(carreraConverter::convertToDto)
+                .map(periodoConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
