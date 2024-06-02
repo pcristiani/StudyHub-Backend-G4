@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
+@RequestMapping("/api/examen")
 public class ExamenController {
     @Autowired
     private ExamenService examenService;
 
-    @PostMapping("/api/examen/registroAsignaturaAPeriodo")
+    @PostMapping("registroAsignaturaAPeriodo")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> registroAsignaturaAPeriodo(@RequestBody DtNuevoExamen nuevoExamen) {
         return examenService.registroAsignaturaAPeriodo(nuevoExamen);

@@ -16,43 +16,44 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 @Validated
+@RequestMapping("/api/usuario")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
-    @GetMapping("/api/usuario/getUsuarios")
+    @GetMapping("/getUsuarios")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F')")
     public List<DtUsuario> getUsuarios() {
         return usuarioService.getUsuarios();
     }
 
-    @GetMapping("/api/usuario/getDocentes")
+    @GetMapping("/getDocentes")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getDocentes() {
         return ResponseEntity.ok().body(usuarioService.getDocentes());
     }
 
-    @GetMapping("/api/usuario/getUsuario/{idUsuario}")
+    @GetMapping("/getUsuario/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getUsuariosById(@PathVariable Integer idUsuario) {
         return usuarioService.getUsuarioById(idUsuario);
     }
 
-    @GetMapping("/api/usuario/getDocentesByAsignaturaId/{idAsignatura}")
+    @GetMapping("/getDocentesByAsignaturaId/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getDocentesByAsignaturaId(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok().body(usuarioService.getDocentesByAsignaturaId(idAsignatura));
     }
 
-    @GetMapping("/api/usuario/getEstudiantesPendientes")
+    @GetMapping("/getEstudiantesPendientes")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getEstudiantesPendientes() {
         List<DtUsuario> dtUsuarios = usuarioService.getEstudiantesPendientes();
         return ResponseEntity.ok().body(dtUsuarios);
     }
 
-    @PutMapping("/api/usuario/acceptEstudiante/{idUsuario}")
+    @PutMapping("/acceptEstudiante/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> acceptEstudiante(@PathVariable Integer idUsuario, @RequestBody Boolean aceptado) throws MessagingException, IOException {
         return usuarioService.acceptEstudiante(idUsuario,aceptado);
@@ -63,13 +64,13 @@ public class UsuarioController {
         return usuarioService.register(dtNuevoUsuario);
     }
 
-    @PutMapping("/api/usuario/modificarUsuario/{idUsuario}")
+    @PutMapping("/modificarUsuario/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A')")
     public ResponseEntity<?> modificarUsuario(@PathVariable Integer idUsuario, @RequestBody DtUsuario dtUsuario) {
         return usuarioService.modificarUsuario(idUsuario, dtUsuario);
     }
 
-    @DeleteMapping("/api/usuario/bajaUsuario/{idUsuario}")
+    @DeleteMapping("/bajaUsuario/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A')")
     public ResponseEntity<?> bajaUsuario(@PathVariable Integer idUsuario) {
         return usuarioService.bajaUsuario(idUsuario);
@@ -103,13 +104,13 @@ public class UsuarioController {
         return usuarioService.modificarDocente(idDocente, dtDocente);
     }
 
-    @PutMapping("/api/usuario/modificarPerfil/{idUsuario}")
+    @PutMapping("/modificarPerfil/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> modificarPerfil(@PathVariable Integer idUsuario, @RequestBody DtPerfil dtPerfil) {
         return usuarioService.modificarPerfil(idUsuario, dtPerfil);
     }
 
-    @PutMapping("/api/usuario/modificarPassword/{idUsuario}")
+    @PutMapping("/modificarPassword/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> modificarPassword(@PathVariable Integer idUsuario, @RequestBody String newPassword) {
         return usuarioService.modificarPassword(idUsuario, newPassword);
