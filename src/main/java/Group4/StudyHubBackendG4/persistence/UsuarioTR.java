@@ -19,12 +19,12 @@ public class UsuarioTR {
     private Usuario usuario;
     @Column(columnDefinition = "TEXT")
     private String jwt;
-    private String tokenReseteoContrasenia;
+    private String mobileToken;
 
-    public UsuarioTR(Usuario usuario, String jwt, String tokenReseteoContrasenia) {
+    public UsuarioTR(Usuario usuario, String jwt, String mobileToken) {
         this.usuario = usuario;
         this.jwt = jwt;
-        this.tokenReseteoContrasenia = tokenReseteoContrasenia;
+        this.mobileToken = mobileToken;
     }
 
     public Integer getIdTR() {
@@ -51,11 +51,11 @@ public class UsuarioTR {
         this.jwt = jwt;
     }
 
-    public String getTokenReseteoContrasenia() {
-        return tokenReseteoContrasenia;
+    public String getMobileToken() {
+        return mobileToken;
     }
 
-    public void setTokenReseteoContrasenia(String tokenReseteoContrasenia) {
-        this.tokenReseteoContrasenia = tokenReseteoContrasenia;
+    public void setMobileToken(String mobileToken) {
+        this.mobileToken = mobileToken;
     }
 }
