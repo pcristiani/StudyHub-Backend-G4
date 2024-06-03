@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.io.IOException;
 import java.time.DateTimeException;
@@ -99,6 +101,7 @@ public class CarreraService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ResponseEntity<String> nuevaCarrera(DtNuevaCarrera dtNuevaCarrera) {
 
         Optional<Carrera> existingCarrera = Optional.ofNullable(carreraRepo.findByNombre(dtNuevaCarrera.getNombre()));
@@ -110,6 +113,12 @@ public class CarreraService {
                 .CarreraFromDtNuevaCarrera(dtNuevaCarrera);
 
         carreraRepo.save(carrera);
+        ResponseEntity<?> asignarCoordinadorResult = asignarCoordinador(carrera.getIdCarrera(), dtNuevaCarrera.getIdCoordinador());
+
+        if(asignarCoordinadorResult.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.badRequest().body(Objects.requireNonNull(asignarCoordinadorResult.getBody()).toString());
+        }
 
         return ResponseEntity.ok().body("Carrera registrada con éxito.");
     }
@@ -217,6 +226,7 @@ public class CarreraService {
         return null;
     }
 
+    @Transactional
     public ResponseEntity<?> asignarCoordinador(Integer idCarrera, Integer idCoordinador) {
         Optional<Carrera> carreraOpt = carreraRepo.findById(idCarrera);
         Optional<Usuario> coordinadorOpt = usuarioRepo.findById(idCoordinador);

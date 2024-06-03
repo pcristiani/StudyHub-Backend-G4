@@ -93,7 +93,6 @@ public class CarreraController {
         return carreraService.acceptEstudianteCarrera(dtInscripcionCarrera);
     }
 
-    //Este metodo es temporal, se va a sacar: asignar coordinador a carrera
     @PutMapping("/asignarCoordinadorCarrera/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
     public ResponseEntity<?> asignarCoordinadorCarrera(@PathVariable Integer idCarrera, @RequestBody Integer idUsuario) {
