@@ -217,7 +217,6 @@ public class CarreraService {
         return null;
     }
 
-    //Funcion que asigne coordinadores a carreras en la tabla carrera_coordinador
     public ResponseEntity<?> asignarCoordinador(Integer idCarrera, Integer idCoordinador) {
         Optional<Carrera> carreraOpt = carreraRepo.findById(idCarrera);
         Optional<Usuario> coordinadorOpt = usuarioRepo.findById(idCoordinador);

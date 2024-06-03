@@ -58,14 +58,6 @@ public class AsignaturaService {
     @Autowired
     private AsignaturaConverter asignaturaConverter;
 
-    @Autowired
-    private HorarioAsignaturaConverter horarioAsignaturaConverter;
-
-    private List<DtAsignatura> convertToDtAsignatura (List<Asignatura> asignaturas) {
-        return asignaturas.stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
-    }
     public List<DtAsignatura> getAsignaturas() {
         return convertToDtAsignatura(asignaturaRepo.findAll());
     }
@@ -78,26 +70,18 @@ public class AsignaturaService {
             return ResponseEntity.badRequest().body("Carrera no encontrada");
         }
 
-        return ResponseEntity.ok().body(asignaturaRepo.findByCarrera(carrera)
-                .stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList()));
-        return convertToDtAsignatura(asignaturaRepo.findByCarrera(carrera));
+        return ResponseEntity.ok().body(convertToDtAsignatura(asignaturaRepo.findByCarrera(carrera)));
     }
 
     public ResponseEntity<?> getAsignaturasDeCarreraConExamen(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera)
                 .orElse(null);
 
-        return convertToDtAsignatura(asignaturaRepo.findByCarreraAndTieneExamen(carrera, true));
         if (carrera == null){
             return ResponseEntity.badRequest().body("Carrera no encontrada");
         }
 
-        return ResponseEntity.ok().body(asignaturaRepo.findByCarreraAndTieneExamen(carrera, true)
-                .stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList()));
+        return ResponseEntity.ok().body(convertToDtAsignatura(asignaturaRepo.findByCarreraAndTieneExamen(carrera, true)));
     }
 
     public List<DtAsignatura> getAsignaturasAprobadas(Integer idEstudiante) {
@@ -539,5 +523,11 @@ public class AsignaturaService {
         cursadaRepo.save(cursada);
 
         return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursada + " cambiado exitosamente a " + nuevoResultado);
+    }
+
+    private List<DtAsignatura> convertToDtAsignatura (List<Asignatura> asignaturas) {
+        return asignaturas.stream()
+                .map(asignaturaConverter::convertToDto)
+                .collect(Collectors.toList());
     }
 }
