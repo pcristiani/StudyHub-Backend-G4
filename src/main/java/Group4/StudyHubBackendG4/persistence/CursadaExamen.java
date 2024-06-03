@@ -14,13 +14,19 @@ public class CursadaExamen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idCursadaExamen;
+
     @ManyToOne
     @JoinColumn(name = "idCursada", nullable = false)
     private Cursada cursada;
+
     @ManyToOne
     @JoinColumn(name = "idExamen", nullable = false)
     private Examen examen;
+
     private Date fechaHora;
+
     private String cedulaEstudiante;
+
     private String resultado;
+
 }

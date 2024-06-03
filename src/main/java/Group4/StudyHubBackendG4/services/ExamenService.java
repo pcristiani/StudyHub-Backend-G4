@@ -1,8 +1,10 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtCursadaExamen;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,17 +16,24 @@ import java.util.List;
 
 @Service
 public class ExamenService {
+
     @Autowired
     private AsignaturaRepo asignaturaRepo;
+
     @Autowired
     private PeriodoExamenRepo periodoExamenRepo;
+
     @Autowired
     private ExamenRepo examenRepo;
+
     @Autowired
     private DocenteRepo docenteRepo;
+
     @Autowired
     private DocenteExamenRepo docenteExamenRepo;
 
+    @Autowired
+    private CursadaExamenRepo cursadaExamenRepo;
 
     public ResponseEntity<?> registroAsignaturaAPeriodo(DtNuevoExamen nuevoExamen) {
         //Validar que existe asignatura
@@ -71,4 +80,9 @@ public class ExamenService {
 
         return ResponseEntity.ok().body("Se registró la asignatura al periodo de examen.");
     }
+
+    public List<DtCursadaExamen> findCursadasExamenByAnioAndAsignatura(Integer anio, Integer idAsignatura) {
+        return cursadaExamenRepo.findCursadasAExamenByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.EXAMEN);
+    }
+
 }
