@@ -117,7 +117,7 @@ public class UsuarioService {
         usuarioRepo.save(usuario);
 
         if(!RoleUtil.isEstudiante(dtNuevoUsuario)){
-            //this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
+            this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
             pushService.sendPushNotification(1,"Mensaje de prueba", "Hola mundo");
         }
 
