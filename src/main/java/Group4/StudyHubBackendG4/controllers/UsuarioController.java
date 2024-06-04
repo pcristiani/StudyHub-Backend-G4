@@ -114,4 +114,10 @@ public class UsuarioController {
     public ResponseEntity<?> modificarPassword(@PathVariable Integer idUsuario, @RequestBody String newPassword) {
         return usuarioService.modificarPassword(idUsuario, newPassword);
     }
+
+    @GetMapping("/api/usuario/getResumenActividad/{idUsuario}")
+    @PreAuthorize("hasRole('ROLE_A')")
+    public ResponseEntity<?> getResumenActividad(@PathVariable Integer idUsuario) {
+        return usuarioService.getActividadUsuario(idUsuario);
+    }
 }

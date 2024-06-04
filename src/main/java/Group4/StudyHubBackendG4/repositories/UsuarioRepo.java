@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.repositories;
 
+import Group4.StudyHubBackendG4.persistence.Actividad;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,7 @@ public interface UsuarioRepo extends JpaRepository<Usuario, Integer> {
     List<Usuario> findAllByValidado(@Param("validado") Boolean validado);
     Boolean existsByCedula(String cedula);
     Boolean existsByEmail(String email);
+
+    @Query("SELECT a FROM Actividad a WHERE a.usuario = :usuario")
+    List<Actividad> findActividadesByUsuario(@Param("usuario") Usuario usuario);
 }

@@ -5,6 +5,7 @@ import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
+import Group4.StudyHubBackendG4.utils.converters.ActividadConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import jakarta.mail.MessagingException;
@@ -56,8 +57,12 @@ public class UsuarioService {
 
     @Autowired
     private CarreraService carreraService;
+
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private ActividadConverter actividadConverter;
 
     public List<DtUsuario> getUsuarios() {
         return usuarioRepo.findAll().stream()
@@ -363,5 +368,27 @@ public class UsuarioService {
             return ResponseEntity.ok().body("Contraseña modificada exitosamente.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró usuario.");
+    }
+
+    public ResponseEntity<?> getActividadUsuario(Integer idUsuario) {
+        Usuario usuario = usuarioRepo.findById(idUsuario).orElse(null);
+        if (usuario != null) {
+            List<Actividad> actividades = usuarioRepo.findActividadesByUsuario(usuario);
+            if (actividades == null || actividades.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron actividades para el usuario");
+            }
+
+            List<DtActividad> dtActividades = actividades.stream()
+                    .map(actividadConverter::convertToDto)
+                    .collect(Collectors.toList());
+
+            if (dtActividades.size() < 10) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No hay suficiente información para generar el resumen de actividades");
+            }
+
+            return ResponseEntity.ok().body(dtActividades);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el usuario");
+        }
     }
 }
