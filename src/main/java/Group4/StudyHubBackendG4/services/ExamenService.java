@@ -82,38 +82,52 @@ public class ExamenService {
 
 
     public ResponseEntity<?> inscripcionExamen(DtInscripcionExamen dtInscripcionExamen) {
-        //Valido que existe el estudiante
+        // Valido que existe el estudiante
         Usuario estudiante = usuarioRepo.findById(dtInscripcionExamen.getIdEstudiante()).orElse(null);
         if (estudiante == null) {
             return ResponseEntity.badRequest().body("No existe el estudiante.");
         }
 
-        //Validar que existe el examen
+        // Validar que existe el examen
         Examen examen = examenRepo.findById(dtInscripcionExamen.getIdExamen()).orElse(null);
         if (examen == null) {
             return ResponseEntity.badRequest().body("No existe el examen.");
         }
 
-        //Obtengo la asignatura del examen
+        // Obtengo la asignatura del examen
         Asignatura asignatura = examen.getAsignatura();
-        //Valido que el estudiante no la haya aprobado y que tenga el resultado examen
+        // Valido que el estudiante no la haya aprobado y que tenga el resultado examen
         List<EstudianteCursada> estudianteCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(estudiante, asignatura);
         if (estudianteCursadas.isEmpty()) {
             return ResponseEntity.badRequest().body("El estudiante no cursa la asignatura.");
         }
 
-        //Valido que el estudiante no haya aprobado la asignatura
+        boolean tieneExamenEnCursada = false;
         for (EstudianteCursada ec : estudianteCursadas) {
             if (ec.getCursada().getResultado().equals("APROBADO")) {
                 return ResponseEntity.badRequest().body("El estudiante ya aprobó la asignatura.");
             }
+            if (ec.getCursada().getResultado().equals("EXAMEN")) {
+                tieneExamenEnCursada = true;
+            }
         }
 
-        //Valido que el estudiante no haya aprobado el examen
+        if (!tieneExamenEnCursada) {
+            return ResponseEntity.badRequest().body("El estudiante no tiene una cursada con resultado 'EXAMEN'.");
+        }
+
+        // Valido que el estudiante no haya aprobado el examen
         List<CursadaExamen> cursadaExamenes = cursadaExamenRepo.findByCedulaEstudianteAndExamen(estudiante.getCedula(), examen);
         for (CursadaExamen ce : cursadaExamenes) {
             if (ce.getResultado().equals("APROBADO")) {
                 return ResponseEntity.badRequest().body("El estudiante ya aprobó el examen.");
+            }
+        }
+
+        // Valido que el estudiante no tenga otro examen en curso
+        for (CursadaExamen ce : cursadaExamenes) {
+            if (ce.getResultado().equals("EXAMEN")) {
+                return ResponseEntity.badRequest().body("El estudiante ya tiene un examen en curso.");
             }
         }
 
@@ -127,5 +141,4 @@ public class ExamenService {
 
         return ResponseEntity.ok().body("Se inscribió al examen.");
     }
-
 }
