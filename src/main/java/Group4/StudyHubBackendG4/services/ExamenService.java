@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
@@ -24,6 +25,12 @@ public class ExamenService {
     private DocenteRepo docenteRepo;
     @Autowired
     private DocenteExamenRepo docenteExamenRepo;
+    @Autowired
+    private UsuarioRepo usuarioRepo;
+    @Autowired
+    private EstudianteCursadaRepo estudianteCursadaRepo;
+    @Autowired
+    private CursadaExamenRepo cursadaExamenRepo;
 
 
     public ResponseEntity<?> registroAsignaturaAPeriodo(DtNuevoExamen nuevoExamen) {
@@ -71,4 +78,54 @@ public class ExamenService {
 
         return ResponseEntity.ok().body("Se registró la asignatura al periodo de examen.");
     }
+
+
+
+    public ResponseEntity<?> inscripcionExamen(DtInscripcionExamen dtInscripcionExamen) {
+        //Valido que existe el estudiante
+        Usuario estudiante = usuarioRepo.findById(dtInscripcionExamen.getIdEstudiante()).orElse(null);
+        if (estudiante == null) {
+            return ResponseEntity.badRequest().body("No existe el estudiante.");
+        }
+
+        //Validar que existe el examen
+        Examen examen = examenRepo.findById(dtInscripcionExamen.getIdExamen()).orElse(null);
+        if (examen == null) {
+            return ResponseEntity.badRequest().body("No existe el examen.");
+        }
+
+        //Obtengo la asignatura del examen
+        Asignatura asignatura = examen.getAsignatura();
+        //Valido que el estudiante no la haya aprobado y que tenga el resultado examen
+        List<EstudianteCursada> estudianteCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(estudiante, asignatura);
+        if (estudianteCursadas.isEmpty()) {
+            return ResponseEntity.badRequest().body("El estudiante no cursa la asignatura.");
+        }
+
+        //Valido que el estudiante no haya aprobado la asignatura
+        for (EstudianteCursada ec : estudianteCursadas) {
+            if (ec.getCursada().getResultado().equals("APROBADO")) {
+                return ResponseEntity.badRequest().body("El estudiante ya aprobó la asignatura.");
+            }
+        }
+
+        //Valido que el estudiante no haya aprobado el examen
+        List<CursadaExamen> cursadaExamenes = cursadaExamenRepo.findByCedulaEstudianteAndExamen(estudiante.getCedula(), examen);
+        for (CursadaExamen ce : cursadaExamenes) {
+            if (ce.getResultado().equals("APROBADO")) {
+                return ResponseEntity.badRequest().body("El estudiante ya aprobó el examen.");
+            }
+        }
+
+        CursadaExamen cursadaExamen = new CursadaExamen();
+        cursadaExamen.setCedulaEstudiante(estudiante.getCedula());
+        cursadaExamen.setExamen(examen);
+        cursadaExamen.setFechaHora(LocalDateTime.now());
+        cursadaExamen.setCursada(estudianteCursadas.get(0).getCursada());
+        cursadaExamen.setResultado("PENDIENTE");
+        cursadaExamenRepo.save(cursadaExamen);
+
+        return ResponseEntity.ok().body("Se inscribió al examen.");
+    }
+
 }

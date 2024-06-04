@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.controllers;
 
+import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
 import Group4.StudyHubBackendG4.datatypes.DtPeriodoExamenRequest;
 import Group4.StudyHubBackendG4.services.CarreraService;
@@ -19,5 +20,11 @@ public class ExamenController {
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> registroAsignaturaAPeriodo(@RequestBody DtNuevoExamen nuevoExamen) {
         return examenService.registroAsignaturaAPeriodo(nuevoExamen);
+    }
+
+    @PostMapping("/api/examen/inscripcionExamen")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> inscripcionExamen(@RequestBody DtInscripcionExamen dtInscripcionExamen) {
+        return examenService.inscripcionExamen(dtInscripcionExamen);
     }
 }
