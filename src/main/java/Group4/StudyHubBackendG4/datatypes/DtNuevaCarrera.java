@@ -17,4 +17,5 @@ public class DtNuevaCarrera {
 
     private String requisitos;
     private Integer duracion;
+    private Integer idCoordinador;
 }

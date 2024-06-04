@@ -1,18 +1,27 @@
 package Group4.StudyHubBackendG4.controllers;
 
 import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
+import Group4.StudyHubBackendG4.datatypes.DtCursadaExamen;
+import Group4.StudyHubBackendG4.datatypes.DtCursadaPendiente;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
 import Group4.StudyHubBackendG4.datatypes.DtPeriodoExamenRequest;
+import Group4.StudyHubBackendG4.persistence.Cursada;
+import Group4.StudyHubBackendG4.repositories.CursadaExamenRepo;
 import Group4.StudyHubBackendG4.services.CarreraService;
 import Group4.StudyHubBackendG4.services.ExamenService;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
+@RequestMapping("/api/examen")
 public class ExamenController {
+
     @Autowired
     private ExamenService examenService;
 
@@ -31,5 +40,17 @@ public class ExamenController {
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> inscripcionExamen(@RequestBody DtInscripcionExamen dtInscripcionExamen) {
         return examenService.inscripcionExamen(dtInscripcionExamen);
+    }
+/*
+    @PostMapping("/cambiarResultadoCursada/{idCursadaExamen}")
+    public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam String nuevoResultadoStr) {
+        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, ResultadoAsignatura.valueOf(nuevoResultadoStr)));
+    }
+
+ */
+    @GetMapping("/cursadasConExamen")
+    public ResponseEntity<?> getCursadasPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
+        List<DtCursadaExamen> pendientes = examenService.findCursadasExamenByAnioAndAsignatura(anio, idAsignatura);
+        return ResponseEntity.ok(pendientes);
     }
 }

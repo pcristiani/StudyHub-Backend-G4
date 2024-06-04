@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.persistence;
 
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,5 +20,6 @@ public class Cursada {
     @JoinColumn(name = "idHorarioAsignatura", nullable = false)
     private HorarioAsignatura horarioAsignatura;
 
-    private String resultado;
+    @Enumerated(EnumType.STRING)
+    private ResultadoAsignatura resultado;
 }
