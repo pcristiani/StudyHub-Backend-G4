@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.datatypes.DtExamen;
 import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
 import Group4.StudyHubBackendG4.persistence.*;
@@ -33,6 +34,20 @@ public class ExamenService {
     private CursadaExamenRepo cursadaExamenRepo;
 
 
+    public List<DtExamen> getExamenes(Integer idUsuario) {
+        Usuario user = usuarioRepo.findById(idUsuario).orElse(null);
+        List<Examen> examenes = cursadaExamenRepo.findAllExamenesByCedulaEstudiante(user.getCedula());
+        List<DtExamen> dtExamenes = new ArrayList<>();
+        for (Examen examen : examenes) {
+            DtExamen dtExamen = new DtExamen();
+            dtExamen.setIdExamen(examen.getIdExamen());
+            dtExamen.setAsignatura(examen.getAsignatura().getNombre());
+            dtExamen.setPeriodoExamen(examen.getPeriodoExamen().getNombre());
+            dtExamen.setFechaHora(examen.getFechaHora());
+            dtExamenes.add(dtExamen);
+        }
+        return dtExamenes;
+    }
     public ResponseEntity<?> registroAsignaturaAPeriodo(DtNuevoExamen nuevoExamen) {
         //Validar que existe asignatura
         Asignatura asignatura = asignaturaRepo.findById(nuevoExamen.getIdAsignatura()).orElse(null);
@@ -101,7 +116,7 @@ public class ExamenService {
         if (estudianteCursadas.isEmpty()) {
             return ResponseEntity.badRequest().body("El estudiante no cursa la asignatura.");
         }
-
+        Cursada cursada = null;
         boolean tieneExamenEnCursada = false;
         for (EstudianteCursada ec : estudianteCursadas) {
             if (ec.getCursada().getResultado().equals("APROBADO")) {
@@ -109,6 +124,7 @@ public class ExamenService {
             }
             if (ec.getCursada().getResultado().equals("EXAMEN")) {
                 tieneExamenEnCursada = true;
+                cursada = ec.getCursada();
             }
         }
 
@@ -126,7 +142,7 @@ public class ExamenService {
 
         // Valido que el estudiante no tenga otro examen en curso
         for (CursadaExamen ce : cursadaExamenes) {
-            if (ce.getResultado().equals("EXAMEN")) {
+            if (ce.getResultado().equals("PENDIENTE")) {
                 return ResponseEntity.badRequest().body("El estudiante ya tiene un examen en curso.");
             }
         }
@@ -134,8 +150,7 @@ public class ExamenService {
         CursadaExamen cursadaExamen = new CursadaExamen();
         cursadaExamen.setCedulaEstudiante(estudiante.getCedula());
         cursadaExamen.setExamen(examen);
-        cursadaExamen.setFechaHora(LocalDateTime.now());
-        cursadaExamen.setCursada(estudianteCursadas.get(0).getCursada());
+        cursadaExamen.setCursada(cursada);
         cursadaExamen.setResultado("PENDIENTE");
         cursadaExamenRepo.save(cursadaExamen);
 

@@ -276,6 +276,7 @@ public class CarreraService {
             nuevoPeriodo.setCarrera(carrera);
             nuevoPeriodo.setFechaInicio(fechaInicio);
             nuevoPeriodo.setFechaFin(fechaFin);
+            nuevoPeriodo.setNombre(fechas.getNombre());
 
             periodoExamenRepo.save(nuevoPeriodo);
 

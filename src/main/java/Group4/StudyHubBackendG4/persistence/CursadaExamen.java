@@ -21,7 +21,6 @@ public class CursadaExamen {
     @ManyToOne
     @JoinColumn(name = "idExamen", nullable = false)
     private Examen examen;
-    private LocalDateTime fechaHora;
     private String cedulaEstudiante;
     private String resultado;
 }

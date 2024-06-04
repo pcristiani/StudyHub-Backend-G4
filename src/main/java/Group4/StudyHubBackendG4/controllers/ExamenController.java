@@ -16,6 +16,11 @@ public class ExamenController {
     @Autowired
     private ExamenService examenService;
 
+    @GetMapping("/api/examen/getExamenes/{idUsuario}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getExamenes(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok().body(examenService.getExamenes(idUsuario));
+    }
     @PostMapping("/api/examen/registroAsignaturaAPeriodo")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> registroAsignaturaAPeriodo(@RequestBody DtNuevoExamen nuevoExamen) {
