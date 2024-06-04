@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -20,7 +21,7 @@ public class CursadaExamen {
     @ManyToOne
     @JoinColumn(name = "idExamen", nullable = false)
     private Examen examen;
-    private Date fechaHora;
+    private LocalDateTime fechaHora;
     private String cedulaEstudiante;
     private String resultado;
 }
