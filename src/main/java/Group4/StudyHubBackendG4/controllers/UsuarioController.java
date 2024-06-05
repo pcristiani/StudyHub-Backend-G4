@@ -52,7 +52,7 @@ public class UsuarioController {
         return usuarioService.acceptEstudiante(idUsuario,aceptado);
     }
 
-    @PostMapping("/api/usuario/registerUsuario")
+    @PostMapping("/registerUsuario")
     public ResponseEntity<?> createUsuario(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) throws MessagingException, IOException {
         return usuarioService.register(dtNuevoUsuario);
     }
