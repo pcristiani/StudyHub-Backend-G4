@@ -271,13 +271,12 @@ public class AsignaturaService {
             if (solapado) {
                 return ResponseEntity.badRequest().body("Horarios superpuestos detectados para el dia " + diaSemana);
             }
-        }
 
+        }
         HorarioAsignatura horarioAsignatura = createAndSaveHorarioAsignatura(asignatura, dtNuevoHorarioAsignatura.getAnio());
         createAndSaveHorarioDias(horarioAsignatura, dtNuevoHorarioAsignatura.getDtHorarioDias());
         createAndSaveDocenteHorarioAsignatura(docente, horarioAsignatura);
-
-        return ResponseEntity.ok("Horarios registered successfully");
+        return ResponseEntity.ok("Horarios registrados satisfactoriamente.");
     }
 
 
