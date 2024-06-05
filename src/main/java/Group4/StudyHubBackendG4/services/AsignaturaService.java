@@ -6,6 +6,7 @@ import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -86,12 +87,12 @@ public class AsignaturaService {
 
     public List<DtAsignatura> getAsignaturasAprobadas(Integer idEstudiante) {
         Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
-        return convertToDtAsignatura(estudianteCursadaRepo.findAprobadasByEstudiante(user));
+        return convertToDtAsignatura(estudianteCursadaRepo.findAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO));
     }
 
     public List<DtAsignatura> getAsignaturasNoAprobadas(Integer idEstudiante) {
         Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
-        return convertToDtAsignatura(estudianteCursadaRepo.findNoAprobadasByEstudiante(user));
+        return convertToDtAsignatura(estudianteCursadaRepo.findNoAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO));
     }
 
     public List<DtHorarioAsignatura> getHorarios(Integer id) {

@@ -25,18 +25,18 @@ public class ExamenController {
     @Autowired
     private ExamenService examenService;
 
-    @GetMapping("/api/examen/getExamenes/{idUsuario}")
+    @GetMapping("/getExamenes/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getExamenes(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok().body(examenService.getExamenes(idUsuario));
     }
-    @PostMapping("/api/examen/registroAsignaturaAPeriodo")
+    @PostMapping("/registroAsignaturaAPeriodo")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> registroAsignaturaAPeriodo(@RequestBody DtNuevoExamen nuevoExamen) {
         return examenService.registroAsignaturaAPeriodo(nuevoExamen);
     }
 
-    @PostMapping("/api/examen/inscripcionExamen")
+    @PostMapping("/inscripcionExamen")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> inscripcionExamen(@RequestBody DtInscripcionExamen dtInscripcionExamen) {
         return examenService.inscripcionExamen(dtInscripcionExamen);
@@ -48,8 +48,8 @@ public class ExamenController {
     }
 
  */
-    @GetMapping("/cursadasConExamen")
-    public ResponseEntity<?> getCursadasPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
+    @GetMapping("/cursadasExamenPendientes")
+    public ResponseEntity<?> getCursadasExamenPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
         List<DtCursadaExamen> pendientes = examenService.findCursadasExamenByAnioAndAsignatura(anio, idAsignatura);
         return ResponseEntity.ok(pendientes);
     }

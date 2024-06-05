@@ -15,5 +15,5 @@ public class DtCursadaExamen {
     private String apellidoEstudiante;
     private String mailEstudiante;
     private String cedulaEstudiante;
-    private String resultado;
+
 }

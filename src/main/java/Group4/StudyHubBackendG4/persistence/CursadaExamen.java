@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.persistence;
 
+import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,7 @@ public class CursadaExamen {
 
     private String cedulaEstudiante;
 
-    private String resultado;
+    @Enumerated(EnumType.STRING)
+    private ResultadoExamen resultado;
 
 }

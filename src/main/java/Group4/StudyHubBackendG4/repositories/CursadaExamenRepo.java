@@ -14,12 +14,12 @@ import java.util.List;
 @Repository
 public interface CursadaExamenRepo extends JpaRepository<CursadaExamen, Integer> {
 
-    @Query("SELECT new Group4.StudyHubBackendG4.datatypes.DtCursadaExamen(ce.idCursadaExamen, ce.cursada.idCursada, ce.examen.idExamen, ec.usuario.nombre, ec.usuario.apellido, ec.usuario.email, ec.usuario.cedula, ce.resultado) " +
-            "FROM CursadaExamen ce " +
-            "JOIN ce.cursada c " +
-            "JOIN EstudianteCursada ec ON ec.cursada.idCursada = c.idCursada " +
-            "WHERE c.horarioAsignatura.anio = :anio AND c.asignatura.idAsignatura = :idAsignatura AND c.resultado = :resultado")
-    List<DtCursadaExamen> findCursadasAExamenByAnioAndAsignatura(@Param("anio") Integer anio, @Param("idAsignatura") Integer idAsignatura, @Param("resultado") ResultadoAsignatura resultado);
+        @Query("SELECT new Group4.StudyHubBackendG4.datatypes.DtCursadaExamen(ce.idCursadaExamen, ce.cursada.idCursada, ce.examen.idExamen, ec.usuario.nombre, ec.usuario.apellido, ec.usuario.email, ec.usuario.cedula) " +
+                "FROM CursadaExamen ce " +
+                "JOIN ce.cursada c " +
+                "JOIN EstudianteCursada ec ON ec.cursada.idCursada = c.idCursada " +
+                "WHERE c.horarioAsignatura.anio = :anio AND c.asignatura.idAsignatura = :idAsignatura AND c.resultado = :resultado")
+        List<DtCursadaExamen> findCursadasAExamenByAnioAndAsignatura(@Param("anio") Integer anio, @Param("idAsignatura") Integer idAsignatura, @Param("resultado") ResultadoAsignatura resultado);
 
         List<CursadaExamen> findByCedulaEstudianteAndExamen(String cedulaEstudiante, Examen examen);
 
