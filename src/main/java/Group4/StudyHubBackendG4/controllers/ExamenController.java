@@ -1,8 +1,7 @@
 package Group4.StudyHubBackendG4.controllers;
 
-import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
 import Group4.StudyHubBackendG4.datatypes.DtCursadaExamen;
-import Group4.StudyHubBackendG4.datatypes.DtCursadaPendiente;
+import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
 import Group4.StudyHubBackendG4.datatypes.DtPeriodoExamenRequest;
 import Group4.StudyHubBackendG4.persistence.Cursada;
@@ -19,24 +18,27 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
-@RequestMapping("/api/examen")
 public class ExamenController {
-
     @Autowired
     private ExamenService examenService;
 
-    @GetMapping("/getExamenes/{idUsuario}")
+    @GetMapping("/api/examen/getExamenes/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getExamenes(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok().body(examenService.getExamenes(idUsuario));
     }
-    @PostMapping("/registroAsignaturaAPeriodo")
+    @GetMapping("/api/examen/getExamenesAsignatura/{idAsignatura}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getExamenesAsignatura(@PathVariable Integer idAsignatura) {
+        return ResponseEntity.ok().body(examenService.getExamenesAsignatura(idAsignatura));
+    }
+    @PostMapping("/api/examen/registroAsignaturaAPeriodo")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> registroAsignaturaAPeriodo(@RequestBody DtNuevoExamen nuevoExamen) {
         return examenService.registroAsignaturaAPeriodo(nuevoExamen);
     }
 
-    @PostMapping("/inscripcionExamen")
+    @PostMapping("/api/examen/inscripcionExamen")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> inscripcionExamen(@RequestBody DtInscripcionExamen dtInscripcionExamen) {
         return examenService.inscripcionExamen(dtInscripcionExamen);

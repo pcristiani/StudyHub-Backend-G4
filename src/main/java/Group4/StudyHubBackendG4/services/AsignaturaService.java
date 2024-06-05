@@ -74,6 +74,13 @@ public class AsignaturaService {
         return ResponseEntity.ok().body(convertToDtAsignatura(asignaturaRepo.findByCarrera(carrera)));
     }
 
+    public List<DtAsignatura> getAsignaturasDeEstudiante(Integer idUsuario) {
+        Usuario user = usuarioRepo.findById(idUsuario)
+                .orElse(null);
+
+        return convertToDtAsignatura(estudianteCursadaRepo.findByEstudiante(user));
+    }
+
     public ResponseEntity<?> getAsignaturasDeCarreraConExamen(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera)
                 .orElse(null);

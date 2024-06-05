@@ -16,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
-@RequestMapping("/api/carrera")
 public class CarreraController {
 
     @Autowired
@@ -26,74 +25,74 @@ public class CarreraController {
         this.carreraService = carreraService;
     }
 
-    @GetMapping("/getCarreras")
+    @GetMapping("/api/carrera/getCarreras")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getCarreras() {
         return ResponseEntity.ok().body(carreraService.getCarreras());
     }
 
-    @GetMapping("/getCarrerasInscripcionesPendientes")
+    @GetMapping("/api/carrera/getCarrerasInscripcionesPendientes")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getCarrerasInscripcionesPendientes() {
         return ResponseEntity.ok().body(carreraService.getCarrerasInscripcionesPendientes());
     }
 
-    @GetMapping("/getCarrerasInscripto/{idUsuario}")
+    @GetMapping("/api/carrera/getCarrerasInscripto/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getCarrerasInscripto(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok().body(carreraService.getCarrerasInscripto(idUsuario));
     }
 
-    @GetMapping("/getInscriptosPendientes/{idCarrera}")
+    @GetMapping("/api/carrera/getInscriptosPendientes/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getInscriptosPendientes(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok().body(carreraService.getInscriptosPendientes(idCarrera));
     }
-    @GetMapping("/getCarrerasConPeriodo")
+    @GetMapping("/api/carrera/getCarrerasConPeriodo")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getCarrerasConPeriodo() {
         return ResponseEntity.ok().body(carreraService.getCarrerasConPeriodo());
     }
-    @GetMapping("/getPeriodosDeCarrera/{idCarrera}")
+    @GetMapping("/api/carrera/getPeriodosDeCarrera/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getPeriodosDeCarrera(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok().body(carreraService.getPeriodosDeCarrera(idCarrera));
     }
 
 
-    @PostMapping("/altaCarrera")
+    @PostMapping("/api/carrera/altaCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
     public ResponseEntity<?> altaCarrera(@Valid @RequestBody DtNuevaCarrera dtNuevaCarrera) throws MessagingException, IOException {
         return carreraService.nuevaCarrera(dtNuevaCarrera);
     }
 
 
-    @PostMapping("/altaPeriodoDeExamen/{idCarrera}")
+    @PostMapping("/api/carrera/altaPeriodoDeExamen/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> altaPeriodoDeExamen(@PathVariable Integer idCarrera, @RequestBody DtPeriodoExamenRequest fechas) {
         return carreraService.altaPeriodoDeExamen(idCarrera, fechas);
     }
 
-    @PutMapping("/modificarCarrera/{idCarrera}")
+    @PutMapping("/api/carrera/modificarCarrera/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
     public ResponseEntity<?> modificarCarrera(@PathVariable Integer idCarrera, @RequestBody DtCarrera dtCarrera) {
         return carreraService.modificarCarrera(idCarrera, dtCarrera);
     }
 
     //inscripcion a carrera
-    @PostMapping("/inscripcionCarrera")
+    @PostMapping("/api/carrera/inscripcionCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> inscripcionCarrera(@RequestBody DtInscripcionCarrera dtInscripcionCarrera) {
         return carreraService.inscripcionCarrera(dtInscripcionCarrera);
     }
 
-    @PutMapping("/acceptEstudianteCarrera")
+    @PutMapping("/api/carrera/acceptEstudianteCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> acceptEstudianteCarrera(@RequestBody DtInscripcionCarrera dtInscripcionCarrera) throws MessagingException, IOException {
         return carreraService.acceptEstudianteCarrera(dtInscripcionCarrera);
     }
 
-    @PutMapping("/asignarCoordinadorCarrera/{idCarrera}")
+    @PutMapping("/api/carrera/asignarCoordinadorCarrera/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
     public ResponseEntity<?> asignarCoordinadorCarrera(@PathVariable Integer idCarrera, @RequestBody Integer idUsuario) {
         return carreraService.asignarCoordinador(idCarrera, idUsuario);

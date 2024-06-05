@@ -16,77 +16,76 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 @Validated
-@RequestMapping("/api")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
-    @GetMapping("/usuario/getUsuarios")
+    @GetMapping("/api/usuario/getUsuarios")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F')")
     public List<DtUsuario> getUsuarios() {
         return usuarioService.getUsuarios();
     }
 
-    @GetMapping("/usuario/getDocentes")
+    @GetMapping("/api/usuario/getDocentes")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getDocentes() {
         return ResponseEntity.ok().body(usuarioService.getDocentes());
     }
 
-    @GetMapping("/usuario/getUsuario/{idUsuario}")
+    @GetMapping("/api/usuario/getUsuario/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getUsuariosById(@PathVariable Integer idUsuario) {
         return usuarioService.getUsuarioById(idUsuario);
     }
 
-    @GetMapping("/usuario/getEstudiantesPendientes")
+    @GetMapping("/api/usuario/getEstudiantesPendientes")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getEstudiantesPendientes() {
         List<DtUsuario> dtUsuarios = usuarioService.getEstudiantesPendientes();
         return ResponseEntity.ok().body(dtUsuarios);
     }
 
-    @PutMapping("/usuario/acceptEstudiante/{idUsuario}")
+    @PutMapping("/api/usuario/acceptEstudiante/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> acceptEstudiante(@PathVariable Integer idUsuario, @RequestBody Boolean aceptado) throws MessagingException, IOException {
         return usuarioService.acceptEstudiante(idUsuario,aceptado);
     }
 
-    @PostMapping("/usuario/registerUsuario")
+    @PostMapping("/api/usuario/registerUsuario")
     public ResponseEntity<?> createUsuario(@Valid @RequestBody DtNuevoUsuario dtNuevoUsuario) throws MessagingException, IOException {
         return usuarioService.register(dtNuevoUsuario);
     }
 
-    @PutMapping("/usuario/modificarUsuario/{idUsuario}")
+    @PutMapping("/api/usuario/modificarUsuario/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A')")
     public ResponseEntity<?> modificarUsuario(@PathVariable Integer idUsuario, @RequestBody DtUsuario dtUsuario) {
         return usuarioService.modificarUsuario(idUsuario, dtUsuario);
     }
 
-    @DeleteMapping("/usuario/bajaUsuario/{idUsuario}")
+    @DeleteMapping("/api/usuario/bajaUsuario/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_A')")
     public ResponseEntity<?> bajaUsuario(@PathVariable Integer idUsuario) {
         return usuarioService.bajaUsuario(idUsuario);
     }
 
-    @PostMapping("/usuario/forgotPassword")
+    @PostMapping("/forgotPassword")
     public ResponseEntity<?> forgotPassword(@RequestBody String email) throws MessagingException, IOException, MessagingException, IOException {
         return usuarioService.recuperarPasswordEmail(email);
     }
 
-    @PostMapping("/usuario/recuperarPassword")
+    @PostMapping("/recuperarPassword")
     public ResponseEntity<?> recuperarPassword(@RequestBody DtNewPassword dtNewPassword){
         return usuarioService.recuperarPassword(dtNewPassword.getToken(), dtNewPassword.getNewPassword());
     }
 
-    @PutMapping("/usuario/modificarPerfil/{idUsuario}")
+    @PutMapping("/api/usuario/modificarPerfil/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> modificarPerfil(@PathVariable Integer idUsuario, @RequestBody DtPerfil dtPerfil) {
         return usuarioService.modificarPerfil(idUsuario, dtPerfil);
     }
 
-    @PutMapping("/usuario/modificarPassword/{idUsuario}")
+    @PutMapping("/api/usuario/modificarPassword/{idUsuario}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> modificarPassword(@PathVariable Integer idUsuario, @RequestBody String newPassword) {
         return usuarioService.modificarPassword(idUsuario, newPassword);
@@ -98,25 +97,25 @@ public class UsuarioController {
         return usuarioService.getActividadUsuario(idUsuario);
     }
 
-    @GetMapping("/docente/getDocentesByAsignaturaId/{idAsignatura}")
+    @GetMapping("/api/docente/getDocentesByAsignaturaId/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getDocentesByAsignaturaId(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok().body(usuarioService.getDocentesByAsignaturaId(idAsignatura));
     }
 
-    @PostMapping("/docente/altaDocente")
+    @PostMapping("/api/docente/altaDocente")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> altaDocente(@Valid @RequestBody DtNuevoDocente dtNuevoDocente) throws MessagingException, IOException {
         return usuarioService.nuevoDocente(dtNuevoDocente);
     }
 
-    @PutMapping("/docente/modificarDocente/{idDocente}")
+    @PutMapping("/api/docente/modificarDocente/{idDocente}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> modificarDocente(@PathVariable Integer idDocente, @RequestBody DtDocente dtDocente) {
         return usuarioService.modificarDocente(idDocente, dtDocente);
     }
 
-    @DeleteMapping("/docente/bajaDocente/{idDocente}")
+    @DeleteMapping("/api/docente/bajaDocente/{idDocente}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> bajaDocente(@PathVariable Integer idDocente) {
         return usuarioService.bajaDocente(idDocente);

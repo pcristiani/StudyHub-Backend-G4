@@ -45,17 +45,30 @@ public class ExamenService {
     private CursadaExamenRepo cursadaExamenRepo;
 
 
+    private DtExamen examenToDtExamen(Examen examen){
+        DtExamen dtExamen = new DtExamen();
+        dtExamen.setIdExamen(examen.getIdExamen());
+        dtExamen.setAsignatura(examen.getAsignatura().getNombre());
+        dtExamen.setPeriodoExamen(examen.getPeriodoExamen().getNombre());
+        dtExamen.setFechaHora(examen.getFechaHora());
+        return dtExamen;
+    }
     public List<DtExamen> getExamenes(Integer idUsuario) {
         Usuario user = usuarioRepo.findById(idUsuario).orElse(null);
         List<Examen> examenes = cursadaExamenRepo.findAllExamenesByCedulaEstudiante(user.getCedula());
         List<DtExamen> dtExamenes = new ArrayList<>();
         for (Examen examen : examenes) {
-            DtExamen dtExamen = new DtExamen();
-            dtExamen.setIdExamen(examen.getIdExamen());
-            dtExamen.setAsignatura(examen.getAsignatura().getNombre());
-            dtExamen.setPeriodoExamen(examen.getPeriodoExamen().getNombre());
-            dtExamen.setFechaHora(examen.getFechaHora());
-            dtExamenes.add(dtExamen);
+            dtExamenes.add(examenToDtExamen(examen));
+        }
+        return dtExamenes;
+    }
+
+    public List<DtExamen> getExamenesAsignatura(Integer idAsignatura) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+        List<Examen> examenes = examenRepo.findByAsignatura(asignatura);
+        List<DtExamen> dtExamenes = new ArrayList<>();
+        for (Examen examen : examenes) {
+            dtExamenes.add(examenToDtExamen(examen));
         }
         return dtExamenes;
     }
@@ -171,5 +184,4 @@ public class ExamenService {
     public List<DtCursadaExamen> findCursadasExamenByAnioAndAsignatura(Integer anio, Integer idAsignatura) {
         return cursadaExamenRepo.findCursadasAExamenByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.EXAMEN);
     }
-
 }
