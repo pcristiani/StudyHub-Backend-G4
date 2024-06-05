@@ -47,7 +47,7 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturasAprobadas(idEstudiante));
     }
 
-    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")
+    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")             //TODO: FIX
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasNoAprobadas(@PathVariable Integer idEstudiante) {
         return ResponseEntity.ok(asignaturaService.getAsignaturasNoAprobadas(idEstudiante));

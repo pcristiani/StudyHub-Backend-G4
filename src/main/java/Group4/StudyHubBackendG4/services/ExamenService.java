@@ -184,4 +184,18 @@ public class ExamenService {
     public List<DtCursadaExamen> findCursadasExamenByAnioAndAsignatura(Integer anio, Integer idAsignatura) {
         return cursadaExamenRepo.findCursadasAExamenByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.EXAMEN);
     }
+
+    public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, ResultadoExamen nuevoResultado) {
+        CursadaExamen cursadaExamen = cursadaExamenRepo.findById(idCursadaExamen)
+                .orElse(null) ;
+
+        if (cursadaExamen == null) {
+            return ResponseEntity.badRequest().body("No se encontró la cursada.");
+        }
+
+        cursadaExamen.setResultado(nuevoResultado);
+        cursadaExamenRepo.save(cursadaExamen);
+
+        return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursadaExamen + " cambiado exitosamente a " + nuevoResultado);
+    }
 }

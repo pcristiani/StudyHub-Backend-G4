@@ -9,6 +9,7 @@ import Group4.StudyHubBackendG4.repositories.CursadaExamenRepo;
 import Group4.StudyHubBackendG4.services.CarreraService;
 import Group4.StudyHubBackendG4.services.ExamenService;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,13 +44,12 @@ public class ExamenController {
     public ResponseEntity<?> inscripcionExamen(@RequestBody DtInscripcionExamen dtInscripcionExamen) {
         return examenService.inscripcionExamen(dtInscripcionExamen);
     }
-/*
-    @PostMapping("/cambiarResultadoCursada/{idCursadaExamen}")
+
+    @PostMapping("/api/examen/cambiarResultadoCursada/{idCursadaExamen}")
     public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam String nuevoResultadoStr) {
-        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, ResultadoAsignatura.valueOf(nuevoResultadoStr)));
+        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, ResultadoExamen.valueOf(nuevoResultadoStr)));
     }
 
- */
     @GetMapping("/api/examen/getCursadasExamenPendientes")
     public ResponseEntity<?> getCursadasExamenPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
         List<DtCursadaExamen> pendientes = examenService.findCursadasExamenByAnioAndAsignatura(anio, idAsignatura);
