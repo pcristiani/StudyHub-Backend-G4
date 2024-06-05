@@ -50,7 +50,7 @@ public class ExamenController {
     }
 
  */
-    @GetMapping("/cursadasExamenPendientes")
+    @GetMapping("/api/examen/getCursadasExamenPendientes")
     public ResponseEntity<?> getCursadasExamenPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
         List<DtCursadaExamen> pendientes = examenService.findCursadasExamenByAnioAndAsignatura(anio, idAsignatura);
         return ResponseEntity.ok(pendientes);
