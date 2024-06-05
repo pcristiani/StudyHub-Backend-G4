@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.persistence;
 
+import Group4.StudyHubBackendG4.datatypes.DtHorarioDias;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -25,4 +26,17 @@ public class HorarioDias {
     @JoinColumn(name = "idHorarioAsignatura", nullable = false)
     private HorarioAsignatura horarioAsignatura;
 
+
+    public static DtHorarioDias horarioDiasfromDtHorarioDias(HorarioDias horarioDias) {
+        if (horarioDias == null) {
+            return null;
+        }
+
+        DtHorarioDias dto = new DtHorarioDias();
+        dto.setDiaSemana(horarioDias.getDiaSemana());
+        dto.setHoraInicio(horarioDias.getHoraInicio());
+        dto.setHoraFin(horarioDias.getHoraFin());
+
+        return dto;
+    }
 }
