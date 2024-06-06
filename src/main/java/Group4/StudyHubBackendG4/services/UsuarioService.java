@@ -5,8 +5,10 @@ import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
+import Group4.StudyHubBackendG4.utils.converters.ActividadConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,8 +57,24 @@ public class UsuarioService {
 
     @Autowired
     private CarreraService carreraService;
+
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private ActividadConverter actividadConverter;
+
+    @Autowired
+    private AsignaturaRepo asignaturaRepo;
+
+    @Autowired
+    private EstudianteCursadaRepo estudianteCursadaRepo;
+
+    @Autowired
+    private CarreraRepo carreraRepo;
+
+    @Autowired
+    private CursadaExamenRepo cursadaExamenRepo;
 
     public List<DtUsuario> getUsuarios() {
         return usuarioRepo.findAll().stream()
@@ -366,7 +381,111 @@ public class UsuarioService {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró usuario.");
     }
+  
+    public ResponseEntity<?> getActividadUsuario(Integer idUsuario) {
+        Usuario usuario = usuarioRepo.findById(idUsuario).orElse(null);
+        if (usuario != null) {
+            List<Actividad> actividades = usuarioRepo.findActividadesByUsuario(usuario);
+            if (actividades == null || actividades.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron actividades para el usuario");
+            }
 
+            List<DtActividad> dtActividades = actividades.stream()
+                    .map(actividadConverter::convertToDto)
+                    .collect(Collectors.toList());
+
+            if (dtActividades.size() < 10) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No hay suficiente información para generar el resumen de actividades");
+            }
+
+            return ResponseEntity.ok().body(dtActividades);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el usuario");
+        }
+    }
+
+    public ResponseEntity<?> getCalificacionesAsignaturas(Integer idEstudiante, Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+        if (carrera == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró la carrera.");
+        }
+
+        Usuario estudiante = usuarioRepo.findById(idEstudiante).orElse(null);
+        if (estudiante == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el estudiante.");
+        }
+
+        List<EstudianteCursada> estudianteCursadas = estudianteCursadaRepo.findCursadasEstudiante(estudiante);
+        if (estudianteCursadas.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron cursadas del estudiante.");
+        }
+
+        List<Asignatura> asignaturasCarrera = asignaturaRepo.findByCarrera(carrera);
+        if (asignaturasCarrera.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron asignaturas para la carrera.");
+        }
+
+        Map<Integer, DtCalificacionAsignatura> calificacionesMap = new HashMap<>();
+
+        for (EstudianteCursada estudianteCursada : estudianteCursadas) {
+            Asignatura asignatura = estudianteCursada.getCursada().getAsignatura();
+            if (asignaturasCarrera.contains(asignatura)) {
+                Integer idAsignatura = asignatura.getIdAsignatura();
+                String asignaturaNombre = asignatura.getNombre();
+                String calificacion = estudianteCursada.getCursada().getResultado().getNombre();
+
+                if (!calificacionesMap.containsKey(idAsignatura)) {
+                    calificacionesMap.put(idAsignatura, new DtCalificacionAsignatura(idAsignatura, asignaturaNombre, new ArrayList<>()));
+                }
+                calificacionesMap.get(idAsignatura).getCalificaciones().add(calificacion);
+            }
+        }
+
+        List<DtCalificacionAsignatura> dtCalificaciones = new ArrayList<>(calificacionesMap.values());
+
+        return ResponseEntity.ok(dtCalificaciones);
+    }
+
+    public ResponseEntity<?> getCalificacionesExamenes(Integer idEstudiante, Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+        if (carrera == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró la carrera.");
+        }
+
+        Usuario estudiante = usuarioRepo.findById(idEstudiante).orElse(null);
+        if (estudiante == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el estudiante.");
+        }else if (!estudiante.getRol().equals("E")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario no es un estudiante.");
+        }
+
+        List<Examen> examenes = cursadaExamenRepo.findAllExamenesByCedulaEstudiante(estudiante.getCedula());
+        if (examenes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron exámenes para el estudiante.");
+        }
+
+        List<CursadaExamen> cursadasExamenes = cursadaExamenRepo.findByCedulaEstudianteAndExamenIn(estudiante.getCedula(), examenes);
+        if (cursadasExamenes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron cursadas de exámenes para el estudiante.");
+        }
+
+        List<DtCalificacionExamen> calificaciones = cursadasExamenes.stream()
+                .filter(cursadaExamen -> cursadaExamen.getCursada().getAsignatura().getCarrera().getIdCarrera().equals(idCarrera))
+                .map(cursadaExamen -> new DtCalificacionExamen(
+                        cursadaExamen.getCursada().getAsignatura().getIdAsignatura(),
+                        cursadaExamen.getCursada().getAsignatura().getNombre(),
+                        cursadaExamen.getExamen().getIdExamen(),
+                        cursadaExamen.getResultado().getNombre()
+                ))
+                .collect(Collectors.toList());
+
+        if (calificaciones.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron exámenes para la carrera especificada.");
+        }
+
+        return ResponseEntity.ok(calificaciones);
+    }
+  
     public ResponseEntity<?> registerMobileToken(Integer idUsuario, String mobileToken) {
         Usuario usuario = usuarioRepo.findById(idUsuario).orElse(null);
         UsuarioTR usuarioTR = usuarioTrRepo.findByUsuario(usuario);

@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.repositories;
 
+import Group4.StudyHubBackendG4.datatypes.DtExamen;
 import Group4.StudyHubBackendG4.persistence.Asignatura;
 import Group4.StudyHubBackendG4.persistence.Carrera;
 import Group4.StudyHubBackendG4.persistence.Docente;
@@ -9,10 +10,13 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface ExamenRepo extends JpaRepository<Examen, Integer> {
 
     boolean existsByAsignaturaAndFechaHora(Asignatura asignatura, LocalDateTime fechaHoraExamen);
+
+    List<Examen> findByAsignatura(Asignatura asignatura);
 }
 

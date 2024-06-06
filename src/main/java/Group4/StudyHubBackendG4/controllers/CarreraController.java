@@ -21,10 +21,6 @@ public class CarreraController {
     @Autowired
     private CarreraService carreraService;
 
-    public CarreraController(CarreraService carreraService) {
-        this.carreraService = carreraService;
-    }
-
     @GetMapping("/api/carrera/getCarreras")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getCarreras() {
@@ -92,7 +88,6 @@ public class CarreraController {
         return carreraService.acceptEstudianteCarrera(dtInscripcionCarrera);
     }
 
-    //Este metodo es temporal, se va a sacar: asignar coordinador a carrera
     @PutMapping("/api/carrera/asignarCoordinadorCarrera/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
     public ResponseEntity<?> asignarCoordinadorCarrera(@PathVariable Integer idCarrera, @RequestBody Integer idUsuario) {

@@ -7,6 +7,7 @@ import java.time.LocalDate;
 public class DtPeriodoExamen {
     private Integer idPeriodoExamen;
     private Integer idCarrera;
+    private String nombre;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
 

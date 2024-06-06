@@ -4,8 +4,9 @@ import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
-import Group4.StudyHubBackendG4.utils.converters.HorarioAsignaturaConverter;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,13 @@ public class AsignaturaService {
 
     @Autowired
     private AsignaturaRepo asignaturaRepo;
+
     @Autowired
     private PreviaturasRepo previaturasRepo;
+
     @Autowired
     private UsuarioRepo usuarioRepo;
+
     @Autowired
     private CarreraRepo carreraRepo;
 
@@ -55,50 +59,47 @@ public class AsignaturaService {
     @Autowired
     private AsignaturaConverter asignaturaConverter;
 
-    @Autowired
-    private HorarioAsignaturaConverter horarioAsignaturaConverter;
-
     public List<DtAsignatura> getAsignaturas() {
-        return asignaturaRepo.findAll()
-                .stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
+        return convertToDtAsignatura(asignaturaRepo.findAll());
     }
 
-    public List<DtAsignatura> getAsignaturasDeCarrera(Integer idCarrera) {
+    public ResponseEntity<?> getAsignaturasDeCarrera(Integer idCarrera) {
         Carrera carrera = carreraRepo.findById(idCarrera)
-                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+                .orElse(null);
 
-        return asignaturaRepo.findByCarrera(carrera)
-                .stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
+        if (carrera == null){
+            return ResponseEntity.badRequest().body("Carrera no encontrada");
+        }
+
+        return ResponseEntity.ok().body(convertToDtAsignatura(asignaturaRepo.findByCarrera(carrera)));
     }
 
-    public Object getAsignaturasDeCarreraConExamen(Integer idCarrera) {
-        Carrera carrera = carreraRepo.findById(idCarrera)
-                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+    public List<DtAsignatura> getAsignaturasDeEstudiante(Integer idUsuario) {
+        Usuario user = usuarioRepo.findById(idUsuario)
+                .orElse(null);
 
-        return asignaturaRepo.findByCarreraAndTieneExamen(carrera, true)
-                .stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
+        return convertToDtAsignatura(estudianteCursadaRepo.findByEstudiante(user));
+    }
+
+    public ResponseEntity<?> getAsignaturasDeCarreraConExamen(Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera)
+                .orElse(null);
+
+        if (carrera == null){
+            return ResponseEntity.badRequest().body("Carrera no encontrada");
+        }
+
+        return ResponseEntity.ok().body(convertToDtAsignatura(asignaturaRepo.findByCarreraAndTieneExamen(carrera, true)));
     }
 
     public List<DtAsignatura> getAsignaturasAprobadas(Integer idEstudiante) {
         Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
-        return estudianteCursadaRepo.findAprobadasByEstudiante(user)
-                .stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
+        return convertToDtAsignatura(estudianteCursadaRepo.findAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO));
     }
 
     public List<DtAsignatura> getAsignaturasNoAprobadas(Integer idEstudiante) {
         Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
-        return estudianteCursadaRepo.findNoAprobadasByEstudiante(user)
-                .stream()
-                .map(asignaturaConverter::convertToDto)
-                .collect(Collectors.toList());
+        return convertToDtAsignatura(estudianteCursadaRepo.findNoAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO));
     }
 
     public List<DtHorarioAsignatura> getHorarios(Integer id) {
@@ -106,18 +107,17 @@ public class AsignaturaService {
         return asig == null ? null :
         horarioAsignaturaRepo.findByAsignatura(asig)
                 .stream()
-                .map(horarioAsignaturaConverter::convertToDto)
+                .map(DtHorarioAsignatura::horarioAsignaturafromDtHorarioAsignatura)
                 .toList();
     }
 
     public ResponseEntity<?> altaAsignatura(DtNuevaAsignatura dtNuevaAsignatura) {
-        // Validate Carrera existence
+
         Carrera carrera = carreraRepo.findById(dtNuevaAsignatura.getIdCarrera()).orElse(null);
         if (carrera == null) {
             return ResponseEntity.badRequest().body("Carrera no encontrada.");
         }
 
-        // Validate Docentes
         List<Integer> idDocentes = dtNuevaAsignatura.getIdDocentes();
         if (idDocentes == null || idDocentes.isEmpty()) {
             return ResponseEntity.badRequest().body("Ingrese al menos un docente.");
@@ -128,22 +128,18 @@ public class AsignaturaService {
                 .map(optionalDocente -> optionalDocente.orElse(null))
                 .collect(Collectors.toList());
 
-        // Check if all docentes were found
         if (docentes.contains(null)) {
             return ResponseEntity.badRequest().body("Uno o más docentes no encontrados.");
         }
 
-        // Validate Asignatura uniqueness
         if (asignaturaRepo.existsByNombreAndCarrera(dtNuevaAsignatura.getNombre(), carrera)) {
             return ResponseEntity.badRequest().body("La asignatura ya existe.");
         }
 
-        // Validate Previaturas for circularity
-        if (this.validarCircularidad(dtNuevaAsignatura.getPreviaturas())) {
+        if (this.validarCircularidad(null, dtNuevaAsignatura.getPreviaturas())) {
             return ResponseEntity.badRequest().body("Existen circularidades en las previaturas seleccionadas.");
         }
 
-        // Convert and prepare Asignatura entity
         DtAsignatura dtAsignatura = dtNuevaAsignatura.dtAsignaturaFromDtNuevaAsignatura(dtNuevaAsignatura);
         Asignatura asignatura = asignaturaConverter.convertToEntity(dtAsignatura);
 
@@ -188,7 +184,7 @@ public class AsignaturaService {
         return ResponseEntity.ok().body("Asignatura creada exitosamente.");
     }
 
-
+/*
     private Boolean validarCircularidad(List<Integer> idsPreviaturas) {
         if (idsPreviaturas == null || idsPreviaturas.isEmpty()) {
             return false;
@@ -229,7 +225,7 @@ public class AsignaturaService {
         stack.remove(idAsignatura);
         return false;
     }
-
+*/
     public ResponseEntity<?> registroHorarios(Integer idAsignatura, DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
         Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
                 .orElse(null);
@@ -249,27 +245,38 @@ public class AsignaturaService {
 
         for (DtHorarioDias newHorarioDia : dtNuevoHorarioAsignatura.getDtHorarioDias()) {
             DiaSemana diaSemana = newHorarioDia.getDiaSemana();
-            Integer horaInicio = newHorarioDia.getHoraInicio();
-            Integer horaFin = newHorarioDia.getHoraFin();
+            String horaInicioStr = newHorarioDia.getHoraInicio();
+            String horaFinStr = newHorarioDia.getHoraFin();
 
-            if (horaInicio < 0 || horaInicio > 23 || horaFin < 0 || horaFin > 23 || horaInicio >= horaFin) {
-                return ResponseEntity.badRequest().body("horaInicio debe ser menor a horaFin, y tener un valor entre 0-23");
+            // Validar y convertir horaInicio y horaFin
+            if (!esHoraValida(horaInicioStr) || !esHoraValida(horaFinStr)) {
+                return ResponseEntity.badRequest().body("Formato de hora inválido. Use HH:mm");
             }
 
-            for (HorarioDias existingHorarioDia : existingHorarioDias) {
-                if (existingHorarioDia.getDiaSemana().equals(diaSemana)) {
-                    if (horaInicio < existingHorarioDia.getHoraFin() && horaFin > existingHorarioDia.getHoraInicio()) {
-                        return ResponseEntity.badRequest().body("Horarios superpuestos detectados para el dia " + diaSemana);
-                    }
-                }
+            int horaInicio = convertirHora(horaInicioStr);
+            int horaFin = convertirHora(horaFinStr);
+
+            if (horaInicio >= horaFin) {
+                return ResponseEntity.badRequest().body("horaInicio debe ser menor a horaFin, y los valores deben ser válidos (por ejemplo, 10:30 para 10:30)");
             }
+
+            boolean solapado = existingHorarioDias.stream()
+                    .filter(horario -> horario.getDiaSemana().equals(diaSemana))
+                    .anyMatch(existingHorarioDia -> {
+                        int existingHoraInicio = convertirHora(existingHorarioDia.getHoraInicio());
+                        int existingHoraFin = convertirHora(existingHorarioDia.getHoraFin());
+                        return horaInicio < existingHoraFin && horaFin > existingHoraInicio;
+                    });
+
+            if (solapado) {
+                return ResponseEntity.badRequest().body("Horarios superpuestos detectados para el dia " + diaSemana);
+            }
+
         }
-
         HorarioAsignatura horarioAsignatura = createAndSaveHorarioAsignatura(asignatura, dtNuevoHorarioAsignatura.getAnio());
         createAndSaveHorarioDias(horarioAsignatura, dtNuevoHorarioAsignatura.getDtHorarioDias());
         createAndSaveDocenteHorarioAsignatura(docente, horarioAsignatura);
-
-        return ResponseEntity.ok("Horarios registered successfully");
+        return ResponseEntity.ok("Horarios registrados satisfactoriamente.");
     }
 
 
@@ -278,9 +285,9 @@ public class AsignaturaService {
         HorarioAsignatura horario = horarioAsignaturaRepo.findById(inscripcion.getIdHorario()).orElse(null);
         Usuario usuario = usuarioRepo.findById(inscripcion.getIdEstudiante()).orElse(null);
 
-        //Validaciones basicas
+        // Validaciones básicas
         if (asignatura == null) {
-           return "La asignatura no existe";
+            return "La asignatura no existe";
         }
         if (horario == null) {
             return "El horario no existe";
@@ -288,52 +295,52 @@ public class AsignaturaService {
         if (usuario == null) {
             return "El usuario no existe";
         }
-        if (!usuario.getRol().equals("E")) {
+        if (!"E".equals(usuario.getRol())) {
             return "El usuario no es un estudiante";
         }
-        if (horario.getAsignatura().getIdAsignatura() != asignatura.getIdAsignatura()) {
+        if (!horario.getAsignatura().getIdAsignatura().equals(asignatura.getIdAsignatura())) {
             return "El horario no pertenece a la asignatura seleccionada";
         }
         Carrera carrera = asignatura.getCarrera();
-        InscripcionCarrera inscripcionCarrera = inscripcionCarreraRepo.findByUsuarioAndCarreraAndActivaAndValidada(usuario,carrera,true,true).orElse(null);
+        InscripcionCarrera inscripcionCarrera = inscripcionCarreraRepo.findByUsuarioAndCarreraAndActivaAndValidada(usuario, carrera, true, true).orElse(null);
 
         if (inscripcionCarrera == null) {
             return "El usuario no está inscripto en la carrera correspondiente a la asignatura";
         }
-        // TODO: Realizar validacion ya cursada
+
         List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
         List<Cursada> aprobadasCursadas = listCursadas.stream()
                 .map(EstudianteCursada::getCursada)
-                .filter(cursada -> "APROBADA".equals(cursada.getResultado()))
+                .filter(cursada -> cursada.getResultado() == ResultadoAsignatura.EXONERADO)
                 .toList();
 
-        if(!aprobadasCursadas.isEmpty()){
-            return  "La asignatura ya fue aprobada!";
+        if (!aprobadasCursadas.isEmpty()) {
+            return "La asignatura ya fue aprobada!";
         }
 
-        // Realizar validacion inscripcion pendiente
+        // Realizar validación de inscripción pendiente
         List<Cursada> inscripcionPendiente = listCursadas.stream()
                 .map(EstudianteCursada::getCursada)
-                .filter(cursada -> "PENDIENTE".equals(cursada.getResultado()))
+                .filter(cursada -> cursada.getResultado() == ResultadoAsignatura.PENDIENTE)
                 .toList();
 
-        if(!inscripcionPendiente.isEmpty()){
-            return  "Tiene una inscripcion pendiente.";
+        if (!inscripcionPendiente.isEmpty()) {
+            return "Tiene una inscripción pendiente.";
         }
 
-        // Realizar validacion previas
+        // Realizar validación de previas
         List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
         List<Asignatura> asignaturasPrevias = previas.stream()
                 .map(Previaturas::getPrevia)
                 .toList();
 
-        // Para cada previa obtengo todas las cursadas y valido si alguna de ellas fue aprobada
+        // Para cada previa, obtener todas las cursadas y validar si alguna de ellas fue aprobada
         boolean previasAprobadas = asignaturasPrevias.stream()
                 .allMatch(previa -> {
                     List<EstudianteCursada> cursadasPrevia = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, previa);
                     return cursadasPrevia.stream()
                             .map(EstudianteCursada::getCursada)
-                            .anyMatch(cursada -> cursada.getResultado().equals("APROBADA"));
+                            .anyMatch(cursada -> cursada.getResultado() == ResultadoAsignatura.EXONERADO);
                 });
 
         if (!previasAprobadas) {
@@ -343,7 +350,6 @@ public class AsignaturaService {
     }
 
     public ResponseEntity<?> inscripcionAsignatura(DtNuevaInscripcionAsignatura inscripcion) {
-        // TODO: Realizar inscripcion
         Asignatura asignatura = asignaturaRepo.findById(inscripcion.getIdAsignatura()).orElse(null);
         HorarioAsignatura horario = horarioAsignaturaRepo.findById(inscripcion.getIdHorario()).orElse(null);
         Usuario user = usuarioRepo.findById(inscripcion.getIdEstudiante()).orElse(null);
@@ -351,7 +357,7 @@ public class AsignaturaService {
         Cursada cursada = new Cursada();
         cursada.setAsignatura(asignatura);
         cursada.setHorarioAsignatura(horario);
-        cursada.setResultado("PENDIENTE");
+        cursada.setResultado(ResultadoAsignatura.PENDIENTE);
         cursadaRepo.save(cursada);
 
         EstudianteCursada estudianteCursada = new EstudianteCursada();
@@ -387,6 +393,29 @@ public class AsignaturaService {
         docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
     }
 
+    private boolean esHoraValida(String horaStr) {
+        String[] partes = horaStr.split(":");
+        if (partes.length != 2) {
+            return false;
+        }
+
+        try {
+            int horas = Integer.parseInt(partes[0]);
+            int minutos = Integer.parseInt(partes[1]);
+
+            return horas >= 0 && horas <= 23 && minutos >= 0 && minutos <= 59;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private int convertirHora(String horaStr) {
+        String[] partes = horaStr.split(":");
+        int horas = Integer.parseInt(partes[0]);
+        int minutos = Integer.parseInt(partes[1]);
+        return horas * 60 + minutos;
+    }
+
     public ResponseEntity<?> registrarPreviaturas(Integer idAsignatura, List<Integer> nuevasPrevias) {
         Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
         if (asignatura == null) {
@@ -416,7 +445,7 @@ public class AsignaturaService {
         }
 
         // Verificar la circularidad en todas las previaturas combinadas
-        boolean circularidad = validarCircularidadSimulada(idAsignatura, nuevasPrevias);
+        boolean circularidad = validarCircularidad(idAsignatura, nuevasPrevias);
         if (circularidad) {
             return ResponseEntity.badRequest().body("Existen circularidades en las previaturas seleccionadas.");
         }
@@ -440,13 +469,13 @@ public class AsignaturaService {
         return ResponseEntity.ok().body("Previaturas registradas exitosamente.");
     }
 
-    private boolean validarCircularidadSimulada(Integer idAsignatura, List<Integer> nuevasPrevias) {
+    private boolean validarCircularidad(Integer idAsignatura, List<Integer> nuevasPrevias) {
         Set<Integer> visitado = new HashSet<>();
         Set<Integer> stack = new HashSet<>();
 
         // Verificar todas las nuevas previas para detectar ciclos
         for (Integer idPrevia : nuevasPrevias) {
-            if (esCiclicoSimulado(idAsignatura, idPrevia, visitado, stack)) {
+            if (esCiclico(idAsignatura, idPrevia, visitado, stack)) {
                 return true;
             }
         }
@@ -454,7 +483,7 @@ public class AsignaturaService {
         return false;
     }
 
-    private boolean esCiclicoSimulado(Integer idAsignatura, Integer idPrevia, Set<Integer> visitado, Set<Integer> stack) {
+    private boolean esCiclico(Integer idAsignatura, Integer idPrevia, Set<Integer> visitado, Set<Integer> stack) {
         if (stack.contains(idPrevia)) {
             return true; // Ciclo detectado
         }
@@ -475,7 +504,7 @@ public class AsignaturaService {
         if (asignatura != null) {
             List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignatura);
             for (Previaturas previatura : previaturas) {
-                if (esCiclicoSimulado(idAsignatura, previatura.getPrevia().getIdAsignatura(), visitado, stack)) {
+                if (esCiclico(idAsignatura, previatura.getPrevia().getIdAsignatura(), visitado, stack)) {
                     return true;
                 }
             }
@@ -485,5 +514,48 @@ public class AsignaturaService {
         return false;
     }
 
+    public List<DtCursadaPendiente> getCursadasPendientesByAnioAndAsignatura(Integer anio, Integer idAsignatura) {
+        return cursadaRepo.findCursadasPendientesByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.PENDIENTE);
+    }
 
+    public ResponseEntity<?> modificarResultadoCursada(Integer idCursada, ResultadoAsignatura nuevoResultado) {
+        Cursada cursada = cursadaRepo.findById(idCursada)
+                .orElse(null) ;
+
+        if (cursada == null) {
+            return ResponseEntity.badRequest().body("No se encontró la cursada.");
+        }
+
+        cursada.setResultado(nuevoResultado);
+        cursadaRepo.save(cursada);
+
+        return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursada + " cambiado exitosamente a " + nuevoResultado);
+    }
+
+    private List<DtAsignatura> convertToDtAsignatura (List<Asignatura> asignaturas) {
+        return asignaturas.stream()
+                .map(asignaturaConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public ResponseEntity<?> getPreviasAsignatura(Integer idAsignatura) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+
+        if (asignatura == null) {
+            return ResponseEntity.badRequest().body("Asignatura no encontrada.");
+        }
+
+        List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
+
+        if (previas.isEmpty()) {
+            return ResponseEntity.ok().body("La asignatura no tiene previas.");
+        }
+
+        List<DtAsignatura> previasDto = previas.stream()
+                .map(Previaturas::getPrevia)
+                .map(asignaturaConverter::convertToDto)
+                .toList();
+
+        return ResponseEntity.ok().body(previasDto);
+    }
 }

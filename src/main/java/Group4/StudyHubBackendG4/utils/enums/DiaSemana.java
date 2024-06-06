@@ -1,5 +1,8 @@
 package Group4.StudyHubBackendG4.utils.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum DiaSemana {
     LUNES(1, "Lunes"),
     MARTES(2, "Martes"),
@@ -17,29 +20,4 @@ public enum DiaSemana {
         this.nombre = nombre;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public static DiaSemana fromId(int id) {
-        for (DiaSemana dia : values()) {
-            if (dia.id == id) {
-                return dia;
-            }
-        }
-        throw new IllegalArgumentException("Invalid id: " + id);
-    }
-
-    public static DiaSemana fromNombre(String nombre) {
-        for (DiaSemana dia : values()) {
-            if (dia.nombre.equalsIgnoreCase(nombre)) {
-                return dia;
-            }
-        }
-        throw new IllegalArgumentException("Invalid nombre: " + nombre);
-    }
 }

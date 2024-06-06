@@ -1,11 +1,8 @@
 package Group4.StudyHubBackendG4.controllers;
 
-import Group4.StudyHubBackendG4.datatypes.DtAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaInscripcionAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevaAsignatura;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoHorarioAsignatura;
-import Group4.StudyHubBackendG4.repositories.HorarioAsignaturaRepo;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +17,6 @@ public class AsignaturaController {
 
     @Autowired
     private AsignaturaService asignaturaService;
-    @Autowired
-    private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @GetMapping("/api/asignatura/getAsignaturas")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
@@ -33,6 +28,11 @@ public class AsignaturaController {
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasDeCarrera(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok(asignaturaService.getAsignaturasDeCarrera(idCarrera));
+    }
+    @GetMapping("/api/asignatura/getAsignaturasDeEstudiante/{idUsuario}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasDeEstudiante(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasDeEstudiante(idUsuario));
     }
 
     @GetMapping("/api/asignatura/getAsignaturasDeCarreraConExamen/{idCarrera}")
@@ -47,18 +47,16 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturasAprobadas(idEstudiante));
     }
 
-    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")
+    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")             //TODO: FIX
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasNoAprobadas(@PathVariable Integer idEstudiante) {
         return ResponseEntity.ok(asignaturaService.getAsignaturasNoAprobadas(idEstudiante));
     }
-
-    @PostMapping("/api/asignatura/getHorarios/{idAsignatura}")
+    @GetMapping("/api/asignatura/getHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getHorarios(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok(asignaturaService.getHorarios(idAsignatura));
     }
-
     @PostMapping("/api/asignatura/altaAsignatura")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A')")
     public ResponseEntity<?> altaAsignatura(@Valid @RequestBody DtNuevaAsignatura dtNuevaAsignatura) {
@@ -69,9 +67,7 @@ public class AsignaturaController {
     @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
     public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
-        //TODO: Impl
         return ResponseEntity.ok(asignaturaService.registroHorarios(idAsignatura, dtNuevoHorarioAsignatura));
-
     }
 
     @PostMapping("/api/asignatura/inscripcionAsignatura")
@@ -88,4 +84,21 @@ public class AsignaturaController {
     public ResponseEntity<?> registrarPreviaturas(@PathVariable Integer idAsignatura, @RequestBody List<Integer> previaturas) {
         return ResponseEntity.ok(asignaturaService.registrarPreviaturas(idAsignatura, previaturas));
     }
+
+    @GetMapping("/api/asignatura/cursadasPendientes")
+    public ResponseEntity<?> getCursadasPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
+        List<DtCursadaPendiente> pendientes = asignaturaService.getCursadasPendientesByAnioAndAsignatura(anio, idAsignatura);
+        return ResponseEntity.ok(pendientes);
+    }
+
+    @PostMapping("/api/asignatura/cambiarResultadoCursada/{idCursada}")
+    public ResponseEntity<?> cambiarResultadoCursada(@PathVariable Integer idCursada, @RequestParam String nuevoResultadoStr) {
+        return ResponseEntity.ok(asignaturaService.modificarResultadoCursada(idCursada, ResultadoAsignatura.valueOf(nuevoResultadoStr)));
+    }
+
+    @GetMapping("/api/asignatura/getPreviasAsignatura/{idAsignatura}")
+    public ResponseEntity<?> getPrevias(@PathVariable Integer idAsignatura) {
+        return asignaturaService.getPreviasAsignatura(idAsignatura);
+    }
+
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Actividad")
@@ -17,6 +17,6 @@ public class Actividad {
     @ManyToOne
     @JoinColumn(name = "idUsuario", nullable = false)
     private Usuario usuario;
-    private Date fechaHora;
+    private LocalDateTime fechaHora;
     private String accion;
 }

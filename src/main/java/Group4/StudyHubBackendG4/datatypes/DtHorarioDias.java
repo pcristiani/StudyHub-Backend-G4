@@ -1,40 +1,35 @@
 package Group4.StudyHubBackendG4.datatypes;
 
+import Group4.StudyHubBackendG4.persistence.HorarioDias;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class DtHorarioDias {
+    @Setter
     @NotNull
     private DiaSemana diaSemana;
 
     @NotNull
-    private Integer horaInicio;
+    private String horaInicio;
 
     @NotNull
-    private Integer horaFin;
+    private String horaFin;
 
-    public DiaSemana getDiaSemana() {
-        return diaSemana;
-    }
+    public static DtHorarioDias horarioDiasfromDtHorarioDias(HorarioDias horarioDias) {
+        if (horarioDias == null) {
+            return null;
+        }
 
-    public void setDiaSemana(DiaSemana diaSemana) {
-        this.diaSemana = diaSemana;
-    }
+        DtHorarioDias dto = new DtHorarioDias();
+        dto.setDiaSemana(horarioDias.getDiaSemana());
+        dto.setHoraInicio(horarioDias.getHoraInicio());
+        dto.setHoraFin(horarioDias.getHoraFin());
 
-    public Integer getHoraInicio() {
-        return horaInicio;
-    }
-
-    public Integer getHoraFin() {
-        return horaFin;
+        return dto;
     }
 
 }
