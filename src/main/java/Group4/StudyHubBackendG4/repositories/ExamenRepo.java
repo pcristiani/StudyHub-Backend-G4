@@ -1,10 +1,7 @@
 package Group4.StudyHubBackendG4.repositories;
 
 import Group4.StudyHubBackendG4.datatypes.DtExamen;
-import Group4.StudyHubBackendG4.persistence.Asignatura;
-import Group4.StudyHubBackendG4.persistence.Carrera;
-import Group4.StudyHubBackendG4.persistence.Docente;
-import Group4.StudyHubBackendG4.persistence.Examen;
+import Group4.StudyHubBackendG4.persistence.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +15,7 @@ public interface ExamenRepo extends JpaRepository<Examen, Integer> {
     boolean existsByAsignaturaAndFechaHora(Asignatura asignatura, LocalDateTime fechaHoraExamen);
 
     List<Examen> findByAsignatura(Asignatura asignatura);
+
+    List<Examen> findByPeriodoExamen(PeriodoExamen periodoExamen);
 }
 

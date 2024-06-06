@@ -1,11 +1,10 @@
 package Group4.StudyHubBackendG4.services;
 
-import Group4.StudyHubBackendG4.datatypes.DtCursadaExamen;
-import Group4.StudyHubBackendG4.datatypes.DtExamen;
-import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
+import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
+import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +42,10 @@ public class ExamenService {
 
     @Autowired
     private CursadaExamenRepo cursadaExamenRepo;
+    @Autowired
+    private DocenteConverter docenteConverter;
+    @Autowired
+    private UsuarioConverter usuarioConverter;
 
 
     private DtExamen examenToDtExamen(Examen examen){
@@ -56,6 +59,15 @@ public class ExamenService {
     public List<DtExamen> getExamenes(Integer idUsuario) {
         Usuario user = usuarioRepo.findById(idUsuario).orElse(null);
         List<Examen> examenes = cursadaExamenRepo.findAllExamenesByCedulaEstudiante(user.getCedula());
+        List<DtExamen> dtExamenes = new ArrayList<>();
+        for (Examen examen : examenes) {
+            dtExamenes.add(examenToDtExamen(examen));
+        }
+        return dtExamenes;
+    }
+    public List<DtExamen> getExamenesPeriodo(Integer idPeriodo) {
+        PeriodoExamen periodoExamen = periodoExamenRepo.findById(idPeriodo).orElse(null);
+        List<Examen> examenes = examenRepo.findByPeriodoExamen(periodoExamen);
         List<DtExamen> dtExamenes = new ArrayList<>();
         for (Examen examen : examenes) {
             dtExamenes.add(examenToDtExamen(examen));
@@ -197,5 +209,37 @@ public class ExamenService {
         cursadaExamenRepo.save(cursadaExamen);
 
         return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursadaExamen + " cambiado exitosamente a " + nuevoResultado);
+    }
+
+    public ResponseEntity<?> getActa(Integer idExamen) {
+        Examen examen = examenRepo.findById(idExamen).orElse(null);
+        if(examen == null) {
+            return ResponseEntity.badRequest().body("No se encontró el examen.");
+        }
+        DtExamen dtExamen = examenToDtExamen(examen);
+        String asignatura = dtExamen.getAsignatura();
+
+
+        //obtener docentes
+        List<Docente> docentes = docenteExamenRepo.findDocentesByExamen(examen);
+        List<DtDocente> dtDocentes = new ArrayList<>();
+        for(Docente d: docentes){
+            DtDocente dtDocente = docenteConverter.convertToDto(d);
+            dtDocentes.add(dtDocente);
+        }
+        List<Usuario> estudiantes = cursadaExamenRepo.findUsuariosByExamen(examen);
+        List<DtUsuario> dtEstudiantes = new ArrayList<>();
+        for(Usuario u: estudiantes){
+            DtUsuario dtUsuario = usuarioConverter.convertToDto(u);
+            dtEstudiantes.add(dtUsuario);
+        }
+
+        DtActa acta = new DtActa();
+        acta.setAsignatura(asignatura);
+        acta.setEstudiantes(dtEstudiantes);
+        acta.setDocentes(dtDocentes);
+        acta.setExamen(dtExamen);
+
+        return ResponseEntity.ok().body(acta);
     }
 }

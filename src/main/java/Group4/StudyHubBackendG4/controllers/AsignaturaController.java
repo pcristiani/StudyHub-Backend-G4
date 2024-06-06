@@ -62,7 +62,7 @@ public class AsignaturaController {
     public ResponseEntity<?> altaAsignatura(@Valid @RequestBody DtNuevaAsignatura dtNuevaAsignatura) {
         return asignaturaService.altaAsignatura(dtNuevaAsignatura);
     }
-
+  
     @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
     public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
@@ -100,4 +100,8 @@ public class AsignaturaController {
         return asignaturaService.getPreviasAsignatura(idAsignatura);
     }
 
+    @GetMapping("/api/asignatura/getActa/{idHorario}")
+    public ResponseEntity<?> getActa(@PathVariable Integer idHorario) {
+        return asignaturaService.getActa(idHorario);
+    }
 }

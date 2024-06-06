@@ -1,9 +1,6 @@
 package Group4.StudyHubBackendG4.controllers;
 
-import Group4.StudyHubBackendG4.datatypes.DtCursadaExamen;
-import Group4.StudyHubBackendG4.datatypes.DtInscripcionExamen;
-import Group4.StudyHubBackendG4.datatypes.DtNuevoExamen;
-import Group4.StudyHubBackendG4.datatypes.DtPeriodoExamenRequest;
+import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.Cursada;
 import Group4.StudyHubBackendG4.repositories.CursadaExamenRepo;
 import Group4.StudyHubBackendG4.services.CarreraService;
@@ -33,6 +30,11 @@ public class ExamenController {
     public ResponseEntity<?> getExamenesAsignatura(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok().body(examenService.getExamenesAsignatura(idAsignatura));
     }
+    @GetMapping("/api/examen/getExamenesPeriodo/{idPeriodo}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
+    public ResponseEntity<?> getExamenesPeriodo(@PathVariable Integer idPeriodo) {
+        return ResponseEntity.ok().body(examenService.getExamenesPeriodo(idPeriodo));
+    }
     @PostMapping("/api/examen/registroAsignaturaAPeriodo")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> registroAsignaturaAPeriodo(@RequestBody DtNuevoExamen nuevoExamen) {
@@ -54,5 +56,10 @@ public class ExamenController {
     public ResponseEntity<?> getCursadasExamenPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
         List<DtCursadaExamen> pendientes = examenService.findCursadasExamenByAnioAndAsignatura(anio, idAsignatura);
         return ResponseEntity.ok(pendientes);
+    }
+
+    @GetMapping("/api/examen/getActa/{idExamen}")
+    public ResponseEntity<?> getActa(@PathVariable Integer idExamen) {
+        return examenService.getActa(idExamen);
     }
 }
