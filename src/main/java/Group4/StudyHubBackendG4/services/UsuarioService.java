@@ -32,6 +32,8 @@ public class UsuarioService {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private PushService pushService;
 
     @Autowired
     private UsuarioTrRepo usuarioTrRepo;
@@ -116,6 +118,7 @@ public class UsuarioService {
 
         if(!RoleUtil.isEstudiante(dtNuevoUsuario)){
             this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
+            pushService.sendPushNotification(1,"Mensaje de prueba", "Hola mundo");
         }
 
         return ResponseEntity.ok().body("Usuario registrado con éxito.");

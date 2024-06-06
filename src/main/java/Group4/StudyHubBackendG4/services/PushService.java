@@ -17,10 +17,11 @@ public class PushService {
     @Autowired
     UsuarioTrRepo usuarioTrRepo;
     public void sendPushNotification(Integer idUsuario, String mensaje, String titulo) {
-        Usuario user = usuarioRepo.findById(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        UsuarioTR userTokens = usuarioTrRepo.findByUsuario(user);
-        String token = userTokens.getMobileToken();
+        //Usuario user = usuarioRepo.findById(idUsuario)
+                //.orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        //UsuarioTR userTokens = usuarioTrRepo.findByUsuario(user);
+        //String token = userTokens.getMobileToken();
+        String token = "euDrRKuFRj-zgMBrTjr7Xj:APA91bFz6oYI3RoCwXq5T_6LScQ87FSYJQo9Y9TZZnbcS14jSCjoLGuyi_AyrkZ0-AyGD2EQt_qd8ToTC7HcqCkGp-sglgprJzP7lXIEuX5Bfec7AAd6TCpbrN6z_S359ERT-Qz7dH6Z";
         if (!token.isEmpty()){
             Message message = Message.builder()
                     .setNotification(Notification.builder()
