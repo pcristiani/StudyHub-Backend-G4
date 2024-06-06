@@ -121,4 +121,15 @@ public class UsuarioController {
         return usuarioService.bajaDocente(idDocente);
     }
 
+    @GetMapping("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E') or hasRole('ROLE_F') or hasRole('ROLE_C')")
+    public ResponseEntity<?> getCalificacionesAsignaturas(@PathVariable Integer idEstudiante, @RequestParam Integer idCarrera) {
+        return usuarioService.getCalificacionesAsignaturas(idEstudiante, idCarrera);
+    }
+
+    @GetMapping("/api/estudiante/getCalificacionesExamenes/{idEstudiante}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E') or hasRole('ROLE_F') or hasRole('ROLE_C')")
+    public ResponseEntity<?> getCalificacionesExamenes(@PathVariable Integer idEstudiante, @RequestParam Integer idCarrera) {
+        return usuarioService.getCalificacionesExamenes(idEstudiante, idCarrera);
+    }
 }

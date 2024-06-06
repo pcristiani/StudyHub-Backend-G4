@@ -98,4 +98,9 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.modificarResultadoCursada(idCursada, ResultadoAsignatura.valueOf(nuevoResultadoStr)));
     }
 
+    @GetMapping("/api/asignatura/getPreviasAsignatura/{idAsignatura}")
+    public ResponseEntity<?> getPrevias(@PathVariable Integer idAsignatura) {
+        return asignaturaService.getPreviasAsignatura(idAsignatura);
+    }
+
 }

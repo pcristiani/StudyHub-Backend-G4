@@ -537,4 +537,25 @@ public class AsignaturaService {
                 .map(asignaturaConverter::convertToDto)
                 .collect(Collectors.toList());
     }
+
+    public ResponseEntity<?> getPreviasAsignatura(Integer idAsignatura) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+
+        if (asignatura == null) {
+            return ResponseEntity.badRequest().body("Asignatura no encontrada.");
+        }
+
+        List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
+
+        if (previas.isEmpty()) {
+            return ResponseEntity.ok().body("La asignatura no tiene previas.");
+        }
+
+        List<DtAsignatura> previasDto = previas.stream()
+                .map(Previaturas::getPrevia)
+                .map(asignaturaConverter::convertToDto)
+                .toList();
+
+        return ResponseEntity.ok().body(previasDto);
+    }
 }

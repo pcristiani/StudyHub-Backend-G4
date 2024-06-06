@@ -34,4 +34,7 @@ public interface EstudianteCursadaRepo extends JpaRepository<EstudianteCursada, 
 
     @Query("SELECT ec.cursada.asignatura FROM EstudianteCursada ec WHERE ec.usuario = :usuario")
     List<Asignatura> findByEstudiante(@Param("usuario") Usuario usuario);
+
+    @Query("SELECT ec FROM EstudianteCursada ec WHERE ec.usuario = :usuario")
+    List<EstudianteCursada> findCursadasEstudiante(@Param("usuario") Usuario usuario);
 }
