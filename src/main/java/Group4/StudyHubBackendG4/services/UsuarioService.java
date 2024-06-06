@@ -118,7 +118,6 @@ public class UsuarioService {
 
         if(!RoleUtil.isEstudiante(dtNuevoUsuario)){
             this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
-            pushService.sendPushNotification(1,"Mensaje de prueba", "Hola mundo");
         }
 
         return ResponseEntity.ok().body("Usuario registrado con éxito.");
