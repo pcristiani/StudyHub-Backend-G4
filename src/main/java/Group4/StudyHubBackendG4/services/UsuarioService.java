@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
+import Group4.StudyHubBackendG4.utils.ActionMapping;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.ActividadConverter;
@@ -57,6 +58,9 @@ public class UsuarioService {
 
     @Autowired
     private CarreraService carreraService;
+
+    @Autowired
+    private ActividadService actividadService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -135,6 +139,12 @@ public class UsuarioService {
             this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
         }
 
+        Actividad actividad = new Actividad();
+        actividad.setUsuario(usuario);
+        actividad.setFechaHora(LocalDateTime.now());
+        actividad.setAccion("Registro de Usuario");
+        actividadService.save(actividad);
+
         return ResponseEntity.ok().body("Usuario registrado con éxito.");
     }
 
@@ -207,6 +217,13 @@ public class UsuarioService {
                 Usuario usuario = usuarioRepo.getReferenceById(passwordToken.getUsuario().getIdUsuario());
                 usuario.setPassword(PasswordService.getInstance().hashPassword(newPassword));
                 usuarioRepo.save(usuario);
+
+                Actividad actividad = new Actividad();
+                actividad.setUsuario(usuario);
+                actividad.setFechaHora(LocalDateTime.now());
+                actividad.setAccion("Recuperar Contraseña");
+                actividadService.save(actividad);
+
                 return ResponseEntity.ok().body("Contraseña actualizada con exito");
             } else {
                 return ResponseEntity.badRequest().body("Token expirado.");
