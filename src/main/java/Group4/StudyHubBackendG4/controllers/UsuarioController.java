@@ -132,4 +132,10 @@ public class UsuarioController {
     public ResponseEntity<?> getCalificacionesExamenes(@PathVariable Integer idEstudiante, @RequestParam Integer idCarrera) {
         return usuarioService.getCalificacionesExamenes(idEstudiante, idCarrera);
     }
+
+    @PostMapping("/api/usuario/registerMobileToken/{idUsuario}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> registerMobileToken(@PathVariable Integer idUsuario, @Valid @RequestBody String mobileToken) {
+        return usuarioService.registerMobileToken(idUsuario, mobileToken);
+    }
 }
