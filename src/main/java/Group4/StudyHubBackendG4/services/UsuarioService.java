@@ -31,6 +31,8 @@ public class UsuarioService {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private PushService pushService;
 
     @Autowired
     private UsuarioTrRepo usuarioTrRepo;
@@ -379,7 +381,7 @@ public class UsuarioService {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró usuario.");
     }
-
+  
     public ResponseEntity<?> getActividadUsuario(Integer idUsuario) {
         Usuario usuario = usuarioRepo.findById(idUsuario).orElse(null);
         if (usuario != null) {
@@ -483,5 +485,13 @@ public class UsuarioService {
 
         return ResponseEntity.ok(calificaciones);
     }
+  
+    public ResponseEntity<?> registerMobileToken(Integer idUsuario, String mobileToken) {
+        Usuario usuario = usuarioRepo.findById(idUsuario).orElse(null);
+        UsuarioTR usuarioTR = usuarioTrRepo.findByUsuario(usuario);
+        usuarioTR.setMobileToken(mobileToken);
+        usuarioTrRepo.save(usuarioTR);
 
+        return ResponseEntity.ok().body("Token guardado exitosamente.");
+    }
 }
