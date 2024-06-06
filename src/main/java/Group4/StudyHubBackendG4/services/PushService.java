@@ -17,8 +17,7 @@ public class PushService {
     @Autowired
     UsuarioTrRepo usuarioTrRepo;
     public void sendPushNotification(Integer idUsuario, String mensaje, String titulo) {
-        Usuario user = usuarioRepo.findById(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Usuario user = usuarioRepo.findById(idUsuario).orElse(null);
         UsuarioTR userTokens = usuarioTrRepo.findByUsuario(user);
         String token = userTokens.getMobileToken();
         if (!token.isEmpty()){
@@ -31,7 +30,6 @@ public class PushService {
                     .build();
             try {
                 String response = FirebaseMessaging.getInstance().send(message);
-                System.out.println("Mensaje enviado correctamente: " + response);
             } catch (Exception e) {
                 System.err.println("Error enviando el mensaje: " + e.getMessage());
             }
