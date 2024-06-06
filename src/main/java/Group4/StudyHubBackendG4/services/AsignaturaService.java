@@ -4,6 +4,8 @@ import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
+import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
+import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
@@ -58,6 +60,10 @@ public class AsignaturaService {
 
     @Autowired
     private AsignaturaConverter asignaturaConverter;
+    @Autowired
+    private DocenteConverter docenteConverter;
+    @Autowired
+    private UsuarioConverter usuarioConverter;
 
     public List<DtAsignatura> getAsignaturas() {
         return convertToDtAsignatura(asignaturaRepo.findAll());
@@ -557,5 +563,37 @@ public class AsignaturaService {
                 .toList();
 
         return ResponseEntity.ok().body(previasDto);
+    }
+
+    public ResponseEntity<?> getActa(Integer idHorario) {
+        HorarioAsignatura horarioAsignatura = horarioAsignaturaRepo.findById(idHorario).orElse(null);
+        if(horarioAsignatura == null) {
+            return ResponseEntity.badRequest().body("No se encontró el horario.");
+        }
+        String asignatura = horarioAsignatura.getAsignatura().getNombre();
+
+        //obtener docentes
+        List<Docente> docentes = docenteAsignaturaRepo.findDocentesByAsignaturaId(horarioAsignatura.getAsignatura().getIdAsignatura());
+        List<DtDocente> dtDocentes = new ArrayList<>();
+        for(Docente d: docentes){
+            DtDocente dtDocente = docenteConverter.convertToDto(d);
+            dtDocentes.add(dtDocente);
+        }
+        List<Usuario> estudiantes = cursadaRepo.findEstudianteByHorario(horarioAsignatura);
+        List<DtUsuario> dtEstudiantes = new ArrayList<>();
+        for(Usuario u: estudiantes){
+            DtUsuario dtUsuario = usuarioConverter.convertToDto(u);
+            dtEstudiantes.add(dtUsuario);
+        }
+
+        DtHorarioAsignatura dtHorarioAsignatura = DtHorarioAsignatura.horarioAsignaturafromDtHorarioAsignatura(horarioAsignatura);
+
+        DtActa acta = new DtActa();
+        acta.setAsignatura(asignatura);
+        acta.setEstudiantes(dtEstudiantes);
+        acta.setDocentes(dtDocentes);
+        acta.setHorarioAsignatura(dtHorarioAsignatura);
+
+        return ResponseEntity.ok().body(acta);
     }
 }
