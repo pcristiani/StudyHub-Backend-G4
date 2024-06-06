@@ -50,10 +50,11 @@ public class ActionMapping {
         // Examen Controller
         actionMap.put(Pattern.compile("POST /api/examen/registroAsignaturaAPeriodo"), "Registro de Asignatura a Período de Examen");
         actionMap.put(Pattern.compile("POST /api/examen/inscripcionExamen"), "Inscripción a Examen");
-        actionMap.put(Pattern.compile("POST /api/examen/cambiarResultadoCursada/\\d+"), "Cambiar Resultado de Cursada");
+        actionMap.put(Pattern.compile("POST /api/examen/cambiarResultadoExamen/\\d+"), "Cambiar Resultado de Cursada");
         actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignatura/\\d+"), "Consultar Exámenes por Asignatura");
         actionMap.put(Pattern.compile("GET /api/examen/getExamenes/\\d+"), "Consultar Exámenes por Usuario");
         actionMap.put(Pattern.compile("GET /api/examen/getCursadasExamenPendientes"), "Consultar Cursadas de Examen Pendientes");
+        actionMap.put(Pattern.compile("GET /api/examen/getActa"), "Consulta Acta de Examen");
 
         // Asignatura Controller
         actionMap.put(Pattern.compile("POST /api/asignatura/registroHorarios/\\d+"), "Registro de Horarios de Asignatura");
@@ -70,6 +71,7 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeCarrera/\\d+"), "Consultar Asignaturas de Carrera");
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasAprobadas/\\d+"), "Consultar Asignaturas Aprobadas del Estudiante");
         actionMap.put(Pattern.compile("GET /api/asignatura/cursadasPendientes"), "Consultar Cursadas Pendientes");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getActa"), "Consulta Acta de Asignatura");
 
         // Simple Courses Controller
         actionMap.put(Pattern.compile("GET /course-relations"), "Consultar Relaciones de Cursos");

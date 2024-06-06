@@ -47,7 +47,7 @@ public class ExamenController {
         return examenService.inscripcionExamen(dtInscripcionExamen);
     }
 
-    @PostMapping("/api/examen/cambiarResultadoCursada/{idCursadaExamen}")
+    @PostMapping("/api/examen/cambiarResultadoExamen/{idCursadaExamen}")
     public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam String nuevoResultadoStr) {
         return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, ResultadoExamen.valueOf(nuevoResultadoStr)));
     }
