@@ -115,8 +115,8 @@ public class UsuarioController {
         return usuarioService.modificarPassword(idUsuario, newPassword);
     }
 
-    @PostMapping("/api/usuario/registerMobileToken/{idUsuario}")
-    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
+    @PostMapping("/registerMobileToken/{idUsuario}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> registerMobileToken(@PathVariable Integer idUsuario, @Valid @RequestBody String mobileToken) {
         return usuarioService.registerMobileToken(idUsuario, mobileToken);
     }
