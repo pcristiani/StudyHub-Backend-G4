@@ -1,6 +1,7 @@
 package Group4.StudyHubBackendG4.repositories;
 
 import Group4.StudyHubBackendG4.persistence.Asignatura;
+import Group4.StudyHubBackendG4.persistence.Cursada;
 import Group4.StudyHubBackendG4.persistence.EstudianteCursada;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
@@ -37,4 +38,7 @@ public interface EstudianteCursadaRepo extends JpaRepository<EstudianteCursada, 
 
     @Query("SELECT ec FROM EstudianteCursada ec WHERE ec.usuario = :usuario")
     List<EstudianteCursada> findCursadasEstudiante(@Param("usuario") Usuario usuario);
+
+    @Query("SELECT ec.usuario FROM EstudianteCursada ec WHERE ec.cursada.idCursada = :cursadaId")
+    Usuario findUsuarioByCursadaId(@Param("cursadaId") Integer cursadaId);
 }

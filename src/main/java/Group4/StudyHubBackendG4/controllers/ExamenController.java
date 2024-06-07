@@ -10,11 +10,13 @@ import Group4.StudyHubBackendG4.services.CarreraService;
 import Group4.StudyHubBackendG4.services.ExamenService;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -46,7 +48,7 @@ public class ExamenController {
     }
 
     @PostMapping("/api/examen/cambiarResultadoCursada/{idCursadaExamen}")
-    public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam String nuevoResultadoStr) {
+    public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam String nuevoResultadoStr) throws MessagingException, IOException {
         return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, ResultadoExamen.valueOf(nuevoResultadoStr)));
     }
 

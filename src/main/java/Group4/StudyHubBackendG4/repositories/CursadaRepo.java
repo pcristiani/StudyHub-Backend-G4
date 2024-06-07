@@ -1,7 +1,9 @@
 package Group4.StudyHubBackendG4.repositories;
 
 import Group4.StudyHubBackendG4.datatypes.DtCursadaPendiente;
+import Group4.StudyHubBackendG4.persistence.Asignatura;
 import Group4.StudyHubBackendG4.persistence.Cursada;
+import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +19,6 @@ public interface CursadaRepo extends JpaRepository<Cursada, Integer> {
             "FROM EstudianteCursada ec JOIN ec.cursada c " +
             "WHERE c.horarioAsignatura.anio = :anio AND c.asignatura.idAsignatura = :idAsignatura AND c.resultado = :resultado")
     List<DtCursadaPendiente> findCursadasPendientesByAnioAndAsignatura(@Param("anio") Integer anio, @Param("idAsignatura") Integer idAsignatura, @Param("resultado") ResultadoAsignatura resultado);
-
 
 }
 
