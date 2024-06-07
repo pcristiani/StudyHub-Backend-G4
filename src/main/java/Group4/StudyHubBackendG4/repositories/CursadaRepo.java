@@ -1,7 +1,9 @@
 package Group4.StudyHubBackendG4.repositories;
 
 import Group4.StudyHubBackendG4.datatypes.DtCursadaPendiente;
+import Group4.StudyHubBackendG4.persistence.Asignatura;
 import Group4.StudyHubBackendG4.persistence.Cursada;
+import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.persistence.HorarioAsignatura;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;

@@ -9,7 +9,6 @@ import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.ActividadConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
-import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -240,7 +239,7 @@ public class UsuarioService {
             String resetTokenLink = this.generatePasswordResetToken(usuario);
 
             try {
-                String htmlContent = emailService.getHtmlContent("forgotMail.html");
+                String htmlContent = emailService.getHtmlContent("htmlContent/forgotMail.html");
                 htmlContent = htmlContent.replace("$username", nombreCompleto);
                 htmlContent = htmlContent.replace("$resetTokenLink", resetTokenLink);
 
@@ -282,7 +281,7 @@ public class UsuarioService {
     }
 
     private void notificarAltaDeUsuarioPorMail(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
-        String htmlContent = emailService.getHtmlContent("notifyRegisterByMail.html");
+        String htmlContent = emailService.getHtmlContent("htmlContent/notifyRegisterByMail.html");
         htmlContent = htmlContent.replace("$rol", RoleUtil.getRoleName(dtNuevoUsuario.getRol()));
         htmlContent = htmlContent.replace("$password", dtNuevoUsuario.getPassword());
         htmlContent = htmlContent.replace("$nombreCompleto", dtNuevoUsuario.getNombre() + ' ' + dtNuevoUsuario.getApellido());
@@ -356,7 +355,7 @@ public class UsuarioService {
             user.setValidado(aceptado);
             usuarioRepo.save(user);
             //ENVIAR MAIL AL ESTUDIANTE
-            String htmlContent = emailService.getHtmlContent("notifyAcceptedUser.html");
+            String htmlContent = emailService.getHtmlContent("htmlContent/notifyAcceptedUser.html");
             htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
             emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario ", htmlContent);
             return ResponseEntity.ok().body("Usuario aceptado con exito");

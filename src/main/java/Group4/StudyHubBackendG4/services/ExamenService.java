@@ -7,10 +7,12 @@ import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,10 +44,18 @@ public class ExamenService {
 
     @Autowired
     private CursadaExamenRepo cursadaExamenRepo;
+
     @Autowired
     private DocenteConverter docenteConverter;
+
     @Autowired
     private UsuarioConverter usuarioConverter;
+
+    @Autowired
+    private PushService pushService;
+
+    @Autowired
+    private EmailService emailService;
 
 
     private DtExamen examenToDtExamen(Examen examen){
@@ -197,7 +207,7 @@ public class ExamenService {
         return cursadaExamenRepo.findCursadasAExamenByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.EXAMEN);
     }
 
-    public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, ResultadoExamen nuevoResultado) {
+    public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, ResultadoExamen nuevoResultado) throws MessagingException, IOException {
         CursadaExamen cursadaExamen = cursadaExamenRepo.findById(idCursadaExamen)
                 .orElse(null) ;
 
@@ -207,6 +217,11 @@ public class ExamenService {
 
         cursadaExamen.setResultado(nuevoResultado);
         cursadaExamenRepo.save(cursadaExamen);
+
+        Usuario usuario = cursadaExamenRepo.findEstudianteByCursadaExamenCedula(cursadaExamen);
+
+        notificarResultadoExamenPorMail(usuario, nuevoResultado, cursadaExamen.getCursada().getAsignatura().getNombre());
+        pushService.sendPushNotification(usuario.getIdUsuario(), "Se ha registrado un resultado de tus examenes! ", "StudyHub");
 
         return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursadaExamen + " cambiado exitosamente a " + nuevoResultado);
     }
@@ -241,5 +256,13 @@ public class ExamenService {
         acta.setExamen(dtExamen);
 
         return ResponseEntity.ok().body(acta);
+    }
+
+    private void notificarResultadoExamenPorMail(Usuario user, ResultadoExamen resultadoExamen, String nombreExamen) throws IOException, MessagingException {
+        String htmlContent = emailService.getHtmlContent("htmlContent/notifyResultadoExamen.html");
+        htmlContent = htmlContent.replace("$user", user.getNombre());
+        htmlContent = htmlContent.replace("$nombreExamen", nombreExamen);
+        htmlContent = htmlContent.replace("$resultadoExamen", resultadoExamen.getNombre());
+        emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de resultado de cursada de asignatura", htmlContent);
     }
 }

@@ -3,12 +3,14 @@ package Group4.StudyHubBackendG4.controllers;
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -47,7 +49,7 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturasAprobadas(idEstudiante));
     }
 
-    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")             //TODO: FIX
+    @GetMapping("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasNoAprobadas(@PathVariable Integer idEstudiante) {
         return ResponseEntity.ok(asignaturaService.getAsignaturasNoAprobadas(idEstudiante));
@@ -91,7 +93,7 @@ public class AsignaturaController {
     }
 
     @PostMapping("/api/asignatura/cambiarResultadoCursada/{idCursada}")
-    public ResponseEntity<?> cambiarResultadoCursada(@PathVariable Integer idCursada, @RequestParam String nuevoResultadoStr) {
+    public ResponseEntity<?> cambiarResultadoCursada(@PathVariable Integer idCursada, @RequestParam String nuevoResultadoStr) throws MessagingException, IOException {
         return ResponseEntity.ok(asignaturaService.modificarResultadoCursada(idCursada, ResultadoAsignatura.valueOf(nuevoResultadoStr)));
     }
 
