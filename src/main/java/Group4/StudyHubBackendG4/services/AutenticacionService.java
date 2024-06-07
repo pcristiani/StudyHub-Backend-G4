@@ -1,5 +1,6 @@
 package Group4.StudyHubBackendG4.services;
 
+import Group4.StudyHubBackendG4.persistence.Actividad;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
 import io.jsonwebtoken.Jwts;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,9 @@ public class AutenticacionService {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private ActividadService actividadService;
 
     private static final long EXPIRATION_TIME = 900_000;
 
@@ -56,6 +61,13 @@ public class AutenticacionService {
                     .compact();
 
             usuarioService.actualizarJwt(usuario, jwt);
+
+            Actividad actividad = new Actividad();
+            actividad.setUsuario(usuario);
+            actividad.setFechaHora(LocalDateTime.now());
+            actividad.setAccion("Inicio de sesion");
+            actividadService.save(actividad);
+
             return jwt;
         } else {
             return null;
@@ -65,6 +77,13 @@ public class AutenticacionService {
     @Transactional
     public void logoutUser(String jwt) {
         Usuario usuario = usuarioService.getUsuarioByJwt(jwt);
+
+        Actividad actividad = new Actividad();
+        actividad.setUsuario(usuario);
+        actividad.setFechaHora(LocalDateTime.now());
+        actividad.setAccion("Cierre de sesion");
+        actividadService.save(actividad);
+
         usuarioService.actualizarJwt(usuario, null);
     }
 }

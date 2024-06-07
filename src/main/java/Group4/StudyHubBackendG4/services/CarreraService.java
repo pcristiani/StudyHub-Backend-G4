@@ -206,7 +206,7 @@ public class CarreraService {
 
         assert user != null;
         assert carrera != null;
-        this.notificarValidacionCarrera(user, carrera.getNombre());
+        this.notificarValidacionCarreraPorMail(user, carrera.getNombre());
 
         return ResponseEntity.ok().body("Se aceptó la inscripcion del estudiante a la carrera.");
     }
@@ -296,8 +296,8 @@ public class CarreraService {
         }
     }
 
-    private void notificarValidacionCarrera(Usuario user, String carrera) throws IOException, MessagingException {
-        String htmlContent = emailService.getHtmlContent("notifyAcceptedCarrera.html");
+    private void notificarValidacionCarreraPorMail(Usuario user, String carrera) throws IOException, MessagingException {
+        String htmlContent = emailService.getHtmlContent("htmlContent/notifyAcceptedCarrera.html");
         htmlContent = htmlContent.replace("$carrera", carrera);
         htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
         emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de validación a carrera", htmlContent);

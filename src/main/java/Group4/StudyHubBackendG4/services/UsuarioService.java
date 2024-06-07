@@ -3,12 +3,12 @@ package Group4.StudyHubBackendG4.services;
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
+import Group4.StudyHubBackendG4.utils.ActionMapping;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.ActividadConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
-import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,6 +57,9 @@ public class UsuarioService {
 
     @Autowired
     private CarreraService carreraService;
+
+    @Autowired
+    private ActividadService actividadService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -135,6 +138,12 @@ public class UsuarioService {
             this.notificarAltaDeUsuarioPorMail(dtNuevoUsuario);
         }
 
+        Actividad actividad = new Actividad();
+        actividad.setUsuario(usuario);
+        actividad.setFechaHora(LocalDateTime.now());
+        actividad.setAccion("Registro de Usuario");
+        actividadService.save(actividad);
+
         return ResponseEntity.ok().body("Usuario registrado con éxito.");
     }
 
@@ -207,6 +216,13 @@ public class UsuarioService {
                 Usuario usuario = usuarioRepo.getReferenceById(passwordToken.getUsuario().getIdUsuario());
                 usuario.setPassword(PasswordService.getInstance().hashPassword(newPassword));
                 usuarioRepo.save(usuario);
+
+                Actividad actividad = new Actividad();
+                actividad.setUsuario(usuario);
+                actividad.setFechaHora(LocalDateTime.now());
+                actividad.setAccion("Recuperar Contraseña");
+                actividadService.save(actividad);
+
                 return ResponseEntity.ok().body("Contraseña actualizada con exito");
             } else {
                 return ResponseEntity.badRequest().body("Token expirado.");
@@ -223,7 +239,7 @@ public class UsuarioService {
             String resetTokenLink = this.generatePasswordResetToken(usuario);
 
             try {
-                String htmlContent = emailService.getHtmlContent("forgotMail.html");
+                String htmlContent = emailService.getHtmlContent("htmlContent/forgotMail.html");
                 htmlContent = htmlContent.replace("$username", nombreCompleto);
                 htmlContent = htmlContent.replace("$resetTokenLink", resetTokenLink);
 
@@ -265,7 +281,7 @@ public class UsuarioService {
     }
 
     private void notificarAltaDeUsuarioPorMail(DtNuevoUsuario dtNuevoUsuario) throws IOException, MessagingException {
-        String htmlContent = emailService.getHtmlContent("notifyRegisterByMail.html");
+        String htmlContent = emailService.getHtmlContent("htmlContent/notifyRegisterByMail.html");
         htmlContent = htmlContent.replace("$rol", RoleUtil.getRoleName(dtNuevoUsuario.getRol()));
         htmlContent = htmlContent.replace("$password", dtNuevoUsuario.getPassword());
         htmlContent = htmlContent.replace("$nombreCompleto", dtNuevoUsuario.getNombre() + ' ' + dtNuevoUsuario.getApellido());
@@ -339,7 +355,7 @@ public class UsuarioService {
             user.setValidado(aceptado);
             usuarioRepo.save(user);
             //ENVIAR MAIL AL ESTUDIANTE
-            String htmlContent = emailService.getHtmlContent("notifyAcceptedUser.html");
+            String htmlContent = emailService.getHtmlContent("htmlContent/notifyAcceptedUser.html");
             htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
             emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario ", htmlContent);
             return ResponseEntity.ok().body("Usuario aceptado con exito");

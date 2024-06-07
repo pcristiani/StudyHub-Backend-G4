@@ -12,26 +12,32 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PushService {
+
     @Autowired
     UsuarioRepo usuarioRepo;
+
     @Autowired
     UsuarioTrRepo usuarioTrRepo;
+
     public void sendPushNotification(Integer idUsuario, String mensaje, String titulo) {
         Usuario user = usuarioRepo.findById(idUsuario).orElse(null);
         UsuarioTR userTokens = usuarioTrRepo.findByUsuario(user);
-        String token = userTokens.getMobileToken();
-        if (!token.isEmpty()){
-            Message message = Message.builder()
-                    .setNotification(Notification.builder()
-                            .setTitle(titulo)
-                            .setBody(mensaje)
-                            .build())
-                    .setToken(token)
-                    .build();
-            try {
-                String response = FirebaseMessaging.getInstance().send(message);
-            } catch (Exception e) {
-                System.err.println("Error enviando el mensaje: " + e.getMessage());
+        if (userTokens != null) {
+            String token = userTokens.getMobileToken();
+            if (token != null){
+                Message message = Message.builder()
+                        .setNotification(Notification.builder()
+                                .setTitle(titulo)
+                                .setBody(mensaje)
+                                .build())
+                        .setToken(token)
+                        .build();
+                try {
+                    String response = FirebaseMessaging.getInstance().send(message);
+                    System.out.println("Mensaje enviado correctamente: " + response);
+                } catch (Exception e) {
+                    System.err.println("Error enviando el mensaje: " + e.getMessage());
+                }
             }
         }
     }
