@@ -566,6 +566,35 @@ public class AsignaturaService {
             return ResponseEntity.badRequest().body("Asignatura no encontrada.");
         }
 
+        List<Asignatura> asignaturasCarrera = asignaturaRepo.findByCarrera(asignatura.getCarrera());
+
+        List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
+
+        Set<Asignatura> previasSet = previas.stream()
+                .map(Previaturas::getPrevia)
+                .collect(Collectors.toSet());
+
+        // Filter out the Asignaturas that are Previas
+        List<Asignatura> asignaturasNotPrevias = asignaturasCarrera.stream()
+                .filter(a -> !previasSet.contains(a))
+                .toList();
+
+        // Convert the remaining Asignaturas to DTOs
+        List<DtAsignatura> asignaturasNotPreviasDto = asignaturasNotPrevias.stream()
+                .map(asignaturaConverter::convertToDto)
+                .toList();
+
+
+        return ResponseEntity.ok().body(convertToDtAsignatura(asignaturasNotPrevias));
+    }
+
+    public ResponseEntity<?> getNoPreviasAsignatura(Integer idAsignatura) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+
+        if (asignatura == null) {
+            return ResponseEntity.badRequest().body("Asignatura no encontrada.");
+        }
+
         List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
 
         if (previas.isEmpty()) {
@@ -619,4 +648,5 @@ public class AsignaturaService {
 
         return ResponseEntity.ok().body(acta);
     }
+
 }

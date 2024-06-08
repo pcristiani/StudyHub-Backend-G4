@@ -102,6 +102,11 @@ public class AsignaturaController {
         return asignaturaService.getPreviasAsignatura(idAsignatura);
     }
 
+    @GetMapping("/api/asignatura/getNoPreviasAsignatura/{idAsignatura}")
+    public ResponseEntity<?> getNoPreviasAsignatura(@PathVariable Integer idAsignatura) {
+        return asignaturaService.getNoPreviasAsignatura(idAsignatura);
+    }
+
     @GetMapping("/api/asignatura/getActa/{idHorario}")
     public ResponseEntity<?> getActa(@PathVariable Integer idHorario) {
         return asignaturaService.getActa(idHorario);
