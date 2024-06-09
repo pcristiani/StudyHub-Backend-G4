@@ -559,7 +559,7 @@ public class AsignaturaService {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<?> getPreviasAsignatura(Integer idAsignatura) {
+    public ResponseEntity<?> getNoPreviasAsignatura(Integer idAsignatura) {
         Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
 
         if (asignatura == null) {
@@ -588,7 +588,7 @@ public class AsignaturaService {
         return ResponseEntity.ok().body(convertToDtAsignatura(asignaturasNotPrevias));
     }
 
-    public ResponseEntity<?> getNoPreviasAsignatura(Integer idAsignatura) {
+    public ResponseEntity<?> getPreviasAsignatura(Integer idAsignatura) {
         Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
 
         if (asignatura == null) {
