@@ -574,12 +574,12 @@ public class AsignaturaService {
                 .map(Previaturas::getPrevia)
                 .collect(Collectors.toSet());
 
-        // Filter out the Asignaturas that are Previas
+        // Filtrar las Asignaturas que son previas
         List<Asignatura> asignaturasNotPrevias = asignaturasCarrera.stream()
-                .filter(a -> !previasSet.contains(a))
+                .filter(a -> !previasSet.contains(a) && !a.equals(asignatura))
                 .toList();
 
-        // Convert the remaining Asignaturas to DTOs
+        // Convertir a DT
         List<DtAsignatura> asignaturasNotPreviasDto = asignaturasNotPrevias.stream()
                 .map(asignaturaConverter::convertToDto)
                 .toList();

@@ -81,7 +81,7 @@ public class AsignaturaController {
     }
 
     @PostMapping("/api/asignatura/registrarPreviaturas/{idAsignatura}")
-    @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A')")
     public ResponseEntity<?> registrarPreviaturas(@PathVariable Integer idAsignatura, @RequestBody List<Integer> previaturas) {
         return ResponseEntity.ok(asignaturaService.registrarPreviaturas(idAsignatura, previaturas));
     }
