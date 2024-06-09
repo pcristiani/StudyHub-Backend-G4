@@ -53,6 +53,12 @@ public class CarreraService {
     @Autowired
     private PeriodoConverter periodoConverter;
 
+    @Autowired
+    private AsignaturaRepo asignaturaRepo;
+
+    @Autowired
+    private PreviaturasRepo previaturasRepo;
+
     public ResponseEntity<List<DtCarrera>> getCarreras() {
         return ResponseEntity.ok(carreraRepo.findAll()
                 .stream()
@@ -102,6 +108,34 @@ public class CarreraService {
                 .collect(Collectors.toList());
     }
 
+    public String getPreviaturasGrafo(Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+        if(carrera == null){
+            return "";
+        }
+        List<Asignatura> asignaturas = asignaturaRepo.findByCarrera(carrera);
+        List<Previaturas> previaturas = previaturasRepo.findByCarreraId(idCarrera);
+
+        // Inicializar grafo
+        StringBuilder graphBuilder = new StringBuilder("graph G {\n");
+        graphBuilder.append("node [shape=rectangle, style=filled, color=lightblue];\n");
+        graphBuilder.append("rankdir=TB;\n");
+
+        // Definir nodos
+        for (Asignatura asignatura : asignaturas) {
+            graphBuilder.append(String.format("\"%s\" [label=\"%s\"];\n", asignatura.getIdAsignatura(), asignatura.getNombre()));
+        }
+
+        // Definir aristas con las previas
+        for (Previaturas prev : previaturas) {
+            graphBuilder.append(String.format("\"%s\" -- \"%s\";\n",
+                    prev.getPrevia().getIdAsignatura(),
+                    prev.getAsignatura().getIdAsignatura()));
+        }
+
+        graphBuilder.append("}\n");
+        return graphBuilder.toString();
+    }
     @Transactional
     public ResponseEntity<String> nuevaCarrera(DtNuevaCarrera dtNuevaCarrera) {
 

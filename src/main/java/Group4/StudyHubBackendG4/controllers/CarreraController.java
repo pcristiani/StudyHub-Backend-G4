@@ -54,8 +54,11 @@ public class CarreraController {
     public ResponseEntity<?> getPeriodosDeCarrera(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok().body(carreraService.getPeriodosDeCarrera(idCarrera));
     }
-
-
+    @GetMapping("/api/carrera/getPreviaturasGrafo/{idCarrera}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
+    public ResponseEntity<?> getPreviaturasGrafo(@PathVariable Integer idCarrera) {
+        return ResponseEntity.ok().body(carreraService.getPreviaturasGrafo(idCarrera));
+    }
     @PostMapping("/api/carrera/altaCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
     public ResponseEntity<?> altaCarrera(@Valid @RequestBody DtNuevaCarrera dtNuevaCarrera) throws MessagingException, IOException {
