@@ -40,6 +40,9 @@ public class ActivityInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if(!request.getRequestURI().startsWith("/api/")){
+            return;
+        }
         if (response.getStatus() == HttpServletResponse.SC_OK) {
             String token = request.getHeader("Authorization");
 
