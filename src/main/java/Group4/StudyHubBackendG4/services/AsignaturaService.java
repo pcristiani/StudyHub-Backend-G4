@@ -118,6 +118,13 @@ public class AsignaturaService {
         return convertToDtAsignatura(estudianteCursadaRepo.findNoAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO));
     }
 
+    public List<DtAsignatura> getAsignaturasConExamenPendiente(Integer idEstudiante, Integer idCarrera) {
+        Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
+        Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+
+        return convertToDtAsignatura(estudianteCursadaRepo.findExamenPendienteEstudiante(user, ResultadoAsignatura.EXAMEN, carrera));
+    }
+
     public List<DtHorarioAsignatura> getHorarios(Integer id) {
         Asignatura asig = asignaturaRepo.findById(id).orElse(null);
         return asig == null ? null :

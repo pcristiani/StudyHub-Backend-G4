@@ -25,8 +25,6 @@ public class CursadaExamen {
     @JoinColumn(name = "idExamen", nullable = false)
     private Examen examen;
 
-    private Date fechaHora;
-
     private String cedulaEstudiante;
 
     @Enumerated(EnumType.STRING)
