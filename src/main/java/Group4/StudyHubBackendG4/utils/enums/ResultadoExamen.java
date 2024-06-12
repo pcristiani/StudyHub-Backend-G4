@@ -14,4 +14,13 @@ public enum ResultadoExamen {
         this.nombre = nombre;
     }
 
+    public static ResultadoExamen doyResultadoPorCalificacion(int calificacion) {
+        if (calificacion >= 5) {
+            return ResultadoExamen.APROBADO;
+        } else if (calificacion >= 1) {
+            return ResultadoExamen.REPROBADO;
+        } else {
+            return ResultadoExamen.PENDIENTE;
+        }
+    }
 }

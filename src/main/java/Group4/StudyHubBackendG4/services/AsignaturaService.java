@@ -541,7 +541,7 @@ public class AsignaturaService {
         return cursadaRepo.findCursadasPendientesByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.PENDIENTE);
     }
 
-    public ResponseEntity<?> modificarResultadoCursada(Integer idCursada, ResultadoAsignatura nuevoResultado) throws MessagingException, IOException {
+    public ResponseEntity<?> modificarResultadoCursada(Integer idCursada, Integer calificacion) throws MessagingException, IOException {
         Cursada cursada = cursadaRepo.findById(idCursada)
                 .orElse(null) ;
 
@@ -549,12 +549,15 @@ public class AsignaturaService {
             return ResponseEntity.badRequest().body("No se encontró la cursada.");
         }
 
+        ResultadoAsignatura nuevoResultado = ResultadoAsignatura.doyResultadoPorCalificacion(calificacion);
+
         cursada.setResultado(nuevoResultado);
+        cursada.setCalificacion(calificacion);
         cursadaRepo.save(cursada);
 
         Usuario usuario = estudianteCursadaRepo.findUsuarioByCursadaId(idCursada);
 
-        notificarResultadoCursadaPorMail(usuario, nuevoResultado, cursada.getAsignatura().getNombre());
+        notificarResultadoCursadaPorMail(usuario, nuevoResultado, cursada.getAsignatura().getNombre(), calificacion);
         pushService.sendPushNotification(usuario.getIdUsuario(), "Se ha registrado un resultado de tus cursadas! ", "StudyHub");
 
         return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursada + " cambiado exitosamente a " + nuevoResultado);
@@ -616,11 +619,12 @@ public class AsignaturaService {
         return ResponseEntity.ok().body(previasDto);
     }
 
-    private void notificarResultadoCursadaPorMail(Usuario user, ResultadoAsignatura resultadoAsignatura, String nombreAsignatura) throws IOException, MessagingException {
+    private void notificarResultadoCursadaPorMail(Usuario user, ResultadoAsignatura resultadoAsignatura, String nombreAsignatura, Integer calificacion) throws IOException, MessagingException {
         String htmlContent = emailService.getHtmlContent("htmlContent/notifyResultadoAsignatura.html");
         htmlContent = htmlContent.replace("$user", user.getNombre());
         htmlContent = htmlContent.replace("$nombreAsignatura", nombreAsignatura);
         htmlContent = htmlContent.replace("$resultadoAsignatura", resultadoAsignatura.getNombre());
+        htmlContent = htmlContent.replace("$calificacion", calificacion.toString());
         emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de resultado de cursada de asignatura", htmlContent);
     }
 

@@ -30,4 +30,6 @@ public class CursadaExamen {
     @Enumerated(EnumType.STRING)
     private ResultadoExamen resultado;
 
+    @Column(nullable = true, columnDefinition = "int default 0")
+    private int calificacion = 0;
 }

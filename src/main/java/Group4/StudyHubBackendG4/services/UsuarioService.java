@@ -9,6 +9,7 @@ import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.ActividadConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -448,12 +449,15 @@ public class UsuarioService {
             if (asignaturasCarrera.contains(asignatura)) {
                 Integer idAsignatura = asignatura.getIdAsignatura();
                 String asignaturaNombre = asignatura.getNombre();
-                String calificacion = estudianteCursada.getCursada().getResultado().getNombre();
+                ResultadoAsignatura resultado = estudianteCursada.getCursada().getResultado();
+                int calificacion = estudianteCursada.getCursada().getCalificacion();
+
+                DtDetalleCalificacionAsignatura detalleCalificacion = new DtDetalleCalificacionAsignatura(resultado, calificacion);
 
                 if (!calificacionesMap.containsKey(idAsignatura)) {
                     calificacionesMap.put(idAsignatura, new DtCalificacionAsignatura(idAsignatura, asignaturaNombre, new ArrayList<>()));
                 }
-                calificacionesMap.get(idAsignatura).getCalificaciones().add(calificacion);
+                calificacionesMap.get(idAsignatura).getCalificaciones().add(detalleCalificacion);
             }
         }
 
@@ -491,7 +495,8 @@ public class UsuarioService {
                         cursadaExamen.getCursada().getAsignatura().getIdAsignatura(),
                         cursadaExamen.getCursada().getAsignatura().getNombre(),
                         cursadaExamen.getExamen().getIdExamen(),
-                        cursadaExamen.getResultado().getNombre()
+                        cursadaExamen.getResultado().getNombre(),
+                        cursadaExamen.getCalificacion()
                 ))
                 .collect(Collectors.toList());
 

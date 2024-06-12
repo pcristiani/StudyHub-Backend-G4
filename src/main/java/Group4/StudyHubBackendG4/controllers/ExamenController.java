@@ -50,8 +50,8 @@ public class ExamenController {
     }
 
     @PostMapping("/api/examen/cambiarResultadoExamen/{idCursadaExamen}")
-    public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam String nuevoResultadoStr) throws MessagingException, IOException {
-        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, ResultadoExamen.valueOf(nuevoResultadoStr)));
+    public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam Integer calificacion) throws MessagingException, IOException {
+        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, calificacion));
     }
 
     @GetMapping("/api/examen/getCursadasExamenPendientes")

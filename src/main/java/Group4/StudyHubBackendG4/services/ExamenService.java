@@ -207,7 +207,7 @@ public class ExamenService {
         return cursadaExamenRepo.findCursadasAExamenByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.EXAMEN);
     }
 
-    public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, ResultadoExamen nuevoResultado) throws MessagingException, IOException {
+    public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, Integer calificacion) throws MessagingException, IOException {
         CursadaExamen cursadaExamen = cursadaExamenRepo.findById(idCursadaExamen)
                 .orElse(null) ;
 
@@ -215,12 +215,15 @@ public class ExamenService {
             return ResponseEntity.badRequest().body("No se encontró la cursada.");
         }
 
+        ResultadoExamen nuevoResultado = ResultadoExamen.doyResultadoPorCalificacion(calificacion);
+
+        cursadaExamen.setCalificacion(calificacion);
         cursadaExamen.setResultado(nuevoResultado);
         cursadaExamenRepo.save(cursadaExamen);
 
         Usuario usuario = cursadaExamenRepo.findEstudianteByCursadaExamenCedula(cursadaExamen);
 
-        notificarResultadoExamenPorMail(usuario, nuevoResultado, cursadaExamen.getCursada().getAsignatura().getNombre());
+        notificarResultadoExamenPorMail(usuario, nuevoResultado, cursadaExamen.getCursada().getAsignatura().getNombre(), calificacion);
         pushService.sendPushNotification(usuario.getIdUsuario(), "Se ha registrado un resultado de tus examenes! ", "StudyHub");
 
         return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursadaExamen + " cambiado exitosamente a " + nuevoResultado);
@@ -258,11 +261,12 @@ public class ExamenService {
         return ResponseEntity.ok().body(acta);
     }
 
-    private void notificarResultadoExamenPorMail(Usuario user, ResultadoExamen resultadoExamen, String nombreExamen) throws IOException, MessagingException {
+    private void notificarResultadoExamenPorMail(Usuario user, ResultadoExamen resultadoExamen, String nombreExamen, Integer calificacion) throws IOException, MessagingException {
         String htmlContent = emailService.getHtmlContent("htmlContent/notifyResultadoExamen.html");
         htmlContent = htmlContent.replace("$user", user.getNombre());
         htmlContent = htmlContent.replace("$nombreExamen", nombreExamen);
         htmlContent = htmlContent.replace("$resultadoExamen", resultadoExamen.getNombre());
+        htmlContent = htmlContent.replace("$calificacion", calificacion.toString());
         emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de resultado de cursada de asignatura", htmlContent);
     }
 }
