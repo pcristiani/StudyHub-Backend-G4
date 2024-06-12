@@ -21,7 +21,7 @@ public interface CursadaExamenRepo extends JpaRepository<CursadaExamen, Integer>
                 "WHERE c.horarioAsignatura.anio = :anio AND c.asignatura.idAsignatura = :idAsignatura AND c.resultado = :resultado")
         List<DtCursadaExamen> findCursadasAExamenByAnioAndAsignatura(@Param("anio") Integer anio, @Param("idAsignatura") Integer idAsignatura, @Param("resultado") ResultadoAsignatura resultado);
 
-        List<CursadaExamen> findByCedulaEstudianteAndExamen(String cedulaEstudiante, Examen examen);
+        CursadaExamen findByCedulaEstudianteAndExamen(String cedulaEstudiante, Examen examen);
 
         @Query("SELECT ce.examen FROM CursadaExamen ce WHERE ce.cedulaEstudiante = :cedulaEstudiante")
         List<Examen> findAllExamenesByCedulaEstudiante(@Param("cedulaEstudiante") String cedulaEstudiante);

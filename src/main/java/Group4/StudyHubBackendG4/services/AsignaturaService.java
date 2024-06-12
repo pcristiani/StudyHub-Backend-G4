@@ -331,17 +331,15 @@ public class AsignaturaService {
             return "El usuario no está inscripto en la carrera correspondiente a la asignatura";
         }
 
-        List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
-        List<Cursada> aprobadasCursadas = listCursadas.stream()
-                .map(EstudianteCursada::getCursada)
-                .filter(cursada -> cursada.getResultado() == ResultadoAsignatura.EXONERADO)
-                .toList();
-
-        if (!aprobadasCursadas.isEmpty()) {
-            return "La asignatura ya fue aprobada!";
+        // Valido que el estudiante no la haya aprobado y que tenga el resultado examen
+        List<Asignatura> asignaturasNoAprobadas = estudianteCursadaRepo.findNoAprobadasByEstudiante(usuario, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO);
+        boolean isAsignaturaNoAprobada = asignaturasNoAprobadas.contains(asignatura);
+        if(!isAsignaturaNoAprobada) {
+            return "El estudiante ya aprobó la asignatura.";
         }
 
         // Realizar validación de inscripción pendiente
+        List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
         List<Cursada> inscripcionPendiente = listCursadas.stream()
                 .map(EstudianteCursada::getCursada)
                 .filter(cursada -> cursada.getResultado() == ResultadoAsignatura.PENDIENTE)
