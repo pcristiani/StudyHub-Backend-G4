@@ -32,6 +32,7 @@ public class UsuarioService {
 
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private PushService pushService;
 
