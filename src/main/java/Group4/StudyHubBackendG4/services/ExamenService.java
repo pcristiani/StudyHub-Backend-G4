@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ExamenService {
@@ -91,6 +92,19 @@ public class ExamenService {
         List<Examen> examenes = examenRepo.findByAsignatura(asignatura);
         List<DtExamen> dtExamenes = new ArrayList<>();
         for (Examen examen : examenes) {
+            dtExamenes.add(examenToDtExamen(examen));
+        }
+        return dtExamenes;
+    }
+
+    public List<DtExamen> getExamenesAsignaturaPorAnio(Integer idAsignatura, Integer anio) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+        List<Examen> examenes = examenRepo.findByAsignatura(asignatura);
+        List<Examen> filteredExamenes = examenes.stream()
+                .filter(examen -> examen.getFechaHora().getYear() == anio)
+                .toList();
+        List<DtExamen> dtExamenes = new ArrayList<>();
+        for (Examen examen : filteredExamenes) {
             dtExamenes.add(examenToDtExamen(examen));
         }
         return dtExamenes;
@@ -198,8 +212,24 @@ public class ExamenService {
         return ResponseEntity.ok().body("Se inscribió al examen.");
     }
 
-    public List<DtCursadaExamen> findCursadasExamenByAnioAndAsignatura(Integer anio, Integer idAsignatura) {
-        return cursadaExamenRepo.findCursadasAExamenByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.EXAMEN);
+    public List<DtCursadaExamen> findCursadasExamenByExamen(Integer idExamen) {
+        Examen examen = examenRepo.findById(idExamen).orElse(null);
+        List<CursadaExamen> cursadaExamen = cursadaExamenRepo.findByExamen(examen);
+        List<DtCursadaExamen> dtCursadaExamen = new ArrayList<>();
+        for (CursadaExamen ce: cursadaExamen) {
+            Usuario user = usuarioRepo.findByCedula(ce.getCedulaEstudiante());
+            DtCursadaExamen dtCe = new DtCursadaExamen();
+            dtCe.setIdCursadaExamen(ce.getIdCursadaExamen());
+            dtCe.setIdCursada(ce.getCursada().getIdCursada());
+            dtCe.setIdExamen(ce.getExamen().getIdExamen());
+            dtCe.setNombreEstudiante(user.getNombre());
+            dtCe.setApellidoEstudiante(user.getApellido());
+            dtCe.setMailEstudiante(user.getEmail());
+            dtCe.setCedulaEstudiante(ce.getCedulaEstudiante());
+            dtCe.setCalificacion(ce.getCalificacion());
+            dtCursadaExamen.add(dtCe);
+        }
+        return dtCursadaExamen;
     }
 
     public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, Integer calificacion) throws MessagingException, IOException {
