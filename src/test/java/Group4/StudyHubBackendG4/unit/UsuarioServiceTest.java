@@ -1,19 +1,27 @@
-package com.example.demo;
+package Group4.StudyHubBackendG4.unit;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
+import Group4.StudyHubBackendG4.services.ActividadService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class UsuarioServiceTest {
@@ -24,37 +32,88 @@ public class UsuarioServiceTest {
     @Mock
     private UsuarioConverter usuarioConverter;
 
+    @Mock
+    private ActividadService actividadService;
+
     @InjectMocks
     private UsuarioService usuarioService;
 
-    private List<Usuario> usuarios;
-    private List<DtUsuario> dtUsuarios;
+    private Usuario user1;
+    private Usuario user2;
+    private DtUsuario dtUser1;
+    private DtUsuario dtUser2;
+    private DtNuevoUsuario nuevoUsuario;
 
     @BeforeEach
     public void setUp() {
-        // Set up mock data
-        Usuario user1 = new Usuario();
-        Usuario user2 = new Usuario();
-        usuarios = List.of(user1, user2);
+        // Arrange
+        user1 = new Usuario();
+        user1.setIdUsuario(1);
+        user1.setNombre("John");
+        user1.setApellido("Doe");
 
-        DtUsuario dtUser1 = new DtUsuario();
-        DtUsuario dtUser2 = new DtUsuario();
-        dtUsuarios = List.of(dtUser1, dtUser2);
+        user2 = new Usuario();
+        user2.setIdUsuario(2);
+        user2.setNombre("Jane");
+        user2.setApellido("Smith");
+
+        dtUser1 = new DtUsuario();
+        dtUser1.setIdUsuario(1);
+        dtUser1.setNombre("John");
+        dtUser1.setApellido("Doe");
+
+        dtUser2 = new DtUsuario();
+        dtUser2.setIdUsuario(2);
+        dtUser2.setNombre("Jane");
+        dtUser2.setApellido("Smith");
+
+        nuevoUsuario = new DtNuevoUsuario();
+        nuevoUsuario.setCedula("12345678");
+        nuevoUsuario.setNombre("John");
+        nuevoUsuario.setApellido("Doe");
+        nuevoUsuario.setEmail("john.doe@example.com");
+        nuevoUsuario.setRol("E");
     }
 
     @Test
-    public void testGetUsuarios() {
-        // Define behavior of mocks
-        when(usuarioRepo.findAll()).thenReturn(usuarios);
-        when(usuarioConverter.convertToDto(usuarios.get(0))).thenReturn(dtUsuarios.get(0));
-        when(usuarioConverter.convertToDto(usuarios.get(1))).thenReturn(dtUsuarios.get(1));
+    public void testGetUsuariosReturnsOk() {
+        // When
+        when(usuarioRepo.findAll()).thenReturn(Arrays.asList(user1, user2));
+        when(usuarioConverter.convertToDto(user1)).thenReturn(dtUser1);
+        when(usuarioConverter.convertToDto(user2)).thenReturn(dtUser2);
 
-        // Call the method under test
+        // Act
         List<DtUsuario> result = usuarioService.getUsuarios();
 
-        // Verify the results
+        // Assert
         assertEquals(2, result.size());
-        assertEquals(dtUsuarios.get(0), result.get(0));
-        assertEquals(dtUsuarios.get(1), result.get(1));
+        assertEquals(dtUser1, result.get(0));
+        assertEquals(dtUser2, result.get(1));
+    }
+
+    @Test
+    public void testRegisterReturnsOk() throws IOException, MessagingException {
+
+        // When
+        when(usuarioRepo.findByCedula(nuevoUsuario.getCedula())).thenReturn(null);
+        when(usuarioRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        ResponseEntity<String> response = usuarioService.register(nuevoUsuario);
+
+        // Assert
+        assertEquals("Usuario registrado con éxito.", response.getBody());
+    }
+
+    @Test
+    public void testRegisterReturnsBadRequest() throws IOException, MessagingException {
+        // When
+        when(usuarioRepo.findByCedula(nuevoUsuario.getCedula())).thenReturn(user1);
+
+        // Act
+        ResponseEntity<String> response = usuarioService.register(nuevoUsuario);
+
+        // Assert
+        assertEquals("La cedula ingresada ya existe en el sistema.", response.getBody());
     }
 }
