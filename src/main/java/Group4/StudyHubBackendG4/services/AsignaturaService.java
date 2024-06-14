@@ -334,7 +334,7 @@ public class AsignaturaService {
         // Valido que el estudiante no la haya aprobado y que tenga el resultado examen
         List<Asignatura> asignaturasNoAprobadas = estudianteCursadaRepo.findNoAprobadasByEstudiante(usuario, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO);
         boolean isAsignaturaNoAprobada = asignaturasNoAprobadas.contains(asignatura);
-        if(!isAsignaturaNoAprobada) {
+        if(!isAsignaturaNoAprobada && !asignaturasNoAprobadas.isEmpty()){
             return "El estudiante ya aprobó la asignatura.";
         }
 
