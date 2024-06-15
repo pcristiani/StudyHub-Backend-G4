@@ -39,6 +39,12 @@ public class CarreraController {
         return ResponseEntity.ok().body(carreraService.getCarrerasInscripto(idUsuario));
     }
 
+    @GetMapping("/api/carrera/getCarrerasCoordinador/{idUsuario}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getCarrerasCoordinador(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok().body(carreraService.getCarrerasCoordinador(idUsuario));
+    }
+
     @GetMapping("/api/carrera/getInscriptosPendientes/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getInscriptosPendientes(@PathVariable Integer idCarrera) {

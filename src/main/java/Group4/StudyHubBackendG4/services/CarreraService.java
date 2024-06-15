@@ -91,6 +91,13 @@ public class CarreraService {
             : null;
     }
 
+    public List<DtCarrera> getCarrerasCoordinador(Integer idUsuario) {
+        return carreraCoordinadorRepo.findCarrerasByCoordinadorId(idUsuario).stream()
+                .distinct()
+                .map(carreraConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     public List<DtCarrera> getCarrerasConPeriodo() {
         return periodoExamenRepo.findDistinctCarreras()
                 .stream()
@@ -376,4 +383,5 @@ public class CarreraService {
         return periodoExamenRepo.findByCarreraAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
                 carrera, fechaFin, fechaInicio).isEmpty() ? "" : "El período ingresado se solapa con un período existente.";
     }
+
 }

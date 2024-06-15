@@ -172,9 +172,9 @@ public class ExamenService {
         // Obtengo la asignatura del examen
         Asignatura asignatura = examen.getAsignatura();
         // Valido que el estudiante no la haya aprobado y que tenga el resultado examen
-        List<Asignatura> asignaturasNoAprobadas = estudianteCursadaRepo.findNoAprobadasByEstudiante(estudiante, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO);
-        boolean isAsignaturaNoAprobada = asignaturasNoAprobadas.contains(asignatura);
-        if(!isAsignaturaNoAprobada) {
+        List<Asignatura> asignaturasAprobadas = estudianteCursadaRepo.findAprobadasByEstudiante(estudiante, ResultadoAsignatura.EXONERADO);
+        boolean isAsignaturaAprobada = asignaturasAprobadas.contains(asignatura);
+        if(isAsignaturaAprobada){
             return ResponseEntity.badRequest().body("El estudiante ya aprobó la asignatura.");
         }
 
