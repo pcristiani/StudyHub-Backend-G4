@@ -43,6 +43,8 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripcionesPendientes"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasConPeriodo"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getPreviaturasGrafo"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasCoordinador/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getPreviaturasGrafo/\\d+"), "");
 
 
         // Autenticación Controller
@@ -56,7 +58,10 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignatura/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/examen/getExamenes/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/examen/getCursadasExamenPendientes"), "");
-        actionMap.put(Pattern.compile("GET /api/examen/getActa"), "Obtener acta de Examen");
+        actionMap.put(Pattern.compile("GET /api/examen/getActa/\\d+"), "Obtener acta de Examen");
+        actionMap.put(Pattern.compile("GET /api/examen/getExamenesPeriodo/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignaturaPorAnio/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/examen/getCursadasExamen/\\d+"), "");
 
         // Asignatura Controller
         actionMap.put(Pattern.compile("POST /api/asignatura/registroHorarios/\\d+"), "Registro de Horarios de Asignatura");
@@ -73,7 +78,9 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeCarrera/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasAprobadas/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/asignatura/cursadasPendientes"), "");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getActa"), "Obtener acta de Asignatura");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getActa/\\d+"), "Obtener acta de Asignatura");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasConExamenPendiente/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getNoPreviasAsignatura/\\d+"), "");
 
         // Simple Courses Controller
         actionMap.put(Pattern.compile("GET /course-relations"), "");
