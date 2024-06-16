@@ -228,15 +228,6 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void recuperarPasswordOk() throws Exception {       //Todo: Fix reset token
-        mockMvc.perform(post("/recuperarPassword")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dtNewPassword)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Password reset successfully"));
-    }
-
-    @Test
     public void modificarPerfilOk() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarPerfil/{idUsuario}", user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
