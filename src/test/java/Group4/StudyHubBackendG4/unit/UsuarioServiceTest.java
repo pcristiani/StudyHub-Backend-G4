@@ -193,7 +193,7 @@ public class UsuarioServiceTest {
 
     @Test
     public void getDocentesByAsignaturaIdReturnsOk() {
-        // Arrange
+        // When
         Integer asignaturaId = 1;
         when(docenteAsignaturaRepo.findDocentesByAsignaturaId(asignaturaId)).thenReturn(List.of(docente1, docente2));
         when(docenteConverter.convertToDto(docente1)).thenReturn(dtDocente1);
@@ -210,7 +210,6 @@ public class UsuarioServiceTest {
 
     @Test
     public void registerReturnsOk() throws IOException, MessagingException {
-
         // When
         when(usuarioRepo.findByCedula(nuevoUsuario.getCedula())).thenReturn(null);
         when(usuarioRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));

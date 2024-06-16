@@ -162,11 +162,12 @@ public class UsuarioService {
                 if (!aux.getCedula().equals(dtUsuario.getCedula())) {
                     UsuarioTR usuarioTr = usuarioTrRepo.findByUsuario(aux);
                     String jwt = usuarioTr.getJwt();
-
-                    if(jwtUtil.isTokenExpired(jwt)){
-                        usuarioTrRepo.delete(usuarioTr);
-                    } else {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede modificar la cedula porque el usuario tiene una sesion activa.");
+                    if(jwt != null) {
+                        if (jwtUtil.isTokenExpired(jwt)) {
+                            usuarioTrRepo.delete(usuarioTr);
+                        } else {
+                            return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede modificar la cedula porque el usuario tiene una sesion activa.");
+                        }
                     }
                 }
 
@@ -264,7 +265,7 @@ public class UsuarioService {
         resetToken.setUsuario(usuario);
         PasswordResetToken token = tokenRepo.save(resetToken);
         if (token != null) {
-            String endpointUrl = "http://localhost:3000/resetPassword";
+            String endpointUrl = "http://localhost:3000/resetPassword";         //Todo: fix para deploys!
             return endpointUrl + "/?token=" + resetToken.getToken();
         }
         return "";
