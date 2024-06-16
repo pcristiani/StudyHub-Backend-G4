@@ -11,9 +11,9 @@ public class DtCursadaExamen {
     private Integer idCursadaExamen;
     private Integer idCursada;
     private Integer idExamen;
+    private Integer calificacion;
     private String nombreEstudiante;
     private String apellidoEstudiante;
     private String mailEstudiante;
     private String cedulaEstudiante;
-
 }

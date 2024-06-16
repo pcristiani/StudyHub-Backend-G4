@@ -27,6 +27,12 @@ public class CarreraController {
         return ResponseEntity.ok().body(carreraService.getCarreras());
     }
 
+    @GetMapping("/api/carrera/getCarreraById/{idCarrera}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getCarreraById(@PathVariable Integer idCarrera) {
+        return ResponseEntity.ok().body(carreraService.getCarreraById(idCarrera));
+    }
+
     @GetMapping("/api/carrera/getCarrerasInscripcionesPendientes")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getCarrerasInscripcionesPendientes() {
@@ -37,6 +43,12 @@ public class CarreraController {
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> getCarrerasInscripto(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok().body(carreraService.getCarrerasInscripto(idUsuario));
+    }
+
+    @GetMapping("/api/carrera/getCarrerasCoordinador/{idUsuario}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getCarrerasCoordinador(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok().body(carreraService.getCarrerasCoordinador(idUsuario));
     }
 
     @GetMapping("/api/carrera/getInscriptosPendientes/{idCarrera}")
@@ -54,8 +66,10 @@ public class CarreraController {
     public ResponseEntity<?> getPeriodosDeCarrera(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok().body(carreraService.getPeriodosDeCarrera(idCarrera));
     }
-
-
+    @GetMapping("/api/carrera/getPreviaturasGrafo/{idCarrera}")
+    public ResponseEntity<?> getPreviaturasGrafo(@PathVariable Integer idCarrera) {
+        return ResponseEntity.ok().body(carreraService.getPreviaturasGrafo(idCarrera));
+    }
     @PostMapping("/api/carrera/altaCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
     public ResponseEntity<?> altaCarrera(@Valid @RequestBody DtNuevaCarrera dtNuevaCarrera) throws MessagingException, IOException {

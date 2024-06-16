@@ -18,9 +18,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,11 +51,21 @@ public class CarreraService {
     @Autowired
     private PeriodoConverter periodoConverter;
 
+    @Autowired
+    private AsignaturaRepo asignaturaRepo;
+
+    @Autowired
+    private PreviaturasRepo previaturasRepo;
+
     public ResponseEntity<List<DtCarrera>> getCarreras() {
         return ResponseEntity.ok(carreraRepo.findAll()
                 .stream()
                 .map(carreraConverter::convertToDto)
                 .collect(Collectors.toList()));
+    }
+
+    public DtCarrera getCarreraById(Integer idCarrera) {
+        return carreraConverter.convertToDto(carreraRepo.findById(idCarrera).orElse(null));
     }
 
     public List<DtCarrera> getCarrerasInscripcionesPendientes() {
@@ -87,6 +95,13 @@ public class CarreraService {
             : null;
     }
 
+    public List<DtCarrera> getCarrerasCoordinador(Integer idUsuario) {
+        return carreraCoordinadorRepo.findCarrerasByCoordinadorId(idUsuario).stream()
+                .distinct()
+                .map(carreraConverter::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     public List<DtCarrera> getCarrerasConPeriodo() {
         return periodoExamenRepo.findDistinctCarreras()
                 .stream()
@@ -101,6 +116,68 @@ public class CarreraService {
                 .map(periodoConverter::convertToDto)
                 .collect(Collectors.toList());
     }
+
+    public String getPreviaturasGrafo(Integer idCarrera) {
+        Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+        if (carrera == null) {
+            return "";
+        }
+        List<Asignatura> asignaturas = asignaturaRepo.findByCarrera(carrera);
+        List<Previaturas> previaturas = previaturasRepo.findByCarreraId(idCarrera);
+
+        // Inicializar grafo
+        StringBuilder graphBuilder = new StringBuilder("");
+
+        // Definir nodos
+        for (Asignatura asignatura : asignaturas) {
+            graphBuilder.append(String.format("\"%s\" [label=\"%s\"];\n", asignatura.getIdAsignatura(), asignatura.getNombre()));
+        }
+
+        // Definir un mapa para almacenar previaturas intermedias
+        Map<String, Set<String>> intermedias = new HashMap<>();
+
+        for (Previaturas prev : previaturas) {
+            String sourceId = String.valueOf(prev.getPrevia().getIdAsignatura());
+            String targetId = String.valueOf(prev.getAsignatura().getIdAsignatura());
+
+            // Añadir previaturas intermedias
+            if (!intermedias.containsKey(targetId)) {
+                intermedias.put(targetId, new HashSet<>());
+            }
+            intermedias.get(targetId).add(sourceId);
+        }
+
+        // Definir aristas sin duplicar y evitando las aristas directas innecesarias
+        Set<String> edges = new HashSet<>();
+        for (Previaturas prev : previaturas) {
+            String sourceId = String.valueOf(prev.getPrevia().getIdAsignatura());
+            String targetId = String.valueOf(prev.getAsignatura().getIdAsignatura());
+
+            boolean ingorarArista = false;
+            if (intermedias.containsKey(targetId)) {
+                for (String intermediate : intermedias.get(targetId)) {
+                    if (intermedias.containsKey(intermediate) && intermedias.get(intermediate).contains(sourceId)) {
+                        ingorarArista = true;
+                        break;
+                    }
+                }
+            }
+
+            // Solo añadir arista si no es una arista directa innecesaria
+            if (!ingorarArista) {
+                String edge = String.format("\"%s\" -- \"%s\"", sourceId, targetId);
+                if (!edges.contains(edge)) {
+                    graphBuilder.append(edge).append(";\n");
+                    edges.add(edge);
+                }
+            }
+        }
+
+        return graphBuilder.toString();
+    }
+
+
+
 
     @Transactional
     public ResponseEntity<String> nuevaCarrera(DtNuevaCarrera dtNuevaCarrera) {

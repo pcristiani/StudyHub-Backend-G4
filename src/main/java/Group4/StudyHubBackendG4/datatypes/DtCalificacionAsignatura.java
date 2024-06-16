@@ -12,5 +12,5 @@ import java.util.List;
 public class DtCalificacionAsignatura {
     private Integer idAsignatura;
     private String asignatura;
-    private List<String> calificaciones;
+    private List<DtDetalleCalificacionAsignatura> calificaciones;
 }

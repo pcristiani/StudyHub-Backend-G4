@@ -11,5 +11,6 @@ public class DtCalificacionExamen {
     private Integer idAsignatura;
     private String asignatura;
     private Integer idExamen;
-    private String calificacion;
+    private String resultado;
+    private Integer calificacion;
 }

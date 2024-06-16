@@ -4,6 +4,7 @@ import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
+import Group4.StudyHubBackendG4.utils.converters.CarreraConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
@@ -70,6 +71,9 @@ public class AsignaturaService {
     private UsuarioConverter usuarioConverter;
 
     @Autowired
+    private CarreraConverter carreraConverter;
+
+    @Autowired
     private PushService pushService;
 
     @Autowired
@@ -88,6 +92,10 @@ public class AsignaturaService {
         }
 
         return ResponseEntity.ok().body(convertToDtAsignatura(asignaturaRepo.findByCarrera(carrera)));
+    }
+
+    public DtAsignatura getAsignaturaById(Integer idAsignatura) {
+        return asignaturaConverter.convertToDto(asignaturaRepo.findById(idAsignatura).orElse(null));
     }
 
     public List<DtAsignatura> getAsignaturasDeEstudiante(Integer idUsuario) {
@@ -115,7 +123,27 @@ public class AsignaturaService {
 
     public List<DtAsignatura> getAsignaturasNoAprobadas(Integer idEstudiante) {
         Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
-        return convertToDtAsignatura(estudianteCursadaRepo.findNoAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO));
+        List<Asignatura> listAllAsignaturas = new ArrayList<>();
+        List<Carrera> carreras = inscripcionCarreraRepo.findCarrerasInscripto(user).stream()
+                .map(InscripcionCarrera::getCarrera)
+                .distinct()
+                .toList();
+        for(Carrera c: carreras) {
+            List<Asignatura> asignaturasCarrera = asignaturaRepo.findByCarrera(c);
+            listAllAsignaturas.addAll(asignaturasCarrera);
+        }
+        List<Asignatura> aprobadas = estudianteCursadaRepo.findAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO);
+
+        listAllAsignaturas.removeAll(aprobadas);
+
+        return convertToDtAsignatura(listAllAsignaturas);
+    }
+
+    public List<DtAsignatura> getAsignaturasConExamenPendiente(Integer idEstudiante, Integer idCarrera) {
+        Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
+        Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
+
+        return convertToDtAsignatura(estudianteCursadaRepo.findExamenPendienteEstudiante(user, ResultadoAsignatura.EXAMEN, carrera));
     }
 
     public List<DtHorarioAsignatura> getHorarios(Integer id) {
@@ -324,17 +352,15 @@ public class AsignaturaService {
             return "El usuario no está inscripto en la carrera correspondiente a la asignatura";
         }
 
-        List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
-        List<Cursada> aprobadasCursadas = listCursadas.stream()
-                .map(EstudianteCursada::getCursada)
-                .filter(cursada -> cursada.getResultado() == ResultadoAsignatura.EXONERADO)
-                .toList();
-
-        if (!aprobadasCursadas.isEmpty()) {
-            return "La asignatura ya fue aprobada!";
+        // Valido que el estudiante no la haya aprobado y que tenga el resultado examen
+        List<Asignatura> asignaturasAprobadas = estudianteCursadaRepo.findAprobadasByEstudiante(usuario, ResultadoAsignatura.EXONERADO);
+        boolean isAsignaturaAprobada = asignaturasAprobadas.contains(asignatura);
+        if(isAsignaturaAprobada){
+            return "El estudiante ya aprobó la asignatura.";
         }
 
         // Realizar validación de inscripción pendiente
+        List<EstudianteCursada> listCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(usuario, asignatura);
         List<Cursada> inscripcionPendiente = listCursadas.stream()
                 .map(EstudianteCursada::getCursada)
                 .filter(cursada -> cursada.getResultado() == ResultadoAsignatura.PENDIENTE)
@@ -534,7 +560,7 @@ public class AsignaturaService {
         return cursadaRepo.findCursadasPendientesByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.PENDIENTE);
     }
 
-    public ResponseEntity<?> modificarResultadoCursada(Integer idCursada, ResultadoAsignatura nuevoResultado) throws MessagingException, IOException {
+    public ResponseEntity<?> modificarResultadoCursada(Integer idCursada, Integer calificacion) throws MessagingException, IOException {
         Cursada cursada = cursadaRepo.findById(idCursada)
                 .orElse(null) ;
 
@@ -542,12 +568,15 @@ public class AsignaturaService {
             return ResponseEntity.badRequest().body("No se encontró la cursada.");
         }
 
+        ResultadoAsignatura nuevoResultado = ResultadoAsignatura.doyResultadoPorCalificacion(calificacion);
+
         cursada.setResultado(nuevoResultado);
+        cursada.setCalificacion(calificacion);
         cursadaRepo.save(cursada);
 
         Usuario usuario = estudianteCursadaRepo.findUsuarioByCursadaId(idCursada);
 
-        notificarResultadoCursadaPorMail(usuario, nuevoResultado, cursada.getAsignatura().getNombre());
+        notificarResultadoCursadaPorMail(usuario, nuevoResultado, cursada.getAsignatura().getNombre(), calificacion);
         pushService.sendPushNotification(usuario.getIdUsuario(), "Se ha registrado un resultado de tus cursadas! ", "StudyHub");
 
         return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursada + " cambiado exitosamente a " + nuevoResultado);
@@ -557,6 +586,35 @@ public class AsignaturaService {
         return asignaturas.stream()
                 .map(asignaturaConverter::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    public ResponseEntity<?> getNoPreviasAsignatura(Integer idAsignatura) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+
+        if (asignatura == null) {
+            return ResponseEntity.badRequest().body("Asignatura no encontrada.");
+        }
+
+        List<Asignatura> asignaturasCarrera = asignaturaRepo.findByCarrera(asignatura.getCarrera());
+
+        List<Previaturas> previas = previaturasRepo.findByAsignatura(asignatura);
+
+        Set<Asignatura> previasSet = previas.stream()
+                .map(Previaturas::getPrevia)
+                .collect(Collectors.toSet());
+
+        // Filtrar las Asignaturas que son previas
+        List<Asignatura> asignaturasNotPrevias = asignaturasCarrera.stream()
+                .filter(a -> !previasSet.contains(a) && !a.equals(asignatura))
+                .toList();
+
+        // Convertir a DT
+        List<DtAsignatura> asignaturasNotPreviasDto = asignaturasNotPrevias.stream()
+                .map(asignaturaConverter::convertToDto)
+                .toList();
+
+
+        return ResponseEntity.ok().body(convertToDtAsignatura(asignaturasNotPrevias));
     }
 
     public ResponseEntity<?> getPreviasAsignatura(Integer idAsignatura) {
@@ -580,11 +638,12 @@ public class AsignaturaService {
         return ResponseEntity.ok().body(previasDto);
     }
 
-    private void notificarResultadoCursadaPorMail(Usuario user, ResultadoAsignatura resultadoAsignatura, String nombreAsignatura) throws IOException, MessagingException {
+    private void notificarResultadoCursadaPorMail(Usuario user, ResultadoAsignatura resultadoAsignatura, String nombreAsignatura, Integer calificacion) throws IOException, MessagingException {
         String htmlContent = emailService.getHtmlContent("htmlContent/notifyResultadoAsignatura.html");
         htmlContent = htmlContent.replace("$user", user.getNombre());
         htmlContent = htmlContent.replace("$nombreAsignatura", nombreAsignatura);
         htmlContent = htmlContent.replace("$resultadoAsignatura", resultadoAsignatura.getNombre());
+        htmlContent = htmlContent.replace("$calificacion", calificacion.toString());
         emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de resultado de cursada de asignatura", htmlContent);
     }
 

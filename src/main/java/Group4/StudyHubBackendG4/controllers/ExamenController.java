@@ -50,14 +50,20 @@ public class ExamenController {
     }
 
     @PostMapping("/api/examen/cambiarResultadoExamen/{idCursadaExamen}")
-    public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam String nuevoResultadoStr) throws MessagingException, IOException {
-        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, ResultadoExamen.valueOf(nuevoResultadoStr)));
+    public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam Integer calificacion) throws MessagingException, IOException {
+        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, calificacion));
     }
 
-    @GetMapping("/api/examen/getCursadasExamenPendientes")
-    public ResponseEntity<?> getCursadasExamenPendientes(@RequestParam Integer anio, @RequestParam Integer idAsignatura) {
-        List<DtCursadaExamen> pendientes = examenService.findCursadasExamenByAnioAndAsignatura(anio, idAsignatura);
+    @GetMapping("/api/examen/getCursadasExamen/{idExamen}")
+    public ResponseEntity<?> getCursadasExamen(@PathVariable Integer idExamen) {
+        List<DtCursadaExamen> pendientes = examenService.findCursadasExamenByExamen(idExamen);
         return ResponseEntity.ok(pendientes);
+    }
+
+    @GetMapping("/api/examen/getExamenesAsignaturaPorAnio/{idAsignatura}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getExamenesAsignaturaPorAnio(@PathVariable Integer idAsignatura, @RequestParam Integer anio) {
+        return ResponseEntity.ok().body(examenService.getExamenesAsignaturaPorAnio(idAsignatura, anio));
     }
 
     @GetMapping("/api/examen/getActa/{idExamen}")

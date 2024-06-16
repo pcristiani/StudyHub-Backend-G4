@@ -9,6 +9,7 @@ import Group4.StudyHubBackendG4.utils.RoleUtil;
 import Group4.StudyHubBackendG4.utils.converters.ActividadConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ public class UsuarioService {
 
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private PushService pushService;
 
@@ -160,11 +162,12 @@ public class UsuarioService {
                 if (!aux.getCedula().equals(dtUsuario.getCedula())) {
                     UsuarioTR usuarioTr = usuarioTrRepo.findByUsuario(aux);
                     String jwt = usuarioTr.getJwt();
-
-                    if(jwtUtil.isTokenExpired(jwt)){
-                        usuarioTrRepo.delete(usuarioTr);
-                    } else {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede modificar la cedula porque el usuario tiene una sesion activa.");
+                    if(jwt != null) {
+                        if (jwtUtil.isTokenExpired(jwt)) {
+                            usuarioTrRepo.delete(usuarioTr);
+                        } else {
+                            return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede modificar la cedula porque el usuario tiene una sesion activa.");
+                        }
                     }
                 }
 
@@ -262,7 +265,7 @@ public class UsuarioService {
         resetToken.setUsuario(usuario);
         PasswordResetToken token = tokenRepo.save(resetToken);
         if (token != null) {
-            String endpointUrl = "https://frontstudyhub.vercel.app/resetPassword";
+            String endpointUrl = "http://localhost:3000/resetPassword";         //Todo: fix para deploys!
             return endpointUrl + "/?token=" + resetToken.getToken();
         }
         return "";
@@ -448,12 +451,15 @@ public class UsuarioService {
             if (asignaturasCarrera.contains(asignatura)) {
                 Integer idAsignatura = asignatura.getIdAsignatura();
                 String asignaturaNombre = asignatura.getNombre();
-                String calificacion = estudianteCursada.getCursada().getResultado().getNombre();
+                ResultadoAsignatura resultado = estudianteCursada.getCursada().getResultado();
+                int calificacion = estudianteCursada.getCursada().getCalificacion();
+
+                DtDetalleCalificacionAsignatura detalleCalificacion = new DtDetalleCalificacionAsignatura(resultado, calificacion);
 
                 if (!calificacionesMap.containsKey(idAsignatura)) {
                     calificacionesMap.put(idAsignatura, new DtCalificacionAsignatura(idAsignatura, asignaturaNombre, new ArrayList<>()));
                 }
-                calificacionesMap.get(idAsignatura).getCalificaciones().add(calificacion);
+                calificacionesMap.get(idAsignatura).getCalificaciones().add(detalleCalificacion);
             }
         }
 
@@ -491,7 +497,8 @@ public class UsuarioService {
                         cursadaExamen.getCursada().getAsignatura().getIdAsignatura(),
                         cursadaExamen.getCursada().getAsignatura().getNombre(),
                         cursadaExamen.getExamen().getIdExamen(),
-                        cursadaExamen.getResultado().getNombre()
+                        cursadaExamen.getResultado().getNombre(),
+                        cursadaExamen.getCalificacion()
                 ))
                 .collect(Collectors.toList());
 

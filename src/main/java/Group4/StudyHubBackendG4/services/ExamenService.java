@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ExamenService {
@@ -94,6 +96,19 @@ public class ExamenService {
         }
         return dtExamenes;
     }
+
+    public List<DtExamen> getExamenesAsignaturaPorAnio(Integer idAsignatura, Integer anio) {
+        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
+        List<Examen> examenes = examenRepo.findByAsignatura(asignatura);
+        List<Examen> filteredExamenes = examenes.stream()
+                .filter(examen -> examen.getFechaHora().getYear() == anio)
+                .toList();
+        List<DtExamen> dtExamenes = new ArrayList<>();
+        for (Examen examen : filteredExamenes) {
+            dtExamenes.add(examenToDtExamen(examen));
+        }
+        return dtExamenes;
+    }
     public ResponseEntity<?> registroAsignaturaAPeriodo(DtNuevoExamen nuevoExamen) {
         //Validar que existe asignatura
         Asignatura asignatura = asignaturaRepo.findById(nuevoExamen.getIdAsignatura()).orElse(null);
@@ -148,7 +163,6 @@ public class ExamenService {
         if (estudiante == null) {
             return ResponseEntity.badRequest().body("No existe el estudiante.");
         }
-
         // Validar que existe el examen
         Examen examen = examenRepo.findById(dtInscripcionExamen.getIdExamen()).orElse(null);
         if (examen == null) {
@@ -158,56 +172,67 @@ public class ExamenService {
         // Obtengo la asignatura del examen
         Asignatura asignatura = examen.getAsignatura();
         // Valido que el estudiante no la haya aprobado y que tenga el resultado examen
-        List<EstudianteCursada> estudianteCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(estudiante, asignatura);
-        if (estudianteCursadas.isEmpty()) {
-            return ResponseEntity.badRequest().body("El estudiante no cursa la asignatura.");
-        }
-        Cursada cursada = null;
-        boolean tieneExamenEnCursada = false;
-        for (EstudianteCursada ec : estudianteCursadas) {
-            if (ec.getCursada().getResultado().equals(ResultadoAsignatura.EXONERADO)) {
-                return ResponseEntity.badRequest().body("El estudiante ya aprobó la asignatura.");
-            }
-            if (ec.getCursada().getResultado().equals(ResultadoAsignatura.EXAMEN)) {
-                tieneExamenEnCursada = true;
-                cursada = ec.getCursada();
-            }
+        List<Asignatura> asignaturasAprobadas = estudianteCursadaRepo.findAprobadasByEstudiante(estudiante, ResultadoAsignatura.EXONERADO);
+        boolean isAsignaturaAprobada = asignaturasAprobadas.contains(asignatura);
+        if(isAsignaturaAprobada){
+            return ResponseEntity.badRequest().body("El estudiante ya aprobó la asignatura.");
         }
 
-        if (!tieneExamenEnCursada) {
+        List<EstudianteCursada> estudianteCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(estudiante, asignatura);
+        Optional<Cursada> optionalCursada = estudianteCursadas.stream()
+                .map(EstudianteCursada::getCursada)
+                .filter(cursada -> cursada.getResultado().equals(ResultadoAsignatura.EXAMEN))
+                .findFirst();
+
+        if (optionalCursada.isEmpty()) {
             return ResponseEntity.badRequest().body("El estudiante no tiene una cursada con resultado 'EXAMEN'.");
         }
 
-        // Valido que el estudiante no haya aprobado el examen
-        List<CursadaExamen> cursadaExamenes = cursadaExamenRepo.findByCedulaEstudianteAndExamen(estudiante.getCedula(), examen);
-        for (CursadaExamen ce : cursadaExamenes) {
-            if (ce.getResultado().equals(ResultadoExamen.APROBADO)) {
-                return ResponseEntity.badRequest().body("El estudiante ya aprobó el examen.");
+        Cursada cursada = optionalCursada.get();
+
+        // Valido que el estudiante no haya cursado el examen
+        CursadaExamen cursadaExamen = cursadaExamenRepo.findByCedulaEstudianteAndExamen(estudiante.getCedula(), examen);
+        if(cursadaExamen != null) {
+            switch (cursadaExamen.getResultado()) {
+                case APROBADO:
+                    return ResponseEntity.badRequest().body("El estudiante ya aprobó el examen.");
+                case REPROBADO:
+                    return ResponseEntity.badRequest().body("El estudiante reprobó el examen.");
+                case PENDIENTE:
+                    return ResponseEntity.badRequest().body("El estudiante ya tiene un examen pendiente.");
             }
         }
-
-        // Valido que el estudiante no tenga otro examen en curso
-        for (CursadaExamen ce : cursadaExamenes) {
-            if (ce.getResultado().equals(ResultadoExamen.PENDIENTE)) {
-                return ResponseEntity.badRequest().body("El estudiante ya tiene un examen en curso.");
-            }
-        }
-
-        CursadaExamen cursadaExamen = new CursadaExamen();
-        cursadaExamen.setCedulaEstudiante(estudiante.getCedula());
-        cursadaExamen.setExamen(examen);
-        cursadaExamen.setCursada(cursada);
-        cursadaExamen.setResultado(ResultadoExamen.PENDIENTE);
-        cursadaExamenRepo.save(cursadaExamen);
+        CursadaExamen inscripcionExamen = new CursadaExamen();
+        inscripcionExamen.setCedulaEstudiante(estudiante.getCedula());
+        inscripcionExamen.setExamen(examen);
+        inscripcionExamen.setCursada(cursada);
+        inscripcionExamen.setResultado(ResultadoExamen.PENDIENTE);
+        cursadaExamenRepo.save(inscripcionExamen);
 
         return ResponseEntity.ok().body("Se inscribió al examen.");
     }
 
-    public List<DtCursadaExamen> findCursadasExamenByAnioAndAsignatura(Integer anio, Integer idAsignatura) {
-        return cursadaExamenRepo.findCursadasAExamenByAnioAndAsignatura(anio, idAsignatura, ResultadoAsignatura.EXAMEN);
+    public List<DtCursadaExamen> findCursadasExamenByExamen(Integer idExamen) {
+        Examen examen = examenRepo.findById(idExamen).orElse(null);
+        List<CursadaExamen> cursadaExamen = cursadaExamenRepo.findByExamen(examen);
+        List<DtCursadaExamen> dtCursadaExamen = new ArrayList<>();
+        for (CursadaExamen ce: cursadaExamen) {
+            Usuario user = usuarioRepo.findByCedula(ce.getCedulaEstudiante());
+            DtCursadaExamen dtCe = new DtCursadaExamen();
+            dtCe.setIdCursadaExamen(ce.getIdCursadaExamen());
+            dtCe.setIdCursada(ce.getCursada().getIdCursada());
+            dtCe.setIdExamen(ce.getExamen().getIdExamen());
+            dtCe.setNombreEstudiante(user.getNombre());
+            dtCe.setApellidoEstudiante(user.getApellido());
+            dtCe.setMailEstudiante(user.getEmail());
+            dtCe.setCedulaEstudiante(ce.getCedulaEstudiante());
+            dtCe.setCalificacion(ce.getCalificacion());
+            dtCursadaExamen.add(dtCe);
+        }
+        return dtCursadaExamen;
     }
 
-    public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, ResultadoExamen nuevoResultado) throws MessagingException, IOException {
+    public ResponseEntity<?> modificarResultadoExamen(Integer idCursadaExamen, Integer calificacion) throws MessagingException, IOException {
         CursadaExamen cursadaExamen = cursadaExamenRepo.findById(idCursadaExamen)
                 .orElse(null) ;
 
@@ -215,12 +240,15 @@ public class ExamenService {
             return ResponseEntity.badRequest().body("No se encontró la cursada.");
         }
 
+        ResultadoExamen nuevoResultado = ResultadoExamen.doyResultadoPorCalificacion(calificacion);
+
+        cursadaExamen.setCalificacion(calificacion);
         cursadaExamen.setResultado(nuevoResultado);
         cursadaExamenRepo.save(cursadaExamen);
 
         Usuario usuario = cursadaExamenRepo.findEstudianteByCursadaExamenCedula(cursadaExamen);
 
-        notificarResultadoExamenPorMail(usuario, nuevoResultado, cursadaExamen.getCursada().getAsignatura().getNombre());
+        notificarResultadoExamenPorMail(usuario, nuevoResultado, cursadaExamen.getCursada().getAsignatura().getNombre(), calificacion);
         pushService.sendPushNotification(usuario.getIdUsuario(), "Se ha registrado un resultado de tus examenes! ", "StudyHub");
 
         return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursadaExamen + " cambiado exitosamente a " + nuevoResultado);
@@ -258,11 +286,12 @@ public class ExamenService {
         return ResponseEntity.ok().body(acta);
     }
 
-    private void notificarResultadoExamenPorMail(Usuario user, ResultadoExamen resultadoExamen, String nombreExamen) throws IOException, MessagingException {
+    private void notificarResultadoExamenPorMail(Usuario user, ResultadoExamen resultadoExamen, String nombreExamen, Integer calificacion) throws IOException, MessagingException {
         String htmlContent = emailService.getHtmlContent("htmlContent/notifyResultadoExamen.html");
         htmlContent = htmlContent.replace("$user", user.getNombre());
         htmlContent = htmlContent.replace("$nombreExamen", nombreExamen);
         htmlContent = htmlContent.replace("$resultadoExamen", resultadoExamen.getNombre());
+        htmlContent = htmlContent.replace("$calificacion", calificacion.toString());
         emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de resultado de cursada de asignatura", htmlContent);
     }
 }

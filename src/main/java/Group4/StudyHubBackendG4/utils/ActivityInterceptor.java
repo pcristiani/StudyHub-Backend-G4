@@ -40,6 +40,9 @@ public class ActivityInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if(!request.getRequestURI().startsWith("/api/")){
+            return;
+        }
         if (response.getStatus() == HttpServletResponse.SC_OK) {
             String token = request.getHeader("Authorization");
 
@@ -50,14 +53,14 @@ public class ActivityInterceptor implements HandlerInterceptor {
                 if (cedula != null) {
                     Usuario usuario = usuarioService.getUsuarioByCedula(cedula);
                     if (usuario != null) {
-                        Actividad actividad = new Actividad();
-                        actividad.setUsuario(usuario);
-                        actividad.setFechaHora(LocalDateTime.now());
-
                         String actionDescription = ActionMapping.getActionDescription(request.getMethod(), request.getRequestURI());
-                        actividad.setAccion(actionDescription);
-
-                        actividadService.save(actividad);
+                        if(!actionDescription.isEmpty()){
+                            Actividad actividad = new Actividad();
+                            actividad.setUsuario(usuario);
+                            actividad.setFechaHora(LocalDateTime.now());
+                            actividad.setAccion(actionDescription);
+                            actividadService.save(actividad);
+                        }
                     }
                 }
             }

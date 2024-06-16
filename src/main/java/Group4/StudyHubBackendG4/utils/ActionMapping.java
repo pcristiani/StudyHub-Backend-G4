@@ -18,14 +18,14 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("POST /recuperarPassword"), "Recuperar Contraseña");
         actionMap.put(Pattern.compile("POST /forgotPassword"), "Olvido Contraseña");
         actionMap.put(Pattern.compile("POST /api/docente/altaDocente"), "Alta de Docente");
-        actionMap.put(Pattern.compile("GET /api/usuario/getUsuarios"), "Consulta Usuarios");
-        actionMap.put(Pattern.compile("GET /api/usuario/getUsuario/\\d+"), "Consultar Usuario");
-        actionMap.put(Pattern.compile("GET /api/usuario/getResumenActividad/\\d+"), "Consultar Resumen de Actividad");
-        actionMap.put(Pattern.compile("GET /api/usuario/getEstudiantesPendientes"), "Consultar Estudiantes Pendientes");
-        actionMap.put(Pattern.compile("GET /api/usuario/getDocentes"), "Consultar Docentes");
+        actionMap.put(Pattern.compile("GET /api/usuario/getUsuarios"), "");
+        actionMap.put(Pattern.compile("GET /api/usuario/getUsuario/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/usuario/getResumenActividad/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/usuario/getEstudiantesPendientes"), "");
+        actionMap.put(Pattern.compile("GET /api/usuario/getDocentes"), "");
         actionMap.put(Pattern.compile("GET /api/estudiante/getCalificacionesExamenes/\\d+"), "Consultar Calificaciones de Exámenes del Estudiante");
         actionMap.put(Pattern.compile("GET /api/estudiante/getCalificacionesAsignaturas/\\d+"), "Consultar Calificaciones de Asignaturas del Estudiante");
-        actionMap.put(Pattern.compile("GET /api/docente/getDocentesByAsignaturaId/\\d+"), "Consultar Docentes por Asignatura");
+        actionMap.put(Pattern.compile("GET /api/docente/getDocentesByAsignaturaId/\\d+"), "");
         actionMap.put(Pattern.compile("DELETE /api/usuario/bajaUsuario/\\d+"), "Baja de Usuario");
         actionMap.put(Pattern.compile("DELETE /api/docente/bajaDocente/\\d+"), "Baja de Docente");
 
@@ -36,12 +36,17 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("POST /api/carrera/inscripcionCarrera"), "Inscripción en Carrera");
         actionMap.put(Pattern.compile("POST /api/carrera/altaPeriodoDeExamen/\\d+"), "Alta de Período de Examen");
         actionMap.put(Pattern.compile("POST /api/carrera/altaCarrera"), "Alta de Carrera");
-        actionMap.put(Pattern.compile("GET /api/carrera/getPeriodosDeCarrera/\\d+"), "Consultar Períodos de Carrera");
-        actionMap.put(Pattern.compile("GET /api/carrera/getInscriptosPendientes/\\d+"), "Consultar Inscritos Pendientes");
-        actionMap.put(Pattern.compile("GET /api/carrera/getCarreras"), "Consultar Carreras");
-        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripto/\\d+"), "Consultar Carreras Inscrito por Usuario");
-        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripcionesPendientes"), "Consultar Carreras con Inscripciones Pendientes");
-        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasConPeriodo"), "Consultar Carreras con Período");
+        actionMap.put(Pattern.compile("GET /api/carrera/getPeriodosDeCarrera/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getInscriptosPendientes/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarreras"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarreraById/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripto/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripcionesPendientes"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasConPeriodo"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getPreviaturasGrafo"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasCoordinador/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getPreviaturasGrafo/\\d+"), "");
+
 
         // Autenticación Controller
         actionMap.put(Pattern.compile("POST /iniciarSesion"), "Iniciar Sesión");
@@ -51,10 +56,12 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("POST /api/examen/registroAsignaturaAPeriodo"), "Registro de Asignatura a Período de Examen");
         actionMap.put(Pattern.compile("POST /api/examen/inscripcionExamen"), "Inscripción a Examen");
         actionMap.put(Pattern.compile("POST /api/examen/cambiarResultadoExamen/\\d+"), "Cambiar Resultado de Cursada");
-        actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignatura/\\d+"), "Consultar Exámenes por Asignatura");
-        actionMap.put(Pattern.compile("GET /api/examen/getExamenes/\\d+"), "Consultar Exámenes por Usuario");
-        actionMap.put(Pattern.compile("GET /api/examen/getCursadasExamenPendientes"), "Consultar Cursadas de Examen Pendientes");
-        actionMap.put(Pattern.compile("GET /api/examen/getActa"), "Consulta Acta de Examen");
+        actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignatura/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/examen/getExamenes/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/examen/getActa/\\d+"), "Obtener acta de Examen");
+        actionMap.put(Pattern.compile("GET /api/examen/getExamenesPeriodo/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignaturaPorAnio/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/examen/getCursadasExamen/\\d+"), "");
 
         // Asignatura Controller
         actionMap.put(Pattern.compile("POST /api/asignatura/registroHorarios/\\d+"), "Registro de Horarios de Asignatura");
@@ -62,19 +69,22 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("POST /api/asignatura/inscripcionAsignatura"), "Inscripción en Asignatura");
         actionMap.put(Pattern.compile("POST /api/asignatura/cambiarResultadoCursada/\\d+"), "Cambiar Resultado de Cursada");
         actionMap.put(Pattern.compile("POST /api/asignatura/altaAsignatura"), "Alta de Asignatura");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getPreviasAsignatura/\\d+"), "Consultar Previaturas de Asignatura");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getHorarios/\\d+"), "Consultar Horarios de Asignatura");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturas"), "Consultar Asignaturas");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasNoAprobadas/\\d+"), "Consultar Asignaturas No Aprobadas del Estudiante");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeEstudiante/\\d+"), "Consultar Asignaturas del Estudiante");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeCarreraConExamen/\\d+"), "Consultar Asignaturas de Carrera con Examen");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeCarrera/\\d+"), "Consultar Asignaturas de Carrera");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasAprobadas/\\d+"), "Consultar Asignaturas Aprobadas del Estudiante");
-        actionMap.put(Pattern.compile("GET /api/asignatura/cursadasPendientes"), "Consultar Cursadas Pendientes");
-        actionMap.put(Pattern.compile("GET /api/asignatura/getActa"), "Consulta Acta de Asignatura");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getPreviasAsignatura/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getHorarios/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturas"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturaById/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasNoAprobadas/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeEstudiante/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeCarreraConExamen/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeCarrera/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasAprobadas/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/cursadasPendientes"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getActa/\\d+"), "Obtener acta de Asignatura");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasConExamenPendiente/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getNoPreviasAsignatura/\\d+"), "");
 
         // Simple Courses Controller
-        actionMap.put(Pattern.compile("GET /course-relations"), "Consultar Relaciones de Cursos");
+        actionMap.put(Pattern.compile("GET /course-relations"), "");
     }
 
     public static String getActionDescription(String method, String path) {

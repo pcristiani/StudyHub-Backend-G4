@@ -21,7 +21,7 @@ public interface CursadaExamenRepo extends JpaRepository<CursadaExamen, Integer>
                 "WHERE c.horarioAsignatura.anio = :anio AND c.asignatura.idAsignatura = :idAsignatura AND c.resultado = :resultado")
         List<DtCursadaExamen> findCursadasAExamenByAnioAndAsignatura(@Param("anio") Integer anio, @Param("idAsignatura") Integer idAsignatura, @Param("resultado") ResultadoAsignatura resultado);
 
-        List<CursadaExamen> findByCedulaEstudianteAndExamen(String cedulaEstudiante, Examen examen);
+        CursadaExamen findByCedulaEstudianteAndExamen(String cedulaEstudiante, Examen examen);
 
         @Query("SELECT ce.examen FROM CursadaExamen ce WHERE ce.cedulaEstudiante = :cedulaEstudiante")
         List<Examen> findAllExamenesByCedulaEstudiante(@Param("cedulaEstudiante") String cedulaEstudiante);
@@ -36,4 +36,5 @@ public interface CursadaExamenRepo extends JpaRepository<CursadaExamen, Integer>
         @Query("SELECT ec.usuario FROM EstudianteCursada ec JOIN ec.cursada c JOIN CursadaExamen ce ON c.idCursada = ce.cursada.idCursada WHERE ce.examen = :examen")
         List<Usuario> findUsuariosByExamen(@Param("examen") Examen examen);
 
+        List<CursadaExamen> findByExamen(Examen examen);
 }

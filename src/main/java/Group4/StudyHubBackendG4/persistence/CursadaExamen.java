@@ -25,11 +25,11 @@ public class CursadaExamen {
     @JoinColumn(name = "idExamen", nullable = false)
     private Examen examen;
 
-    private Date fechaHora;
-
     private String cedulaEstudiante;
 
     @Enumerated(EnumType.STRING)
     private ResultadoExamen resultado;
 
+    @Column(nullable = true, columnDefinition = "int default 0")
+    private int calificacion = 0;
 }

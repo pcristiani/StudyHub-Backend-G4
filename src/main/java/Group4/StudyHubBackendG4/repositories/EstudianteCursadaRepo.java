@@ -1,9 +1,6 @@
 package Group4.StudyHubBackendG4.repositories;
 
-import Group4.StudyHubBackendG4.persistence.Asignatura;
-import Group4.StudyHubBackendG4.persistence.Cursada;
-import Group4.StudyHubBackendG4.persistence.EstudianteCursada;
-import Group4.StudyHubBackendG4.persistence.Usuario;
+import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import Group4.StudyHubBackendG4.utils.enums.ResultadoExamen;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,15 +20,8 @@ public interface EstudianteCursadaRepo extends JpaRepository<EstudianteCursada, 
             "JOIN ec.cursada c " +
             "JOIN c.asignatura a " +
             "LEFT JOIN CursadaExamen ce ON ce.cursada.idCursada = c.idCursada " +
-            "WHERE ec.usuario = :usuario AND (c.resultado = 'APROBADO' OR ce.resultado = :resultado)")
+            "WHERE ec.usuario = :usuario AND (c.resultado = :resultado OR ce.resultado = 'APROBADO')")
     List<Asignatura> findAprobadasByEstudiante(@Param("usuario") Usuario usuario, @Param("resultado") ResultadoAsignatura resultado);
-
-    @Query("SELECT DISTINCT a FROM EstudianteCursada ec " +
-            "JOIN ec.cursada c " +
-            "JOIN c.asignatura a " +
-            "LEFT JOIN CursadaExamen ce ON ce.cursada.idCursada = c.idCursada " +
-            "WHERE ec.usuario = :usuario AND (c.resultado != :resultadoAsignatura AND (ce.resultado IS NULL OR ce.resultado != :resultadoExamen))")
-    List<Asignatura> findNoAprobadasByEstudiante(@Param("usuario") Usuario usuario, @Param("resultadoAsignatura") ResultadoAsignatura resultadoAsignatura, @Param("resultadoExamen") ResultadoExamen resultadoExamen);
 
     @Query("SELECT ec.cursada.asignatura FROM EstudianteCursada ec WHERE ec.usuario = :usuario")
     List<Asignatura> findByEstudiante(@Param("usuario") Usuario usuario);
@@ -41,4 +31,11 @@ public interface EstudianteCursadaRepo extends JpaRepository<EstudianteCursada, 
 
     @Query("SELECT ec.usuario FROM EstudianteCursada ec WHERE ec.cursada.idCursada = :cursadaId")
     Usuario findUsuarioByCursadaId(@Param("cursadaId") Integer cursadaId);
+
+    @Query("SELECT DISTINCT a FROM EstudianteCursada ec " +
+            "JOIN ec.cursada c " +
+            "JOIN c.asignatura a " +
+            "LEFT JOIN CursadaExamen ce ON ce.cursada.idCursada = c.idCursada " +
+            "WHERE ec.usuario = :usuario AND (c.resultado = :resultadoAsignatura AND a.carrera = :carrera)")
+    List<Asignatura> findExamenPendienteEstudiante(@Param("usuario") Usuario usuario, @Param("resultadoAsignatura") ResultadoAsignatura examen, @Param("carrera") Carrera carrera);
 }

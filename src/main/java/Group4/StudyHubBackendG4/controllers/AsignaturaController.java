@@ -26,6 +26,13 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.getAsignaturas());
     }
 
+    @GetMapping("/api/asignatura/getAsignaturaById/{idAsignatura}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturaById(@PathVariable Integer idAsignatura) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturaById(idAsignatura));
+    }
+
+
     @GetMapping("/api/asignatura/getAsignaturasDeCarrera/{idCarrera}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getAsignaturasDeCarrera(@PathVariable Integer idCarrera) {
@@ -54,6 +61,13 @@ public class AsignaturaController {
     public ResponseEntity<?> getAsignaturasNoAprobadas(@PathVariable Integer idEstudiante) {
         return ResponseEntity.ok(asignaturaService.getAsignaturasNoAprobadas(idEstudiante));
     }
+
+    @GetMapping("/api/asignatura/getAsignaturasConExamenPendiente/{idEstudiante}")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getAsignaturasConExamenPendiente(@PathVariable Integer idEstudiante, @RequestParam Integer idCarrera) {
+        return ResponseEntity.ok(asignaturaService.getAsignaturasConExamenPendiente(idEstudiante,idCarrera));
+    }
+
     @GetMapping("/api/asignatura/getHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getHorarios(@PathVariable Integer idAsignatura) {
@@ -81,7 +95,7 @@ public class AsignaturaController {
     }
 
     @PostMapping("/api/asignatura/registrarPreviaturas/{idAsignatura}")
-    @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A')")
     public ResponseEntity<?> registrarPreviaturas(@PathVariable Integer idAsignatura, @RequestBody List<Integer> previaturas) {
         return ResponseEntity.ok(asignaturaService.registrarPreviaturas(idAsignatura, previaturas));
     }
@@ -93,13 +107,18 @@ public class AsignaturaController {
     }
 
     @PostMapping("/api/asignatura/cambiarResultadoCursada/{idCursada}")
-    public ResponseEntity<?> cambiarResultadoCursada(@PathVariable Integer idCursada, @RequestParam String nuevoResultadoStr) throws MessagingException, IOException {
-        return ResponseEntity.ok(asignaturaService.modificarResultadoCursada(idCursada, ResultadoAsignatura.valueOf(nuevoResultadoStr)));
+    public ResponseEntity<?> cambiarResultadoCursada(@PathVariable Integer idCursada, @RequestParam Integer calificacion) throws MessagingException, IOException {
+        return ResponseEntity.ok(asignaturaService.modificarResultadoCursada(idCursada, calificacion));
     }
 
     @GetMapping("/api/asignatura/getPreviasAsignatura/{idAsignatura}")
     public ResponseEntity<?> getPrevias(@PathVariable Integer idAsignatura) {
         return asignaturaService.getPreviasAsignatura(idAsignatura);
+    }
+
+    @GetMapping("/api/asignatura/getNoPreviasAsignatura/{idAsignatura}")
+    public ResponseEntity<?> getNoPreviasAsignatura(@PathVariable Integer idAsignatura) {
+        return asignaturaService.getNoPreviasAsignatura(idAsignatura);
     }
 
     @GetMapping("/api/asignatura/getActa/{idHorario}")
