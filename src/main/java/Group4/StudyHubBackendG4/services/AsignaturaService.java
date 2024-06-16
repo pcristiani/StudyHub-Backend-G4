@@ -4,6 +4,7 @@ import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.utils.converters.AsignaturaConverter;
+import Group4.StudyHubBackendG4.utils.converters.CarreraConverter;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
 import Group4.StudyHubBackendG4.utils.converters.UsuarioConverter;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
@@ -70,6 +71,9 @@ public class AsignaturaService {
     private UsuarioConverter usuarioConverter;
 
     @Autowired
+    private CarreraConverter carreraConverter;
+
+    @Autowired
     private PushService pushService;
 
     @Autowired
@@ -88,6 +92,10 @@ public class AsignaturaService {
         }
 
         return ResponseEntity.ok().body(convertToDtAsignatura(asignaturaRepo.findByCarrera(carrera)));
+    }
+
+    public DtAsignatura getAsignaturaById(Integer idAsignatura) {
+        return asignaturaConverter.convertToDto(asignaturaRepo.findById(idAsignatura).orElse(null));
     }
 
     public List<DtAsignatura> getAsignaturasDeEstudiante(Integer idUsuario) {
@@ -115,7 +123,20 @@ public class AsignaturaService {
 
     public List<DtAsignatura> getAsignaturasNoAprobadas(Integer idEstudiante) {
         Usuario user = usuarioRepo.findById(idEstudiante).orElse(null) ;
-        return convertToDtAsignatura(estudianteCursadaRepo.findNoAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO, ResultadoExamen.APROBADO));
+        List<Asignatura> listAllAsignaturas = new ArrayList<>();
+        List<Carrera> carreras = inscripcionCarreraRepo.findCarrerasInscripto(user).stream()
+                .map(InscripcionCarrera::getCarrera)
+                .distinct()
+                .toList();
+        for(Carrera c: carreras) {
+            List<Asignatura> asignaturasCarrera = asignaturaRepo.findByCarrera(c);
+            listAllAsignaturas.addAll(asignaturasCarrera);
+        }
+        List<Asignatura> aprobadas = estudianteCursadaRepo.findAprobadasByEstudiante(user, ResultadoAsignatura.EXONERADO);
+
+        listAllAsignaturas.removeAll(aprobadas);
+
+        return convertToDtAsignatura(listAllAsignaturas);
     }
 
     public List<DtAsignatura> getAsignaturasConExamenPendiente(Integer idEstudiante, Integer idCarrera) {
@@ -657,5 +678,4 @@ public class AsignaturaService {
 
         return ResponseEntity.ok().body(acta);
     }
-
 }

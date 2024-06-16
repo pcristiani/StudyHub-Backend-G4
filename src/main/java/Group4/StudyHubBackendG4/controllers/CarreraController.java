@@ -27,6 +27,12 @@ public class CarreraController {
         return ResponseEntity.ok().body(carreraService.getCarreras());
     }
 
+    @GetMapping("/api/carrera/getCarreraById/{idCarrera}")
+    @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
+    public ResponseEntity<?> getCarreraById(@PathVariable Integer idCarrera) {
+        return ResponseEntity.ok().body(carreraService.getCarreraById(idCarrera));
+    }
+
     @GetMapping("/api/carrera/getCarrerasInscripcionesPendientes")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getCarrerasInscripcionesPendientes() {
@@ -61,7 +67,6 @@ public class CarreraController {
         return ResponseEntity.ok().body(carreraService.getPeriodosDeCarrera(idCarrera));
     }
     @GetMapping("/api/carrera/getPreviaturasGrafo/{idCarrera}")
-    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getPreviaturasGrafo(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok().body(carreraService.getPreviaturasGrafo(idCarrera));
     }

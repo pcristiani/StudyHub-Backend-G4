@@ -23,15 +23,6 @@ public interface EstudianteCursadaRepo extends JpaRepository<EstudianteCursada, 
             "WHERE ec.usuario = :usuario AND (c.resultado = :resultado OR ce.resultado = 'APROBADO')")
     List<Asignatura> findAprobadasByEstudiante(@Param("usuario") Usuario usuario, @Param("resultado") ResultadoAsignatura resultado);
 
-    @Query("SELECT DISTINCT a FROM EstudianteCursada ec " +
-            "JOIN ec.cursada c " +
-            "JOIN c.asignatura a " +
-            "LEFT JOIN CursadaExamen ce ON ce.cursada.idCursada = c.idCursada " +
-            "WHERE ec.usuario = :usuario " +
-            "AND (c.resultado != :resultadoAsignatura " +
-            "AND NOT EXISTS (SELECT 1 FROM CursadaExamen ce2 WHERE ce2.cursada.idCursada = c.idCursada AND ce2.resultado = :resultadoExamen))")
-    List<Asignatura> findNoAprobadasByEstudiante(@Param("usuario") Usuario usuario, @Param("resultadoAsignatura") ResultadoAsignatura resultadoAsignatura, @Param("resultadoExamen") ResultadoExamen resultadoExamen);
-
     @Query("SELECT ec.cursada.asignatura FROM EstudianteCursada ec WHERE ec.usuario = :usuario")
     List<Asignatura> findByEstudiante(@Param("usuario") Usuario usuario);
 

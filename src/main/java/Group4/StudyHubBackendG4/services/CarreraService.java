@@ -64,6 +64,10 @@ public class CarreraService {
                 .collect(Collectors.toList()));
     }
 
+    public DtCarrera getCarreraById(Integer idCarrera) {
+        return carreraConverter.convertToDto(carreraRepo.findById(idCarrera).orElse(null));
+    }
+
     public List<DtCarrera> getCarrerasInscripcionesPendientes() {
         return inscripcionCarreraRepo.findInscripcionesPendientes().stream()
                 .map(InscripcionCarrera::getCarrera)
@@ -161,7 +165,7 @@ public class CarreraService {
 
             // Solo añadir arista si no es una arista directa innecesaria
             if (!ingorarArista) {
-                String edge = String.format("\"%s\" -> \"%s\"", sourceId, targetId);
+                String edge = String.format("\"%s\" -- \"%s\"", sourceId, targetId);
                 if (!edges.contains(edge)) {
                     graphBuilder.append(edge).append(";\n");
                     edges.add(edge);
@@ -383,5 +387,4 @@ public class CarreraService {
         return periodoExamenRepo.findByCarreraAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
                 carrera, fechaFin, fechaInicio).isEmpty() ? "" : "El período ingresado se solapa con un período existente.";
     }
-
 }

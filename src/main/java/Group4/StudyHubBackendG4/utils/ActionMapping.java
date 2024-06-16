@@ -39,6 +39,7 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/carrera/getPeriodosDeCarrera/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getInscriptosPendientes/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarreras"), "");
+        actionMap.put(Pattern.compile("GET /api/carrera/getCarreraById/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripto/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripcionesPendientes"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasConPeriodo"), "");
@@ -57,7 +58,6 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("POST /api/examen/cambiarResultadoExamen/\\d+"), "Cambiar Resultado de Cursada");
         actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignatura/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/examen/getExamenes/\\d+"), "");
-        actionMap.put(Pattern.compile("GET /api/examen/getCursadasExamenPendientes"), "");
         actionMap.put(Pattern.compile("GET /api/examen/getActa/\\d+"), "Obtener acta de Examen");
         actionMap.put(Pattern.compile("GET /api/examen/getExamenesPeriodo/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/examen/getExamenesAsignaturaPorAnio/\\d+"), "");
@@ -72,6 +72,7 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/asignatura/getPreviasAsignatura/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/asignatura/getHorarios/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturas"), "");
+        actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturaById/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasNoAprobadas/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeEstudiante/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/asignatura/getAsignaturasDeCarreraConExamen/\\d+"), "");
