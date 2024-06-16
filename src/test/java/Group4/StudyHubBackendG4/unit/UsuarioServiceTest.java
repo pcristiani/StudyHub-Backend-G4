@@ -10,6 +10,7 @@ import Group4.StudyHubBackendG4.repositories.DocenteAsignaturaRepo;
 import Group4.StudyHubBackendG4.repositories.DocenteRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
 import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
+import Group4.StudyHubBackendG4.services.ActividadService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
@@ -52,6 +53,8 @@ public class UsuarioServiceTest {
     @Mock
     private DocenteConverter docenteConverter;
 
+    @Mock
+    private ActividadService actividadService;
 
     @Mock
     private JwtUtil jwtUtil;

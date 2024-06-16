@@ -20,8 +20,10 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
     @Autowired
     UsuarioRepo usuarioRepo;
+
     @Autowired
     PasswordResetTokenRepo tokenRepo;
 
