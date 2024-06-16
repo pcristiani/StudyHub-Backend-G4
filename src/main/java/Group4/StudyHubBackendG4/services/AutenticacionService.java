@@ -36,8 +36,8 @@ public class AutenticacionService {
     private final Key secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
 
     @Transactional
-    public String authenticateUser(String username, String candidatePassword) {
-        Usuario usuario = usuarioRepository.findByCedula(username);
+    public String authenticateUser(String cedula, String candidatePassword) {
+        Usuario usuario = usuarioRepository.findByCedula(cedula);
         if (usuario != null && PasswordService.getInstance().checkPasswordHash(candidatePassword, usuario.getPassword())){
 
             if(!usuario.getValidado() || !usuario.getActivo()){

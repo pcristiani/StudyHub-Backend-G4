@@ -80,14 +80,14 @@ public class UsuarioServiceTest {
         user1.setNombre("John");
         user1.setApellido("Doe");
         user1.setCedula("12345678");
-        user1.setEmail("johndoe@example.com");
+        user1.setEmail("john.doe@example.com");
 
         user2 = new Usuario();
         user2.setIdUsuario(2);
         user2.setNombre("Jane");
         user2.setApellido("Smith");
         user2.setCedula("87654321");
-        user2.setEmail("janesmith@example.com");
+        user2.setEmail("jane.smith@example.com");
 
         dtUser1 = new DtUsuario();
         dtUser1.setIdUsuario(1);
@@ -247,7 +247,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testModificarUsuarioWithNewCedulaSuccess() {
+    public void testModificarUsuario_NewCedulaSuccess() {
         // When
         when(usuarioRepo.findById(1)).thenReturn(Optional.of(user1));
         when(usuarioRepo.save(any())).thenReturn(user1);
@@ -264,7 +264,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testModificarUsuarioWithNewCedulaConflict() {
+    public void testModificarUsuario_NewCedulaConflict() {
         // When
         when(usuarioRepo.findById(1)).thenReturn(Optional.of(user1));
         when(usuarioTrRepo.findByUsuario(user1)).thenReturn(usuarioTR1);
@@ -279,7 +279,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testModificarUsuarioWithNewCedulaAlreadyExists() {
+    public void testModificarUsuario_NewCedulaAlreadyExists() {
         // When
         when(usuarioRepo.findById(1)).thenReturn(Optional.of(user1));
         when(usuarioRepo.existsByCedula(dtUserForModifyWithExistingCedula.getCedula())).thenReturn(true);
@@ -294,7 +294,7 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testModificarUsuarioEmailAlreadyExists() {
+    public void testModificarUsuario_EmailAlreadyExists() {
         // When
         when(usuarioRepo.findById(1)).thenReturn(Optional.of(user1));
         when(usuarioRepo.existsByEmail(dtUserForModifyWithExistingEmail.getEmail())).thenReturn(true);
@@ -306,5 +306,11 @@ public class UsuarioServiceTest {
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertEquals("El email ingresado ya existe en el sistema.", response.getBody());
         verify(usuarioRepo, never()).save(any());
+    }
+
+    @Test
+    public void testRecuperarPasswordSuccess() {
+
+
     }
 }
