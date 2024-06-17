@@ -5,7 +5,6 @@ import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import Group4.StudyHubBackendG4.services.AutenticacionService;
-import Group4.StudyHubBackendG4.services.ExamenService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import Group4.StudyHubBackendG4.util.DatabaseInitializer;
 import Group4.StudyHubBackendG4.util.TestUtils;
@@ -69,6 +68,7 @@ public class UsuarioControllerTest {
     private String token2;
     private String token4;
     private Carrera carrera1;
+    private Carrera carrera2;
     private Asignatura asignatura1;
     private Asignatura asignatura2;
     private DocenteAsignatura docenteAsignatura1;
@@ -79,10 +79,13 @@ public class UsuarioControllerTest {
     private DtUsuario dtUserModifiedNombreApellidoEmail;
     private DtUsuario dtUserModifiedCedula;
     private DtDocente dtDocente1;
+    private DtDocente dtDocente2;
     private DtNuevoUsuario dtNuevoUsuario;
-    private DtNuevoDocente dtNuevoDocente;
+    private DtNuevoDocente dtNuevoDocente1;
+    private DtNuevoDocente dtNuevoDocente2;
     private DtNewPassword dtNewPassword;
-    private DtPerfil dtPerfil;
+    private DtPerfil dtPerfil1;
+    private DtPerfil dtPerfil2;
 
     @BeforeEach
     public void setUp() {
@@ -102,6 +105,7 @@ public class UsuarioControllerTest {
         autenticacionService.logoutUser(token2);
 
         carrera1 = testUtils.createCarrera("Ingeniería Informática", "Descripción de la carrera", "Requisitos de ingreso", 5, true);
+        carrera2 = testUtils.createCarrera("Traductorado", "Descripción de la carrera", "Requisitos de ingreso", 2, true);
         asignatura1 = testUtils.createAsignatura(carrera1, "Programacion 1", 12, "Descripcion", "Informatica", false, true);
         asignatura2 = testUtils.createAsignatura(carrera1, "Sistemas Operativos", 12, "Descripcion", "Informatica", false, true);
         docenteAsignatura1 = testUtils.createDocenteAsignatura(docente1, asignatura1);
@@ -116,9 +120,12 @@ public class UsuarioControllerTest {
         dtUserModifiedCedula = testUtils.createDtUsuario("Mike", "Tyson", "mike.tyson@example.com", "19980903", "A", "654654321", true, true);
 
         dtNuevoUsuario = testUtils.createDtNuevoUsuario("Michael", "Jordan", "michael.jordan@example.com", "1985-02-17", "23456789", "123", "ROLE_A");
-        dtNuevoDocente = new DtNuevoDocente(1003, "Jack Johnson");
+        dtNuevoDocente1 = new DtNuevoDocente(1003, "Jack Johnson");
+        dtNuevoDocente2 = new DtNuevoDocente(1001, "Jack Johnson");
         dtDocente1 = new DtDocente(null, 1006, "Marcelo Tinelli", true);
-        dtPerfil = new DtPerfil("Andrew", "Dornen", "andrew.dornen@example.com", "19960606");
+        dtDocente2 = new DtDocente(null, 1001, "Marcelo Tinelli", true);
+        dtPerfil1 = new DtPerfil("Andrew", "Dornen", "andrew.dornen@example.com", "19960606");
+        dtPerfil2 = new DtPerfil("Andrew", "Dornen", "john.doe@example.com", "19960606");
 
         dtHorarioDias = new DtHorarioDias(DiaSemana.LUNES, "10:30","12:30");
         dtNuevoHorarioAsignatura = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDias));
@@ -135,7 +142,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void modificarUsuarioOk() throws Exception {
+    public void modificarUsuario_Ok() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarUsuario/{idUsuario}", user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -165,7 +172,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getUsuariosOk() throws Exception {
+    public void getUsuarios_Ok() throws Exception {
         mockMvc.perform(get("/api/usuario/getUsuarios")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -175,7 +182,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getDocentesOk() throws Exception {
+    public void getDocentes_Ok() throws Exception {
         mockMvc.perform(get("/api/usuario/getDocentes")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -185,7 +192,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getUsuarioByIdOk() throws Exception {
+    public void getUsuarioById_Ok() throws Exception {
         mockMvc.perform(get("/api/usuario/getUsuario/{idUsuario}", user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -194,7 +201,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void acceptEstudianteOk() throws Exception {
+    public void acceptEstudiante_Ok() throws Exception {
         mockMvc.perform(put("/api/usuario/acceptEstudiante/{idUsuario}", userNotValidated.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -204,7 +211,17 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getEstudiantesPendientesOk() throws Exception {
+    public void acceptEstudiante_BadRequest() throws Exception {
+        mockMvc.perform(put("/api/usuario/acceptEstudiante/{idUsuario}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(true)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Usuario no existe en el sistema."));
+    }
+
+    @Test
+    public void getEstudiantesPendientes_Ok() throws Exception {
         mockMvc.perform(get("/api/usuario/getEstudiantesPendientes")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -215,7 +232,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void createUsuarioOk() throws Exception {
+    public void createUsuario_Ok() throws Exception {
         mockMvc.perform(post("/registerUsuario")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dtNuevoUsuario)))
@@ -224,7 +241,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void bajaUsuarioOk() throws Exception {
+    public void bajaUsuario_Ok() throws Exception {
         mockMvc.perform(delete("/api/usuario/bajaUsuario/{idUsuario}", user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -234,7 +251,17 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void forgotPasswordOk() throws Exception {
+    public void bajaUsuario_NotFound() throws Exception {
+        mockMvc.perform(delete("/api/usuario/bajaUsuario/{idUsuario}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Id no existe o usuario ya inactivo."));
+
+    }
+
+    @Test
+    public void forgotPassword_Ok() throws Exception {
         mockMvc.perform(post("/forgotPassword")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(user2.getEmail()))
@@ -242,9 +269,18 @@ public class UsuarioControllerTest {
                 .andExpect(content().string("Email enviado."));
     }
 
+    @Test
+    public void forgotPassword_InvalidEmail() throws Exception {
+        mockMvc.perform(post("/forgotPassword")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(("invalidEmail@example.com")))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Invalid email."));
+    }
+
      /*
     @Test
-    public void recuperarPasswordOk() throws Exception {       //Todo: Fix reset token
+    public void recuperarPassword_Ok() throws Exception {       //Todo: Fix reset token
         mockMvc.perform(post("/recuperarPassword")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dtNewPassword)))
@@ -255,18 +291,29 @@ public class UsuarioControllerTest {
      */
 
     @Test
-    public void modificarPerfilOk() throws Exception {
+    public void modificarPerfil_Ok() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarPerfil/{idUsuario}", user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dtPerfil)))
+                        .content(objectMapper.writeValueAsString(dtPerfil1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Perfil modificado exitosamente."));
 
     }
 
     @Test
-    public void modificarPasswordOk() throws Exception {
+    public void modificarPerfil_NotFound() throws Exception {
+        mockMvc.perform(put("/api/usuario/modificarPerfil/{idUsuario}", user2.getIdUsuario())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtPerfil2)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Ese email ya esta en uso."));
+
+    }
+
+    @Test
+    public void modificarPassword_Ok() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarPassword/{idUsuario}", user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -276,7 +323,17 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getResumenActividadOk() throws Exception {
+    public void modificarPassword_NotFound() throws Exception {
+        mockMvc.perform(put("/api/usuario/modificarPassword/{idUsuario}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtNewPassword.getNewPassword())))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontró usuario."));
+    }
+
+    @Test
+    public void getResumenActividad_Ok() throws Exception {
         mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", user4.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -287,17 +344,34 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getResumenActividadNotEnoughActividad() throws Exception {
+    public void getResumenActividad_NoActividad() throws Exception {
+        mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", userNotValidated.getIdUsuario())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontraron actividades para el usuario"));
+    }
+
+    @Test
+    public void getResumenActividadUsuario_NotFound() throws Exception {
+        mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontró el usuario"));
+    }
+
+    @Test
+    public void getResumenActividad_NotEnoughActividad() throws Exception {
         mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("No hay suficiente información para generar el resumen de actividades"));
-
     }
 
     @Test
-    public void getDocentesByAsignaturaIdOk() throws Exception {
+    public void getDocentesByAsignaturaId_Ok() throws Exception {
         mockMvc.perform(get("/api/docente/getDocentesByAsignaturaId/{idAsignatura}", docente1.getIdDocente())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -307,17 +381,27 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void altaDocenteSuccess() throws Exception {
+    public void altaDocente_Success() throws Exception {
         mockMvc.perform(post("/api/docente/altaDocente")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dtNuevoDocente)))
+                        .content(objectMapper.writeValueAsString(dtNuevoDocente1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Docente registrado con éxito."));
     }
 
     @Test
-    public void modificarDocenteSuccess() throws Exception {
+    public void altaDocente_BadRequest() throws Exception {
+        mockMvc.perform(post("/api/docente/altaDocente")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtNuevoDocente2)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Ya existe ese codigo de docente."));
+    }
+
+    @Test
+    public void modificarDocente_Success() throws Exception {
         mockMvc.perform(put("/api/docente/modificarDocente/{idDocente}", docente1.getIdDocente())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -327,7 +411,17 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void bajaDocenteSuccess() throws Exception {
+    public void modificarDocente_NotFound() throws Exception {
+        mockMvc.perform(put("/api/docente/modificarDocente/{idDocente}", docente2.getIdDocente())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtDocente2)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Ya existe un docente con ese codigo."));
+    }
+
+    @Test
+    public void bajaDocente_Success() throws Exception {
         mockMvc.perform(delete("/api/docente/bajaDocente/{idDocente}", docente1.getIdDocente())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -336,16 +430,62 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getCalificacionesAsignaturasSuccess() throws Exception {
+    public void bajaDocente_BadRequest() throws Exception {
+        mockMvc.perform(delete("/api/docente/bajaDocente/{idDocente}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Id no existe."));
+    }
+
+    @Test
+    public void getCalificacionesAsignaturas_Success() throws Exception {
         mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", user2.getIdUsuario())
                         .param("idCarrera", carrera1.getIdCarrera().toString())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].calificaciones[0].resultado").value("PENDIENTE"));  // Replace EXPECTED_RESULT_VALUE with the actual expected value for `resultado`
-
+                .andExpect(jsonPath("$[0].calificaciones[0].resultado").value("PENDIENTE"));
     }
 
+    @Test
+    public void getCalificacionesAsignaturas_CarreraNotFound() throws Exception {
+        mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", user2.getIdUsuario())
+                        .param("idCarrera", "60")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontró la carrera."));
+    }
 
+    @Test
+    public void getCalificacionesAsignaturas_EstudianteNotFound() throws Exception {
+        mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", 60)
+                        .param("idCarrera", carrera1.getIdCarrera().toString())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontró el estudiante."));
+    }
+
+    @Test
+    public void getCalificacionesAsignaturas_CursadaNotFound() throws Exception {
+        mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", user4.getIdUsuario())
+                        .param("idCarrera", carrera1.getIdCarrera().toString())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontraron cursadas del estudiante."));
+    }
+
+    @Test
+    public void getCalificacionesAsignaturas_AsignaturasNotFound() throws Exception {
+        mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", user2.getIdUsuario())
+                        .param("idCarrera", carrera2.getIdCarrera().toString())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontraron asignaturas para la carrera."));
+    }
 
 }
