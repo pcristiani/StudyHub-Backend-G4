@@ -7,10 +7,13 @@ import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.services.ActividadService;
 import Group4.StudyHubBackendG4.services.AutenticacionService;
 import Group4.StudyHubBackendG4.services.PasswordService;
+import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class TestUtils {
@@ -29,6 +32,18 @@ public class TestUtils {
 
     @Autowired
     private DocenteAsignaturaRepo docenteAsignaturaRepo;
+
+    @Autowired
+    private EstudianteCursadaRepo estudianteCursadaRepo;
+
+    @Autowired
+    private CursadaRepo cursadaRepo;
+
+    @Autowired
+    private HorarioDiasRepo horarioDiasRepo;
+
+    @Autowired
+    private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @Autowired
     private ActividadService actividadService;

@@ -3,11 +3,13 @@ package Group4.StudyHubBackendG4.integration;
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
-import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
+import Group4.StudyHubBackendG4.services.AsignaturaService;
 import Group4.StudyHubBackendG4.services.AutenticacionService;
+import Group4.StudyHubBackendG4.services.ExamenService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import Group4.StudyHubBackendG4.util.DatabaseInitializer;
 import Group4.StudyHubBackendG4.util.TestUtils;
+import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,11 +22,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -50,10 +51,10 @@ public class UsuarioControllerTest {
     private UsuarioService usuarioService;
 
     @Autowired
-    private DatabaseInitializer databaseInitializer;
+    private AsignaturaService asignaturaService;
 
     @Autowired
-    private UsuarioRepo usuarioRepo;
+    private DatabaseInitializer databaseInitializer;
 
     @Autowired
     private PasswordResetTokenRepo passwordResetTokenRepo;
@@ -71,8 +72,13 @@ public class UsuarioControllerTest {
     private Asignatura asignatura1;
     private Asignatura asignatura2;
     private DocenteAsignatura docenteAsignatura1;
+    private DocenteAsignatura docenteAsignatura2;
+    private DtHorarioDias dtHorarioDias;
+    private DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura;
+    private DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura;
     private DtUsuario dtUserModifiedNombreApellidoEmail;
     private DtUsuario dtUserModifiedCedula;
+    private DtDocente dtDocente1;
     private DtNuevoUsuario dtNuevoUsuario;
     private DtNuevoDocente dtNuevoDocente;
     private DtNewPassword dtNewPassword;
@@ -83,9 +89,9 @@ public class UsuarioControllerTest {
         databaseInitializer.executeSqlScript("src/test/resources/cleanup.sql");
 
         user1 = testUtils.createUsuario("John", "Doe", "john.doe@example.com", "12345678", "A", "123", true, true);
-        user2 = testUtils.createUsuario("Jane", "Smith", "jane.smith@example.com", "87654321", "A", "123", true, true);
+        user2 = testUtils.createUsuario("Jane", "Smith", "jane.smith@example.com", "87654321", "E", "123", true, true);
         userNotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
-        user4 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "A", "123", true, true);
+        user4 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "E", "123", true, true);
 
         docente1 = testUtils.createDocente(1001, "Alan Grant", true);
         docente2 = testUtils.createDocente(1002, "Ellen Sattler", true);
@@ -96,8 +102,11 @@ public class UsuarioControllerTest {
         autenticacionService.logoutUser(token2);
 
         carrera1 = testUtils.createCarrera("Ingeniería Informática", "Descripción de la carrera", "Requisitos de ingreso", 5, true);
-        asignatura1 = testUtils.createAsignatura(carrera1, "Programacion 1", 12, "Descripcion", "Informatica", false, false);
+        asignatura1 = testUtils.createAsignatura(carrera1, "Programacion 1", 12, "Descripcion", "Informatica", false, true);
+        asignatura2 = testUtils.createAsignatura(carrera1, "Sistemas Operativos", 12, "Descripcion", "Informatica", false, true);
         docenteAsignatura1 = testUtils.createDocenteAsignatura(docente1, asignatura1);
+        docenteAsignatura2 = testUtils.createDocenteAsignatura(docente2, asignatura2);
+        docenteAsignatura2 = testUtils.createDocenteAsignatura(docente2, asignatura2);
 
         for (int i = 0; i < 10; i++) {
             testUtils.createActividad(user4);
@@ -108,15 +117,21 @@ public class UsuarioControllerTest {
 
         dtNuevoUsuario = testUtils.createDtNuevoUsuario("Michael", "Jordan", "michael.jordan@example.com", "1985-02-17", "23456789", "123", "ROLE_A");
         dtNuevoDocente = new DtNuevoDocente(1003, "Jack Johnson");
+        dtDocente1 = new DtDocente(null, 1006, "Marcelo Tinelli", true);
+        dtPerfil = new DtPerfil("Andrew", "Dornen", "andrew.dornen@example.com", "19960606");
+
+        dtHorarioDias = new DtHorarioDias(DiaSemana.LUNES, "10:30","12:30");
+        dtNuevoHorarioAsignatura = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDias));
+        asignaturaService.registroHorarios(asignatura1.getIdAsignatura(), dtNuevoHorarioAsignatura);
+        dtNuevaInscripcionAsignatura = new DtNuevaInscripcionAsignatura(user2.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
+        asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura);
+
 
         //TODO: Fix
         usuarioService.generatePasswordResetToken(user1);
         dtNewPassword = new DtNewPassword();
         dtNewPassword.setToken(String.valueOf(passwordResetTokenRepo.findAll().get(0)));
         dtNewPassword.setNewPassword("newPass123");
-
-        dtPerfil = new DtPerfil("Andrew", "Dornen", "andrew.dornen@example.com", "19960606");
-
     }
 
     @Test
@@ -227,6 +242,18 @@ public class UsuarioControllerTest {
                 .andExpect(content().string("Email enviado."));
     }
 
+     /*
+    @Test
+    public void recuperarPasswordOk() throws Exception {       //Todo: Fix reset token
+        mockMvc.perform(post("/recuperarPassword")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtNewPassword)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Password reset successfully"));
+    }
+
+     */
+
     @Test
     public void modificarPerfilOk() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarPerfil/{idUsuario}", user1.getIdUsuario())
@@ -288,6 +315,37 @@ public class UsuarioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Docente registrado con éxito."));
     }
+
+    @Test
+    public void modificarDocenteSuccess() throws Exception {
+        mockMvc.perform(put("/api/docente/modificarDocente/{idDocente}", docente1.getIdDocente())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtDocente1)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Docente actualizado exitosamente"));
+    }
+
+    @Test
+    public void bajaDocenteSuccess() throws Exception {
+        mockMvc.perform(delete("/api/docente/bajaDocente/{idDocente}", docente1.getIdDocente())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Docente desactivado exitosamente."));
+    }
+
+    @Test
+    public void getCalificacionesAsignaturasSuccess() throws Exception {
+        mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", user2.getIdUsuario())
+                        .param("idCarrera", carrera1.getIdCarrera().toString())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].calificaciones[0].resultado").value("PENDIENTE"));  // Replace EXPECTED_RESULT_VALUE with the actual expected value for `resultado`
+
+    }
+
 
 
 }
