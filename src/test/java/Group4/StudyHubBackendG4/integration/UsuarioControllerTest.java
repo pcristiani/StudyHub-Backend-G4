@@ -104,7 +104,7 @@ public class UsuarioControllerTest {
 
     @Test
     public void acceptEstudiante_Ok() throws Exception {
-        mockMvc.perform(put("/api/usuario/acceptEstudiante/{idUsuario}", setUpHelper.userNotValidated.getIdUsuario())
+        mockMvc.perform(put("/api/usuario/acceptEstudiante/{idUsuario}", setUpHelper.user3NotValidated.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(true)))
@@ -235,7 +235,7 @@ public class UsuarioControllerTest {
 
     @Test
     public void getResumenActividad_NoActividad() throws Exception {
-        mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", setUpHelper.userNotValidated.getIdUsuario())
+        mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", setUpHelper.user3NotValidated.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())

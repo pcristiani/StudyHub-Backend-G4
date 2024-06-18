@@ -2,9 +2,11 @@ package Group4.StudyHubBackendG4.util;
 
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
+import Group4.StudyHubBackendG4.repositories.CarreraRepo;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
 import Group4.StudyHubBackendG4.services.AutenticacionService;
+import Group4.StudyHubBackendG4.services.CarreraService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +30,22 @@ public class SetUpHelper {
     private AsignaturaService asignaturaService;
 
     @Autowired
+    private CarreraService carreraService;
+
+    @Autowired
+    private CarreraRepo carreraRepo;
+
+    @Autowired
     private PasswordResetTokenRepo passwordResetTokenRepo;
-    
+
     public Usuario user1;
     public Usuario user2;
+    public Usuario user3NotValidated;
     public Usuario user4;
+    public Usuario user5Coordinador;
+    public Usuario user6Coordinador;
     public Docente docente1;
     public Docente docente2;
-    public Usuario userNotValidated;
     public String token1;
     public String token2;
     public String token4;
@@ -61,12 +71,16 @@ public class SetUpHelper {
     public DtLoginRequest dtLoginRequest3;
     public DtPerfil dtPerfil1;
     public DtPerfil dtPerfil2;
+    public DtNuevaCarrera dtNuevaCarrera1;
+    public DtNuevaCarrera dtNuevaCarrera2;
+    public DtNuevaCarrera dtNuevaCarreraConflict;
 
 
     public void setUp() {
         setUpUsers();
         setUpTokens();
         setUpDocentes();
+        setUpDtNuevaCarreras();
         setUpCarrerasAndAsignaturas();
         setUpDocenteAsignaturas();
         setUpActividades();
@@ -82,8 +96,10 @@ public class SetUpHelper {
     public void setUpUsers() {
         user1 = testUtils.createUsuario("John", "Doe", "john.doe@example.com", "12345678", "A", "123", true, true);
         user2 = testUtils.createUsuario("Jane", "Smith", "jane.smith@example.com", "87654321", "E", "123", true, true);
-        userNotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
+        user3NotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
         user4 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "E", "123", true, true);
+        user5Coordinador = testUtils.createUsuario("Paul", "Atreides", "paul.atreides@example.com", "987321654", "C", "123", true, true);
+        user6Coordinador = testUtils.createUsuario("Usul", "Muadhib", "usul.muadhib@example.com", "123987452", "C", "123", true, true);
     }
 
     public void setUpTokens() {
@@ -98,9 +114,17 @@ public class SetUpHelper {
         docente2 = testUtils.createDocente(1002, "Ellen Sattler", true);
     }
 
+    public void setUpDtNuevaCarreras() {
+        this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Civil", "Descripción de Ingeniería Civil", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
+        this.dtNuevaCarrera2 = new DtNuevaCarrera("Medicina", "Descripción de Medicina", "Requisitos de Medicina", 6, user5Coordinador.getIdUsuario());
+        this.dtNuevaCarreraConflict = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingenieria", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
+    }
+
     public void setUpCarrerasAndAsignaturas() {
-        carrera1 = testUtils.createCarrera("Ingeniería Informática", "Descripción de la carrera", "Requisitos de ingreso", 5, true);
-        carrera2 = testUtils.createCarrera("Traductorado", "Descripción de la carrera", "Requisitos de ingreso", 2, true);
+        carreraService.nuevaCarrera(this.dtNuevaCarrera1);
+        carreraService.nuevaCarrera(this.dtNuevaCarrera2);
+        carrera1 = carreraRepo.findById(1).get();
+        carrera2 = carreraRepo.findById(2).get();
         asignatura1 = testUtils.createAsignatura(carrera1, "Programacion 1", 12, "Descripcion", "Informatica", false, true);
         asignatura2 = testUtils.createAsignatura(carrera1, "Sistemas Operativos", 12, "Descripcion", "Informatica", false, true);
     }
@@ -108,7 +132,6 @@ public class SetUpHelper {
     public void setUpDocenteAsignaturas() {
         docenteAsignatura1 = testUtils.createDocenteAsignatura(docente1, asignatura1);
         docenteAsignatura2 = testUtils.createDocenteAsignatura(docente2, asignatura2);
-        docenteAsignatura2 = testUtils.createDocenteAsignatura(docente2, asignatura2); // Duplicate?
     }
 
     public void setUpActividades() {
@@ -137,11 +160,9 @@ public class SetUpHelper {
 
     public void setUpDtLoginRequests(){
         dtLoginRequest1 = new DtLoginRequest(user1.getCedula(), "123");
-        dtLoginRequest2 = new DtLoginRequest(userNotValidated.getCedula(), "123");
+        dtLoginRequest2 = new DtLoginRequest(user3NotValidated.getCedula(), "123");
         dtLoginRequest3 = new DtLoginRequest(user1.getCedula(), "wrongPass");
     }
-
-
 
     public void setUpHorarios() {
         dtHorarioDias = new DtHorarioDias(DiaSemana.LUNES, "10:30","12:30");
