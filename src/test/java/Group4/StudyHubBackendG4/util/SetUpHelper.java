@@ -56,6 +56,9 @@ public class SetUpHelper {
     public DtNuevoDocente dtNuevoDocente1;
     public DtNuevoDocente dtNuevoDocente2;
     public DtNewPassword dtNewPassword;
+    public DtLoginRequest dtLoginRequest1;
+    public DtLoginRequest dtLoginRequest2;
+    public DtLoginRequest dtLoginRequest3;
     public DtPerfil dtPerfil1;
     public DtPerfil dtPerfil2;
 
@@ -70,6 +73,7 @@ public class SetUpHelper {
         setUpDtUsuarios();
         setUpDtDocentes();
         setUpDtPerfiles();
+        setUpDtLoginRequests();
         setUpHorarios();
         setUpInscripciones();
         setUpPasswordReset();
@@ -130,6 +134,14 @@ public class SetUpHelper {
         dtPerfil1 = new DtPerfil("Andrew", "Dornen", "andrew.dornen@example.com", "19960606");
         dtPerfil2 = new DtPerfil("Andrew", "Dornen", "john.doe@example.com", "19960606");
     }
+
+    public void setUpDtLoginRequests(){
+        dtLoginRequest1 = new DtLoginRequest(user1.getCedula(), "123");
+        dtLoginRequest2 = new DtLoginRequest(userNotValidated.getCedula(), "123");
+        dtLoginRequest3 = new DtLoginRequest(user1.getCedula(), "wrongPass");
+    }
+
+
 
     public void setUpHorarios() {
         dtHorarioDias = new DtHorarioDias(DiaSemana.LUNES, "10:30","12:30");

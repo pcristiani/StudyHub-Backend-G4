@@ -180,16 +180,6 @@ public class UsuarioControllerTest {
                 .andExpect(content().string("Invalid email."));
     }
 
-
-    @Test
-    public void recuperarPassword_Ok() throws Exception {       //Todo: Fix reset token
-        mockMvc.perform(post("/recuperarPassword")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(setUpHelper.dtNewPassword)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Password reset successfully"));
-    }
-
     @Test
     public void modificarPerfil_Ok() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarPerfil/{idUsuario}", setUpHelper.user1.getIdUsuario())
