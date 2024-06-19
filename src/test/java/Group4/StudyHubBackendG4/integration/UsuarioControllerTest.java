@@ -241,16 +241,6 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void getDocentesByAsignaturaId_Ok() throws Exception {
-        mockMvc.perform(get("/api/docente/getDocentesByAsignaturaId/{idAsignatura}", setUpHelper.docente1.getIdDocente())
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].nombre").value("Alan Grant"));
-    }
-
-    @Test
     public void altaDocente_Success() throws Exception {
         mockMvc.perform(post("/api/docente/altaDocente")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)

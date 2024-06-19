@@ -2,6 +2,7 @@ package Group4.StudyHubBackendG4.util;
 
 import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.*;
+import Group4.StudyHubBackendG4.repositories.AsignaturaRepo;
 import Group4.StudyHubBackendG4.repositories.CarreraRepo;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
 import Group4.StudyHubBackendG4.services.AsignaturaService;
@@ -34,6 +35,9 @@ public class SetUpHelper {
 
     @Autowired
     private CarreraRepo carreraRepo;
+
+    @Autowired
+    private AsignaturaRepo asignaturaRepo;
 
     @Autowired
     private PasswordResetTokenRepo passwordResetTokenRepo;
@@ -84,6 +88,19 @@ public class SetUpHelper {
     public DtInscripcionCarrera dtInscripcionCarreraCarreraNotFound;
     public DtPeriodoExamenRequest dtPeriodoExamenRequest;
     public DtPeriodoExamenRequest dtPeriodoExamenRequestInvalid;
+    public DtCarrera dtCarrera1;
+    public DtCarrera dtCarrera2;
+    public DtCarrera dtCarreraConflict ;
+    public DtNuevaAsignatura dtNuevaAsignatura1;
+    public DtNuevaAsignatura dtNuevaAsignatura2;
+    public DtNuevaAsignatura dtNuevaAsignatura3;
+    public DtNuevaAsignatura dtNuevaAsignaturaConflict1;
+    public DtNuevaAsignatura dtNuevaAsignaturaConflict2;
+    public DtNuevaAsignatura dtNuevaAsignaturaConflict3;
+    public DtNuevaAsignatura dtNuevaAsignaturaConflict4;
+    public DtNuevaAsignatura dtNuevaAsignaturaConflict5;
+    public DtNuevaAsignatura dtNuevaAsignaturaConflict6;
+    public DtNuevaAsignatura dtNuevaAsignaturaConPrevias1;
 
 
     public void setUp() {
@@ -91,7 +108,10 @@ public class SetUpHelper {
         setUpTokens();
         setUpDocentes();
         setUpDtNuevaCarreras();
-        setUpCarrerasAndAsignaturas();
+        setUpCarreras();
+        setUpDtCarreras();
+        setUpDtAsignaturas();
+        setUpAsignaturas();
         setUpDocenteAsignaturas();
         setUpActividades();
         setUpDtUsuarios();
@@ -128,19 +148,22 @@ public class SetUpHelper {
     }
 
     public void setUpDtNuevaCarreras() {
-        this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingeniería Informática ", "Requisitos de Ingeniería Civil", 5, userCoordinador1.getIdUsuario());
+        this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingeniería Informática ", "Requisitos de Ingeniería Informática", 5, userCoordinador1.getIdUsuario());
         this.dtNuevaCarrera2 = new DtNuevaCarrera("Medicina", "Descripción de Medicina", "Requisitos de Medicina", 6, userCoordinador1.getIdUsuario());
         this.dtNuevaCarrera3 = new DtNuevaCarrera("Traductorado", "Descripción de Traductorado", "Requisitos de Traductorado", 2, userCoordinador1.getIdUsuario());
         this.dtNuevaCarrera4Invalid = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingenieria", "Requisitos de Ingeniería Civil", 5, userCoordinador1.getIdUsuario());
     }
 
-    public void setUpCarrerasAndAsignaturas() {
+    public void setUpCarreras() {
         carreraService.nuevaCarrera(this.dtNuevaCarrera1);
         carreraService.nuevaCarrera(this.dtNuevaCarrera2);
         carrera1 = carreraRepo.findById(1).get();
         carrera2 = carreraRepo.findById(2).get();
-        asignatura1 = testUtils.createAsignatura(carrera1, "Programacion 1", 12, "Descripcion", "Informatica", false, true);
-        asignatura2 = testUtils.createAsignatura(carrera1, "Sistemas Operativos", 12, "Descripcion", "Informatica", false, true);
+    }
+
+    public void setUpAsignaturas() {
+        asignatura1 = asignaturaRepo.findById(1).get();
+        asignatura2 = asignaturaRepo.findById(2).get();
     }
 
     public void setUpDocenteAsignaturas() {
@@ -193,6 +216,28 @@ public class SetUpHelper {
     public void setUpDtPeriodoExamenRequests() {
         dtPeriodoExamenRequest = new DtPeriodoExamenRequest("Exámenes de Julio", new DtFecha(2024, 7, 1), new DtFecha(2024, 7, 15));
         dtPeriodoExamenRequestInvalid = new DtPeriodoExamenRequest("Exámenes de Julio", new DtFecha(1, 60, 50), new DtFecha(2024, 7, 15));
+    }
+
+    public void setUpDtCarreras() {
+        dtCarrera1 = new DtCarrera(carrera1.getIdCarrera(), "Ingeniería Civil Modificada", "Descripción modificada", "Nuevos requisitos", 6, true);
+        dtCarrera2 = new DtCarrera(carrera2.getIdCarrera(), "Medicina Modificada", "Descripción modificada", "Nuevos requisitos", 7, true);
+        dtCarreraConflict = new DtCarrera(carrera1.getIdCarrera(), "Ingeniería Informática", "Descripción modificada", "Nuevos requisitos", 6, true);
+    }
+
+    public void setUpDtAsignaturas() {
+        dtNuevaAsignatura1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente1.getIdDocente()), "Sistemas Operativos", 6, "Descripción de Sistemas Operativos", "Informatica", true, true, List.of());
+        dtNuevaAsignatura2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Principios de Programación", "Informatica", true, true, List.of());
+        dtNuevaAsignatura3 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Ingenieria de Software", 12, "Ingenieria de Software", "Informatica", true, true, List.of());
+        dtNuevaAsignaturaConPrevias1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Programación de Aplicaciones", 12, "Descripción de Programación de Aplicaciones", "Informatica", true, true, List.of(1));
+        dtNuevaAsignaturaConflict1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
+        dtNuevaAsignaturaConflict2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
+        dtNuevaAsignaturaConflict3 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(60), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
+        dtNuevaAsignaturaConflict4 = new DtNuevaAsignatura(60, List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
+        dtNuevaAsignaturaConflict5 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Matematica Discreta", 12, "Descripción de Matematica Discreta", "Informatica", true, true, List.of(60));
+        dtNuevaAsignaturaConflict6 = new DtNuevaAsignatura(carrera2.getIdCarrera(), List.of(docente2.getIdDocente()), "Bioquimica 1", 12, "Descripción de Bioquimica 1", "Informatica", true, true, List.of(3));
+        asignaturaService.altaAsignatura(dtNuevaAsignatura2);
+        asignaturaService.altaAsignatura(dtNuevaAsignaturaConPrevias1);
+        asignaturaService.altaAsignatura(dtNuevaAsignatura3);
     }
 
     public void setUpHorarios() {

@@ -170,7 +170,7 @@ public class AsignaturaService {
         List<Docente> docentes = idDocentes.stream()
                 .map(docenteRepo::findById)
                 .map(optionalDocente -> optionalDocente.orElse(null))
-                .collect(Collectors.toList());
+                .toList();
 
         if (docentes.contains(null)) {
             return ResponseEntity.badRequest().body("Uno o más docentes no encontrados.");
@@ -228,48 +228,6 @@ public class AsignaturaService {
         return ResponseEntity.ok().body("Asignatura creada exitosamente.");
     }
 
-/*
-    private Boolean validarCircularidad(List<Integer> idsPreviaturas) {
-        if (idsPreviaturas == null || idsPreviaturas.isEmpty()) {
-            return false;
-        }
-
-        Set<Integer> visitado = new HashSet<>();
-        Set<Integer> stack = new HashSet<>();
-
-        for (Integer idPrevia : idsPreviaturas) {
-            if (esCiclico(idPrevia, visitado, stack)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean esCiclico(Integer idAsignatura, Set<Integer> visitado, Set<Integer> stack) {
-        if (stack.contains(idAsignatura)) {
-            return true; // Ciclo detectado
-        }
-
-        if (visitado.contains(idAsignatura)) {
-            return false;
-        }
-
-        visitado.add(idAsignatura);
-        stack.add(idAsignatura);
-
-        Asignatura asignatura = asignaturaRepo.findById(idAsignatura).orElse(null);
-        List<Previaturas> previaturas = previaturasRepo.findByAsignatura(asignatura);
-        for (Previaturas previatura : previaturas) {
-            if (esCiclico(previatura.getPrevia().getIdAsignatura(), visitado, stack)) {
-                return true;
-            }
-        }
-
-        stack.remove(idAsignatura);
-        return false;
-    }
-*/
     public ResponseEntity<?> registroHorarios(Integer idAsignatura, DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
         Asignatura asignatura = asignaturaRepo.findById(idAsignatura)
                 .orElse(null);

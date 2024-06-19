@@ -185,4 +185,34 @@ public class CarreraControllerTest {
                 .andExpect(content().string("El estudiante no tiene una inscripción pendiente de validación."));
     }
 
+    @Test
+    public void modificarCarrera_Ok() throws Exception {
+        mockMvc.perform(put("/api/carrera/modificarCarrera/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtCarrera1)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Carrera actualizada exitosamente"));
+    }
+
+    @Test
+    public void modificarCarrera_Conflict() throws Exception {
+        mockMvc.perform(put("/api/carrera/modificarCarrera/{idCarrera}", setUpHelper.carrera2.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtCarreraConflict)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Ya existe una carrera con ese nombre."));
+    }
+
+    @Test
+    public void modificarCarrera_NotFound() throws Exception {
+        mockMvc.perform(put("/api/carrera/modificarCarrera/{idCarrera}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtCarreraConflict)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No se encontró carrera."));
+    }
+
 }
