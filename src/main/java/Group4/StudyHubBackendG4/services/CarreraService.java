@@ -165,7 +165,7 @@ public class CarreraService {
 
             // Solo añadir arista si no es una arista directa innecesaria
             if (!ingorarArista) {
-                String edge = String.format("\"%s\" -- \"%s\"", sourceId, targetId);
+                String edge = String.format("\"%s\" -> \"%s\"", sourceId, targetId);
                 if (!edges.contains(edge)) {
                     graphBuilder.append(edge).append(";\n");
                     edges.add(edge);
