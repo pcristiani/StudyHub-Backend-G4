@@ -73,7 +73,15 @@ public class SetUpHelper {
     public DtPerfil dtPerfil2;
     public DtNuevaCarrera dtNuevaCarrera1;
     public DtNuevaCarrera dtNuevaCarrera2;
-    public DtNuevaCarrera dtNuevaCarreraConflict;
+    public DtNuevaCarrera dtNuevaCarrera3;
+    public DtNuevaCarrera dtNuevaCarrera4Invalid;
+    public DtInscripcionCarrera dtInscripcionCarrera1;
+    public DtInscripcionCarrera dtInscripcionCarrera2;
+    public DtInscripcionCarrera dtInscripcionCarreraUserNotFound;
+    public DtInscripcionCarrera dtInscripcionCarreraUserNotStudent;
+    public DtInscripcionCarrera dtInscripcionCarreraCarreraNotFound;
+    public DtPeriodoExamenRequest dtPeriodoExamenRequest;
+    public DtPeriodoExamenRequest dtPeriodoExamenRequestInvalid;
 
 
     public void setUp() {
@@ -88,8 +96,10 @@ public class SetUpHelper {
         setUpDtDocentes();
         setUpDtPerfiles();
         setUpDtLoginRequests();
+        setUpDtInscripcionCarreras();
         setUpHorarios();
         setUpInscripciones();
+        setUpDtPeriodoExamenRequests();
         setUpPasswordReset();
     }
 
@@ -115,9 +125,10 @@ public class SetUpHelper {
     }
 
     public void setUpDtNuevaCarreras() {
-        this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Civil", "Descripción de Ingeniería Civil", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
+        this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingeniería Informática ", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
         this.dtNuevaCarrera2 = new DtNuevaCarrera("Medicina", "Descripción de Medicina", "Requisitos de Medicina", 6, user5Coordinador.getIdUsuario());
-        this.dtNuevaCarreraConflict = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingenieria", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
+        this.dtNuevaCarrera3 = new DtNuevaCarrera("Traductorado", "Descripción de Traductorado", "Requisitos de Traductorado", 2, user5Coordinador.getIdUsuario());
+        this.dtNuevaCarrera4Invalid = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingenieria", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
     }
 
     public void setUpCarrerasAndAsignaturas() {
@@ -162,6 +173,21 @@ public class SetUpHelper {
         dtLoginRequest1 = new DtLoginRequest(user1.getCedula(), "123");
         dtLoginRequest2 = new DtLoginRequest(user3NotValidated.getCedula(), "123");
         dtLoginRequest3 = new DtLoginRequest(user1.getCedula(), "wrongPass");
+    }
+
+    public void setUpDtInscripcionCarreras() {
+        dtInscripcionCarrera1 = new DtInscripcionCarrera(carrera1.getIdCarrera(), user2.getIdUsuario(), true);
+        dtInscripcionCarrera2 = new DtInscripcionCarrera(carrera2.getIdCarrera(), user4.getIdUsuario(), false);
+        dtInscripcionCarreraUserNotFound = new DtInscripcionCarrera(1, 60, false);
+        dtInscripcionCarreraUserNotStudent = new DtInscripcionCarrera(1, user5Coordinador.getIdUsuario(), false);
+        dtInscripcionCarreraCarreraNotFound = new DtInscripcionCarrera(60, user4.getIdUsuario(), false);
+        carreraService.inscripcionCarrera(dtInscripcionCarrera2);
+        carreraService.validateInscripcion(dtInscripcionCarrera2);
+    }
+
+    public void setUpDtPeriodoExamenRequests() {
+        dtPeriodoExamenRequest = new DtPeriodoExamenRequest("Exámenes de Julio", new DtFecha(2024, 7, 1), new DtFecha(2024, 7, 15));
+        dtPeriodoExamenRequestInvalid = new DtPeriodoExamenRequest("Exámenes de Julio", new DtFecha(1, 60, 50), new DtFecha(2024, 7, 15));
     }
 
     public void setUpHorarios() {

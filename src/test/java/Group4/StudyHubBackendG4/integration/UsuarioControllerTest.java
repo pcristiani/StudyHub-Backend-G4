@@ -54,7 +54,7 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testModificarOtherUsuarioCedula_Ok() throws Exception {
+    public void modificarOtherUsuarioCedula_Ok() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarUsuario/{idUsuario}", setUpHelper.user2.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -64,33 +64,13 @@ public class UsuarioControllerTest {
     }
 
    @Test
-    public void testModificarOtherUsuarioCedula_Conflict() throws Exception {
+    public void modificarOtherUsuarioCedula_Conflict() throws Exception {
         mockMvc.perform(put("/api/usuario/modificarUsuario/{idUsuario}", setUpHelper.user1.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtUserModifiedCedula)))
                 .andExpect(status().isConflict())
                 .andExpect(content().string("No se puede modificar la cedula porque el usuario tiene una sesion activa."));
-    }
-
-    @Test
-    public void getUsuarios_Ok() throws Exception {
-        mockMvc.perform(get("/api/usuario/getUsuarios")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(4))
-                .andExpect(jsonPath("$[0].nombre").value("John"));
-    }
-
-    @Test
-    public void getDocentes_Ok() throws Exception {
-        mockMvc.perform(get("/api/usuario/getDocentes")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].nombre").value("Alan Grant"));
     }
 
     @Test

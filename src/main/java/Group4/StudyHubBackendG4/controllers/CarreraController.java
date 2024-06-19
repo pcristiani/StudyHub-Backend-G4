@@ -72,7 +72,7 @@ public class CarreraController {
     }
     @PostMapping("/api/carrera/altaCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_C')")
-    public ResponseEntity<?> altaCarrera(@Valid @RequestBody DtNuevaCarrera dtNuevaCarrera) throws MessagingException, IOException {
+    public ResponseEntity<?> altaCarrera(@Valid @RequestBody DtNuevaCarrera dtNuevaCarrera) {
         return carreraService.nuevaCarrera(dtNuevaCarrera);
     }
 
@@ -89,7 +89,6 @@ public class CarreraController {
         return carreraService.modificarCarrera(idCarrera, dtCarrera);
     }
 
-    //inscripcion a carrera
     @PostMapping("/api/carrera/inscripcionCarrera")
     @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
     public ResponseEntity<?> inscripcionCarrera(@RequestBody DtInscripcionCarrera dtInscripcionCarrera) {
