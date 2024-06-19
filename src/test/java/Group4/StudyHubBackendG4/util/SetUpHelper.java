@@ -38,12 +38,13 @@ public class SetUpHelper {
     @Autowired
     private PasswordResetTokenRepo passwordResetTokenRepo;
 
-    public Usuario user1;
-    public Usuario user2;
-    public Usuario user3NotValidated;
-    public Usuario user4;
-    public Usuario user5Coordinador;
-    public Usuario user6Coordinador;
+    public Usuario userAdmin1;
+    public Usuario userEstudiante1;
+    public Usuario userEstudiante2;
+    public Usuario userEstudiante3;
+    public Usuario useruserEstudianteNotValidated;
+    public Usuario userCoordinador1;
+    public Usuario userCoordinador2;
     public Docente docente1;
     public Docente docente2;
     public String token1;
@@ -77,6 +78,7 @@ public class SetUpHelper {
     public DtNuevaCarrera dtNuevaCarrera4Invalid;
     public DtInscripcionCarrera dtInscripcionCarrera1;
     public DtInscripcionCarrera dtInscripcionCarrera2;
+    public DtInscripcionCarrera dtInscripcionCarrera3;
     public DtInscripcionCarrera dtInscripcionCarreraUserNotFound;
     public DtInscripcionCarrera dtInscripcionCarreraUserNotStudent;
     public DtInscripcionCarrera dtInscripcionCarreraCarreraNotFound;
@@ -104,18 +106,19 @@ public class SetUpHelper {
     }
 
     public void setUpUsers() {
-        user1 = testUtils.createUsuario("John", "Doe", "john.doe@example.com", "12345678", "A", "123", true, true);
-        user2 = testUtils.createUsuario("Jane", "Smith", "jane.smith@example.com", "87654321", "E", "123", true, true);
-        user3NotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
-        user4 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "E", "123", true, true);
-        user5Coordinador = testUtils.createUsuario("Paul", "Atreides", "paul.atreides@example.com", "987321654", "C", "123", true, true);
-        user6Coordinador = testUtils.createUsuario("Usul", "Muadhib", "usul.muadhib@example.com", "123987452", "C", "123", true, true);
+        userAdmin1 = testUtils.createUsuario("John", "Doe", "john.doe@example.com", "12345678", "A", "123", true, true);
+        userEstudiante1 = testUtils.createUsuario("Jane", "Smith", "jane.smith@example.com", "87654321", "E", "123", true, true);
+        userEstudiante2 = testUtils.createUsuario("Bran", "Done", "bran.done@example.com", "123654786", "E", "123", true, true);
+        userEstudiante3 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "E", "123", true, true);
+        useruserEstudianteNotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
+        userCoordinador1 = testUtils.createUsuario("Paul", "Atreides", "paul.atreides@example.com", "987321654", "C", "123", true, true);
+        userCoordinador2 = testUtils.createUsuario("Usul", "Muadhib", "usul.muadhib@example.com", "123987452", "C", "123", true, true);
     }
 
     public void setUpTokens() {
-        token1 = testUtils.authenticateUser(user1.getCedula(), "123");
-        token2 = testUtils.authenticateUser(user2.getCedula(), "123");
-        token4 = testUtils.authenticateUser(user4.getCedula(), "123");
+        token1 = testUtils.authenticateUser(userAdmin1.getCedula(), "123");
+        token2 = testUtils.authenticateUser(userEstudiante1.getCedula(), "123");
+        token4 = testUtils.authenticateUser(userEstudiante3.getCedula(), "123");
         autenticacionService.logoutUser(token2);
     }
 
@@ -125,10 +128,10 @@ public class SetUpHelper {
     }
 
     public void setUpDtNuevaCarreras() {
-        this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingeniería Informática ", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
-        this.dtNuevaCarrera2 = new DtNuevaCarrera("Medicina", "Descripción de Medicina", "Requisitos de Medicina", 6, user5Coordinador.getIdUsuario());
-        this.dtNuevaCarrera3 = new DtNuevaCarrera("Traductorado", "Descripción de Traductorado", "Requisitos de Traductorado", 2, user5Coordinador.getIdUsuario());
-        this.dtNuevaCarrera4Invalid = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingenieria", "Requisitos de Ingeniería Civil", 5, user5Coordinador.getIdUsuario());
+        this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingeniería Informática ", "Requisitos de Ingeniería Civil", 5, userCoordinador1.getIdUsuario());
+        this.dtNuevaCarrera2 = new DtNuevaCarrera("Medicina", "Descripción de Medicina", "Requisitos de Medicina", 6, userCoordinador1.getIdUsuario());
+        this.dtNuevaCarrera3 = new DtNuevaCarrera("Traductorado", "Descripción de Traductorado", "Requisitos de Traductorado", 2, userCoordinador1.getIdUsuario());
+        this.dtNuevaCarrera4Invalid = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingenieria", "Requisitos de Ingeniería Civil", 5, userCoordinador1.getIdUsuario());
     }
 
     public void setUpCarrerasAndAsignaturas() {
@@ -147,7 +150,7 @@ public class SetUpHelper {
 
     public void setUpActividades() {
         for (int i = 0; i < 10; i++) {
-            testUtils.createActividad(user4);
+            testUtils.createActividad(userEstudiante3);
         }
     }
 
@@ -170,18 +173,20 @@ public class SetUpHelper {
     }
 
     public void setUpDtLoginRequests(){
-        dtLoginRequest1 = new DtLoginRequest(user1.getCedula(), "123");
-        dtLoginRequest2 = new DtLoginRequest(user3NotValidated.getCedula(), "123");
-        dtLoginRequest3 = new DtLoginRequest(user1.getCedula(), "wrongPass");
+        dtLoginRequest1 = new DtLoginRequest(userAdmin1.getCedula(), "123");
+        dtLoginRequest2 = new DtLoginRequest(useruserEstudianteNotValidated.getCedula(), "123");
+        dtLoginRequest3 = new DtLoginRequest(userAdmin1.getCedula(), "wrongPass");
     }
 
     public void setUpDtInscripcionCarreras() {
-        dtInscripcionCarrera1 = new DtInscripcionCarrera(carrera1.getIdCarrera(), user2.getIdUsuario(), true);
-        dtInscripcionCarrera2 = new DtInscripcionCarrera(carrera2.getIdCarrera(), user4.getIdUsuario(), false);
+        dtInscripcionCarrera1 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante1.getIdUsuario(), true);
+        dtInscripcionCarrera2 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante3.getIdUsuario(), false);
+        dtInscripcionCarrera3 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante2.getIdUsuario(), false);
         dtInscripcionCarreraUserNotFound = new DtInscripcionCarrera(1, 60, false);
-        dtInscripcionCarreraUserNotStudent = new DtInscripcionCarrera(1, user5Coordinador.getIdUsuario(), false);
-        dtInscripcionCarreraCarreraNotFound = new DtInscripcionCarrera(60, user4.getIdUsuario(), false);
+        dtInscripcionCarreraUserNotStudent = new DtInscripcionCarrera(1, userCoordinador1.getIdUsuario(), false);
+        dtInscripcionCarreraCarreraNotFound = new DtInscripcionCarrera(60, userEstudiante3.getIdUsuario(), false);
         carreraService.inscripcionCarrera(dtInscripcionCarrera2);
+        carreraService.inscripcionCarrera(dtInscripcionCarrera3);
         carreraService.validateInscripcion(dtInscripcionCarrera2);
     }
 
@@ -197,12 +202,12 @@ public class SetUpHelper {
     }
 
     public void setUpInscripciones() {
-        dtNuevaInscripcionAsignatura = new DtNuevaInscripcionAsignatura(user2.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
+        dtNuevaInscripcionAsignatura = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura);
     }
 
     public void setUpPasswordReset() {
-        usuarioService.generatePasswordResetToken(user1);
+        usuarioService.generatePasswordResetToken(userAdmin1);
         dtNewPassword = new DtNewPassword();
         dtNewPassword.setToken(String.valueOf(passwordResetTokenRepo.findAll().get(0)));
         dtNewPassword.setNewPassword("newPass123");

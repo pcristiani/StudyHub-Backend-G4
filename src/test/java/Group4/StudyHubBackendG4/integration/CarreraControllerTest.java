@@ -69,7 +69,7 @@ public class CarreraControllerTest {
         mockMvc.perform(put("/api/carrera/asignarCoordinadorCarrera/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(setUpHelper.user6Coordinador.getIdUsuario())))
+                        .content(objectMapper.writeValueAsString(setUpHelper.userCoordinador2.getIdUsuario())))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Coordinador asignado exitosamente."));
     }
@@ -80,7 +80,7 @@ public class CarreraControllerTest {
         mockMvc.perform(put("/api/carrera/asignarCoordinadorCarrera/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(setUpHelper.user5Coordinador.getIdUsuario())))
+                        .content(objectMapper.writeValueAsString(setUpHelper.userCoordinador1.getIdUsuario())))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("El coordinador ya está asignado a la carrera."));
     }
@@ -156,13 +156,33 @@ public class CarreraControllerTest {
     }
 
     @Test
-    public void altaPeriodoDeExamen_BadRequestasd() throws Exception {
+    public void altaPeriodoDeExamen_CarreraNotFound() throws Exception {
         mockMvc.perform(post("/api/carrera/altaPeriodoDeExamen/{idCarrera}", 60)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtPeriodoExamenRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("La carrera no existe!"));
+    }
+
+    @Test
+    public void acceptEstudianteCarrera_Ok() throws Exception {
+        mockMvc.perform(put("/api/carrera/acceptEstudianteCarrera")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionCarrera3)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Se aceptó la inscripcion del estudiante a la carrera."));
+    }
+
+    @Test
+    public void acceptEstudianteCarrera_InscripcionNotPending() throws Exception {
+        mockMvc.perform(put("/api/carrera/acceptEstudianteCarrera")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionCarrera1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("El estudiante no tiene una inscripción pendiente de validación."));
     }
 
 }
