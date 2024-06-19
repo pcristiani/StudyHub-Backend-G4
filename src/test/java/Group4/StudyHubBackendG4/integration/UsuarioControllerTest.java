@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.integration;
 import Group4.StudyHubBackendG4.util.DatabaseInitializer;
 import Group4.StudyHubBackendG4.util.SetUpHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.io.IOException;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,7 +41,7 @@ public class UsuarioControllerTest {
     private DatabaseInitializer databaseInitializer;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws MessagingException, IOException {
         databaseInitializer.executeSqlScript("src/test/resources/cleanup.sql");
         setUpHelper.setUp();
     }
@@ -84,7 +87,7 @@ public class UsuarioControllerTest {
 
     @Test
     public void acceptEstudiante_Ok() throws Exception {
-        mockMvc.perform(put("/api/usuario/acceptEstudiante/{idUsuario}", setUpHelper.useruserEstudianteNotValidated.getIdUsuario())
+        mockMvc.perform(put("/api/usuario/acceptEstudiante/{idUsuario}", setUpHelper.userEstudianteNotValidated.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(true)))
@@ -215,7 +218,7 @@ public class UsuarioControllerTest {
 
     @Test
     public void getResumenActividad_NoActividad() throws Exception {
-        mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", setUpHelper.useruserEstudianteNotValidated.getIdUsuario())
+        mockMvc.perform(get("/api/usuario/getResumenActividad/{idUsuario}", setUpHelper.userEstudianteNotValidated.getIdUsuario())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())

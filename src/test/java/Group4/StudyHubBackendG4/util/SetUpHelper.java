@@ -10,9 +10,11 @@ import Group4.StudyHubBackendG4.services.AutenticacionService;
 import Group4.StudyHubBackendG4.services.CarreraService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -46,7 +48,7 @@ public class SetUpHelper {
     public Usuario userEstudiante1;
     public Usuario userEstudiante2;
     public Usuario userEstudiante3;
-    public Usuario useruserEstudianteNotValidated;
+    public Usuario userEstudianteNotValidated;
     public Usuario userCoordinador1;
     public Usuario userCoordinador2;
     public Docente docente1;
@@ -86,7 +88,8 @@ public class SetUpHelper {
     public DtInscripcionCarrera dtInscripcionCarreraUserNotFound;
     public DtInscripcionCarrera dtInscripcionCarreraUserNotStudent;
     public DtInscripcionCarrera dtInscripcionCarreraCarreraNotFound;
-    public DtPeriodoExamenRequest dtPeriodoExamenRequest;
+    public DtPeriodoExamenRequest dtPeriodoExamenRequest1;
+    public DtPeriodoExamenRequest dtPeriodoExamenRequest2;
     public DtPeriodoExamenRequest dtPeriodoExamenRequestInvalid;
     public DtCarrera dtCarrera1;
     public DtCarrera dtCarrera2;
@@ -103,7 +106,7 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias1;
 
 
-    public void setUp() {
+    public void setUp() throws MessagingException, IOException {
         setUpUsers();
         setUpTokens();
         setUpDocentes();
@@ -130,7 +133,7 @@ public class SetUpHelper {
         userEstudiante1 = testUtils.createUsuario("Jane", "Smith", "jane.smith@example.com", "87654321", "E", "123", true, true);
         userEstudiante2 = testUtils.createUsuario("Bran", "Done", "bran.done@example.com", "123654786", "E", "123", true, true);
         userEstudiante3 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "E", "123", true, true);
-        useruserEstudianteNotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
+        userEstudianteNotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
         userCoordinador1 = testUtils.createUsuario("Paul", "Atreides", "paul.atreides@example.com", "987321654", "C", "123", true, true);
         userCoordinador2 = testUtils.createUsuario("Usul", "Muadhib", "usul.muadhib@example.com", "123987452", "C", "123", true, true);
     }
@@ -197,25 +200,27 @@ public class SetUpHelper {
 
     public void setUpDtLoginRequests(){
         dtLoginRequest1 = new DtLoginRequest(userAdmin1.getCedula(), "123");
-        dtLoginRequest2 = new DtLoginRequest(useruserEstudianteNotValidated.getCedula(), "123");
+        dtLoginRequest2 = new DtLoginRequest(userEstudianteNotValidated.getCedula(), "123");
         dtLoginRequest3 = new DtLoginRequest(userAdmin1.getCedula(), "wrongPass");
     }
 
-    public void setUpDtInscripcionCarreras() {
+    public void setUpDtInscripcionCarreras() throws MessagingException, IOException {
         dtInscripcionCarrera1 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante1.getIdUsuario(), true);
-        dtInscripcionCarrera2 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante3.getIdUsuario(), false);
+        dtInscripcionCarrera2 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante3.getIdUsuario(), true);
         dtInscripcionCarrera3 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante2.getIdUsuario(), false);
         dtInscripcionCarreraUserNotFound = new DtInscripcionCarrera(1, 60, false);
         dtInscripcionCarreraUserNotStudent = new DtInscripcionCarrera(1, userCoordinador1.getIdUsuario(), false);
         dtInscripcionCarreraCarreraNotFound = new DtInscripcionCarrera(60, userEstudiante3.getIdUsuario(), false);
         carreraService.inscripcionCarrera(dtInscripcionCarrera2);
         carreraService.inscripcionCarrera(dtInscripcionCarrera3);
-        carreraService.validateInscripcion(dtInscripcionCarrera2);
+        carreraService.acceptEstudianteCarrera(dtInscripcionCarrera2);
     }
 
     public void setUpDtPeriodoExamenRequests() {
-        dtPeriodoExamenRequest = new DtPeriodoExamenRequest("Exámenes de Julio", new DtFecha(2024, 7, 1), new DtFecha(2024, 7, 15));
+        dtPeriodoExamenRequest1 = new DtPeriodoExamenRequest("Exámenes de Julio 2024", new DtFecha(2024, 7, 1), new DtFecha(2024, 7, 15));
+        dtPeriodoExamenRequest2 = new DtPeriodoExamenRequest("Exámenes de Diciembre 2024", new DtFecha(2024, 12, 1), new DtFecha(2024, 12, 15));
         dtPeriodoExamenRequestInvalid = new DtPeriodoExamenRequest("Exámenes de Julio", new DtFecha(1, 60, 50), new DtFecha(2024, 7, 15));
+        carreraService.altaPeriodoDeExamen(1, dtPeriodoExamenRequest2);
     }
 
     public void setUpDtCarreras() {

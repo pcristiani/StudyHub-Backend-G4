@@ -110,27 +110,6 @@ public class TestUtils {
         return docenteAsignaturaRepo.save(docenteAsignatura);
     }
 
-    public Asignatura createAsignatura(Carrera carrera, String nombre, Integer creditos, String descripcion, String departamento, Boolean tieneExamen, Boolean activa ) {
-        Asignatura asignatura = new Asignatura();
-        asignatura.setCarrera(carrera);
-        asignatura.setNombre(nombre);
-        asignatura.setCreditos(creditos);
-        asignatura.setDescripcion(descripcion);
-        asignatura.setDepartamento(departamento);
-        asignatura.setTieneExamen(tieneExamen);
-        asignatura.setActiva(activa);
-        return asignaturaRepo.save(asignatura);
-    }
-
-    public Carrera createCarrera(String nombre, String descripcion, String requisitos, Integer duracion, Boolean activa) {
-        Carrera carrera = new Carrera();
-        carrera.setNombre(nombre);
-        carrera.setDescripcion(descripcion);
-        carrera.setRequisitos(requisitos);
-        carrera.setDuracion(duracion);
-        carrera.setActiva(activa);
-        return carreraRepo.save(carrera);
-    }
 
     public void createActividad(Usuario user){
         Actividad actividad = new Actividad();

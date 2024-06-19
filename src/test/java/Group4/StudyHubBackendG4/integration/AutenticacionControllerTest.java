@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.integration;
 import Group4.StudyHubBackendG4.util.DatabaseInitializer;
 import Group4.StudyHubBackendG4.util.SetUpHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.io.IOException;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,7 +41,7 @@ public class AutenticacionControllerTest {
     private DatabaseInitializer databaseInitializer;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws MessagingException, IOException {
         databaseInitializer.executeSqlScript("src/test/resources/cleanup.sql");
         setUpHelper.setUp();
     }

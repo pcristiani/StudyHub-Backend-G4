@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.integration;
 import Group4.StudyHubBackendG4.util.DatabaseInitializer;
 import Group4.StudyHubBackendG4.util.SetUpHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import java.io.IOException;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,7 +42,7 @@ public class CarreraControllerTest {
     private DatabaseInitializer databaseInitializer;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws MessagingException, IOException {
         databaseInitializer.executeSqlScript("src/test/resources/cleanup.sql");
         setUpHelper.setUp();
     }
@@ -140,7 +143,7 @@ public class CarreraControllerTest {
         mockMvc.perform(post("/api/carrera/altaPeriodoDeExamen/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(setUpHelper.dtPeriodoExamenRequest)))
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtPeriodoExamenRequest1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Período de examen añadido con éxito."));
     }
@@ -160,7 +163,7 @@ public class CarreraControllerTest {
         mockMvc.perform(post("/api/carrera/altaPeriodoDeExamen/{idCarrera}", 60)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(setUpHelper.dtPeriodoExamenRequest)))
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtPeriodoExamenRequest1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("La carrera no existe!"));
     }
@@ -215,4 +218,60 @@ public class CarreraControllerTest {
                 .andExpect(content().string("No se encontró carrera."));
     }
 
+    @Test
+    public void getPeriodosDeCarrera_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getPeriodosDeCarrera/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Exámenes de Diciembre 2024"));
+    }
+
+    @Test
+    public void getCarrerasConPeriodo_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getCarrerasConPeriodo")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Ingeniería Informática"));
+    }
+
+    @Test
+    public void getInscriptosPendientes_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getInscriptosPendientes/{idCarrera}", setUpHelper.carrera2.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Bran"))
+                .andExpect(jsonPath("$[0].apellido").value("Done"))
+                .andExpect(jsonPath("$[0].cedula").value("123654786"));
+    }
+
+    @Test
+    public void getCarrerasCoordinador_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getCarrerasCoordinador/{idUsuario}", setUpHelper.userCoordinador1.getIdUsuario())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Ingeniería Informática"))
+                .andExpect(jsonPath("$[1].nombre").value("Medicina"));
+    }
+
+    @Test
+    public void getCarrerasInscripto_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getCarrerasInscripto/{idUsuario}", setUpHelper.userEstudiante3.getIdUsuario())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Medicina"));
+    }
+
+    @Test
+    public void getCarrerasInscripcionesPendientes_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getCarrerasInscripcionesPendientes")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Medicina"));
+    }
 }
