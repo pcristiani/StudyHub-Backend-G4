@@ -204,7 +204,7 @@ public class AsignaturaControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(List.of(setUpHelper.asignatura2.getIdAsignatura()))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body").value("Previaturas registradas exitosamente."));
+                .andExpect(content().string("Previaturas registradas exitosamente."));
     }
 
     @Test

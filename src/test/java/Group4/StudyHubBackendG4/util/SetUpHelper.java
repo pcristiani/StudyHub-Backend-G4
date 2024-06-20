@@ -124,7 +124,6 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignaturaConflict6;
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias1;
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias2;
-    public DtNuevaAsignatura dtNuevaAsignaturaConPreviasCirculares;
 
 
     public void setUp() throws MessagingException, IOException {
@@ -267,7 +266,7 @@ public class SetUpHelper {
         dtNuevaAsignaturaConflict2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict3 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(60), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict4 = new DtNuevaAsignatura(60, List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
-        dtNuevaAsignaturaConflict5 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Matematica Discreta", 12, "Descripción de Matematica Discreta", "Informatica", true, true, List.of(60));
+        dtNuevaAsignaturaConflict5 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Redes de Computadoras", 12, "Descripción de Redes de Computadoras", "Informatica", true, true, List.of(60));
         dtNuevaAsignaturaConflict6 = new DtNuevaAsignatura(carrera2.getIdCarrera(), List.of(docente2.getIdDocente()), "Bioquimica 1", 12, "Descripción de Bioquimica 1", "Medicina", true, true, List.of(3));
         asignaturaService.altaAsignatura(dtNuevaAsignatura2);
         asignaturaService.altaAsignatura(dtNuevaAsignaturaConPrevias1);
