@@ -61,7 +61,7 @@ public class ExamenController {
     }
 
     @GetMapping("/api/examen/getExamenesAsignaturaPorAnio/{idAsignatura}")
-    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_E')")
+    @PreAuthorize("hasRole('ROLE_A') or hasRole('ROLE_F')")
     public ResponseEntity<?> getExamenesAsignaturaPorAnio(@PathVariable Integer idAsignatura, @RequestParam Integer anio) {
         return ResponseEntity.ok().body(examenService.getExamenesAsignaturaPorAnio(idAsignatura, anio));
     }
