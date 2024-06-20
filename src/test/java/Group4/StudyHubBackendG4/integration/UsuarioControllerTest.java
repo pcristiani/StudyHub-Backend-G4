@@ -344,7 +344,7 @@ public class UsuarioControllerTest {
     @Test
     public void getCalificacionesAsignaturas_AsignaturasNotFound() throws Exception {
         mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", setUpHelper.userEstudiante1.getIdUsuario())
-                        .param("idCarrera", setUpHelper.carrera2.getIdCarrera().toString())
+                        .param("idCarrera", setUpHelper.carrera3.getIdCarrera().toString())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())

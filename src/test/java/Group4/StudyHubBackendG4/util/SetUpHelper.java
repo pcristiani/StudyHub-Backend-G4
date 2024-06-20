@@ -58,13 +58,28 @@ public class SetUpHelper {
     public String token4;
     public Carrera carrera1;
     public Carrera carrera2;
+    public Carrera carrera3;
     public Asignatura asignatura1;
     public Asignatura asignatura2;
+    public Asignatura asignatura3;
     public DocenteAsignatura docenteAsignatura1;
     public DocenteAsignatura docenteAsignatura2;
-    public DtHorarioDias dtHorarioDias;
-    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura;
-    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura;
+    public DtHorarioDias dtHorarioDias1;
+    public DtHorarioDias dtHorarioDias2;
+    public DtHorarioDias dtHorarioDias3;
+    public DtHorarioDias dtHorarioDiasInvalidTimeFormat1;
+    public DtHorarioDias dtHorarioDiasInvalidTimeFormat2;
+    public DtHorarioDias dtHorarioDiasInvalidTimeFormat3;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura1;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura2;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura3;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignaturaInvalidDocente;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignaturaInvalidTimeFormat1;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignaturaInvalidTimeFormat2;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignaturaInvalidTimeFormat3;
+    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura1;
+    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura2;
+    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura3;
     public DtUsuario dtUserModifiedNombreApellidoEmail;
     public DtUsuario dtUserModifiedCedula;
     public DtDocente dtDocente1;
@@ -81,6 +96,7 @@ public class SetUpHelper {
     public DtNuevaCarrera dtNuevaCarrera1;
     public DtNuevaCarrera dtNuevaCarrera2;
     public DtNuevaCarrera dtNuevaCarrera3;
+    public DtNuevaCarrera dtNuevaCarrera4;
     public DtNuevaCarrera dtNuevaCarrera4Invalid;
     public DtInscripcionCarrera dtInscripcionCarrera1;
     public DtInscripcionCarrera dtInscripcionCarrera2;
@@ -97,6 +113,7 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignatura1;
     public DtNuevaAsignatura dtNuevaAsignatura2;
     public DtNuevaAsignatura dtNuevaAsignatura3;
+    public DtNuevaAsignatura dtNuevaAsignatura4;
     public DtNuevaAsignatura dtNuevaAsignaturaConflict1;
     public DtNuevaAsignatura dtNuevaAsignaturaConflict2;
     public DtNuevaAsignatura dtNuevaAsignaturaConflict3;
@@ -154,19 +171,23 @@ public class SetUpHelper {
         this.dtNuevaCarrera1 = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingeniería Informática ", "Requisitos de Ingeniería Informática", 5, userCoordinador1.getIdUsuario());
         this.dtNuevaCarrera2 = new DtNuevaCarrera("Medicina", "Descripción de Medicina", "Requisitos de Medicina", 6, userCoordinador1.getIdUsuario());
         this.dtNuevaCarrera3 = new DtNuevaCarrera("Traductorado", "Descripción de Traductorado", "Requisitos de Traductorado", 2, userCoordinador1.getIdUsuario());
+        this.dtNuevaCarrera4 = new DtNuevaCarrera("Economia", "Descripción de Economia", "Requisitos de Economia", 2, userCoordinador1.getIdUsuario());
         this.dtNuevaCarrera4Invalid = new DtNuevaCarrera("Ingeniería Informática", "Descripción de Ingenieria", "Requisitos de Ingeniería Civil", 5, userCoordinador1.getIdUsuario());
     }
 
     public void setUpCarreras() {
         carreraService.nuevaCarrera(this.dtNuevaCarrera1);
         carreraService.nuevaCarrera(this.dtNuevaCarrera2);
+        carreraService.nuevaCarrera(this.dtNuevaCarrera3);
         carrera1 = carreraRepo.findById(1).get();
         carrera2 = carreraRepo.findById(2).get();
+        carrera3 = carreraRepo.findById(3).get();
     }
 
     public void setUpAsignaturas() {
         asignatura1 = asignaturaRepo.findById(1).get();
         asignatura2 = asignaturaRepo.findById(2).get();
+        asignatura3 = asignaturaRepo.findById(4).get();
     }
 
     public void setUpDocenteAsignaturas() {
@@ -233,27 +254,43 @@ public class SetUpHelper {
         dtNuevaAsignatura1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente1.getIdDocente()), "Sistemas Operativos", 6, "Descripción de Sistemas Operativos", "Informatica", true, true, List.of());
         dtNuevaAsignatura2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignatura3 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Ingenieria de Software", 12, "Ingenieria de Software", "Informatica", true, true, List.of());
+        dtNuevaAsignatura4 = new DtNuevaAsignatura(carrera2.getIdCarrera(), List.of(docente2.getIdDocente()), "Bioestadística", 12, "Bioestadística", "Medicina", true, true, List.of());
         dtNuevaAsignaturaConPrevias1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Programación de Aplicaciones", 12, "Descripción de Programación de Aplicaciones", "Informatica", true, true, List.of(1));
         dtNuevaAsignaturaConflict1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict3 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(60), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict4 = new DtNuevaAsignatura(60, List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict5 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Matematica Discreta", 12, "Descripción de Matematica Discreta", "Informatica", true, true, List.of(60));
-        dtNuevaAsignaturaConflict6 = new DtNuevaAsignatura(carrera2.getIdCarrera(), List.of(docente2.getIdDocente()), "Bioquimica 1", 12, "Descripción de Bioquimica 1", "Informatica", true, true, List.of(3));
+        dtNuevaAsignaturaConflict6 = new DtNuevaAsignatura(carrera2.getIdCarrera(), List.of(docente2.getIdDocente()), "Bioquimica 1", 12, "Descripción de Bioquimica 1", "Medicina", true, true, List.of(3));
         asignaturaService.altaAsignatura(dtNuevaAsignatura2);
         asignaturaService.altaAsignatura(dtNuevaAsignaturaConPrevias1);
         asignaturaService.altaAsignatura(dtNuevaAsignatura3);
+        asignaturaService.altaAsignatura(dtNuevaAsignatura4);
     }
 
     public void setUpHorarios() {
-        dtHorarioDias = new DtHorarioDias(DiaSemana.LUNES, "10:30","12:30");
-        dtNuevoHorarioAsignatura = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDias));
-        asignaturaService.registroHorarios(asignatura1.getIdAsignatura(), dtNuevoHorarioAsignatura);
+        dtHorarioDias1 = new DtHorarioDias(DiaSemana.LUNES, "10:30","12:30");
+        dtHorarioDias2 = new DtHorarioDias(DiaSemana.LUNES, "14:00","20:00");
+        dtHorarioDias3 = new DtHorarioDias(DiaSemana.MARTES, "14:00","20:00");
+        dtHorarioDiasInvalidTimeFormat1 = new DtHorarioDias(DiaSemana.LUNES, "1300","20:00");
+        dtHorarioDiasInvalidTimeFormat2 = new DtHorarioDias(DiaSemana.LUNES, "20:00","15:00");
+        dtHorarioDiasInvalidTimeFormat3 = new DtHorarioDias(DiaSemana.LUNES, "11:00","15:00");
+        dtNuevoHorarioAsignatura1 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDias1));
+        dtNuevoHorarioAsignatura2 = new DtNuevoHorarioAsignatura(docente2.getIdDocente(), 2022, List.of(dtHorarioDias2));
+        dtNuevoHorarioAsignatura3 = new DtNuevoHorarioAsignatura(docente2.getIdDocente(), 2022, List.of(dtHorarioDias3));
+        dtNuevoHorarioAsignaturaInvalidDocente = new DtNuevoHorarioAsignatura(60, 2022, List.of(dtHorarioDias2));
+        dtNuevoHorarioAsignaturaInvalidTimeFormat1 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDiasInvalidTimeFormat1));
+        dtNuevoHorarioAsignaturaInvalidTimeFormat2 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDiasInvalidTimeFormat2));
+        dtNuevoHorarioAsignaturaInvalidTimeFormat3 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDiasInvalidTimeFormat3));
+        asignaturaService.registroHorarios(asignatura1.getIdAsignatura(), dtNuevoHorarioAsignatura1);
+        asignaturaService.registroHorarios(asignatura3.getIdAsignatura(), dtNuevoHorarioAsignatura2);
     }
 
     public void setUpInscripciones() {
-        dtNuevaInscripcionAsignatura = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
-        asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura);
+        dtNuevaInscripcionAsignatura1 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
+        dtNuevaInscripcionAsignatura2 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
+        dtNuevaInscripcionAsignatura3 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura3.getIdAsignatura(), 2);
+        asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura1);
     }
 
     public void setUpPasswordReset() {

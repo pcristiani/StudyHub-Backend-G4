@@ -52,7 +52,7 @@ public class CarreraControllerTest {
         mockMvc.perform(post("/api/carrera/altaCarrera")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevaCarrera3)))
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevaCarrera4)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Carrera registrada con éxito."));
     }

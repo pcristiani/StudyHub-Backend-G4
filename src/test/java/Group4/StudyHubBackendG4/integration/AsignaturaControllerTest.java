@@ -2,6 +2,7 @@ package Group4.StudyHubBackendG4.integration;
 
 import Group4.StudyHubBackendG4.util.DatabaseInitializer;
 import Group4.StudyHubBackendG4.util.SetUpHelper;
+import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,7 @@ import java.io.IOException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -116,6 +116,86 @@ public class AsignaturaControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Todas las previaturas deben pertenecer a la misma carrera."));
     }
+
+    @Test
+    public void registroHorarios_Ok() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registroHorarios/{idAsignatura}", setUpHelper.asignatura1.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignatura3)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body").value("Horarios registrados satisfactoriamente."));
+    }
+
+    @Test
+    public void registroHorarios_InvalidIdAsignatura() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registroHorarios/{idAsignatura}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignatura2)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body").value("idAsignatura invalido"));
+    }
+
+    @Test
+    public void registroHorarios_InvalidIdDocente() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registroHorarios/{idAsignatura}", setUpHelper.asignatura1.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidDocente)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body").value("idDocente invalido"));
+    }
+
+    @Test
+    public void registroHorarios_InvalidTimeFormat() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registroHorarios/{idAsignatura}", setUpHelper.asignatura1.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidTimeFormat1)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body").value("Formato de hora inválido. Use HH:mm"));
+    }
+
+    @Test
+    public void registroHorarios_HoraInicioAfterHoraFin() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registroHorarios/{idAsignatura}", setUpHelper.asignatura1.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidTimeFormat2)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body").value("horaInicio debe ser menor a horaFin, y los valores deben ser válidos (por ejemplo, 10:30 para 10:30)"));
+    }
+    @Test
+    public void registroHorarios_HorariosSuperpuestos() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registroHorarios/{idAsignatura}", setUpHelper.asignatura1.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidTimeFormat3)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body").value("Horarios superpuestos detectados para el dia " + DiaSemana.LUNES));
+    }
+
+    @Test
+    public void inscripcionAsignatura_Ok() throws Exception {
+        mockMvc.perform(post("/api/asignatura/inscripcionAsignatura")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevaInscripcionAsignatura3)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Se realizó la inscripcion a la asignatura"));
+    }
+
+    @Test
+    public void inscripcionAsignatura_UsuarioNotInscriptoACarrera() throws Exception {
+        mockMvc.perform(post("/api/asignatura/inscripcionAsignatura")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtNuevaInscripcionAsignatura2)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("El usuario no está inscripto en la carrera correspondiente a la asignatura"));
+    }
+
 
 
 }
