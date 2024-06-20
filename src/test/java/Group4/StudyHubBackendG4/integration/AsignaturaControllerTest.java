@@ -17,6 +17,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -196,6 +197,45 @@ public class AsignaturaControllerTest {
                 .andExpect(content().string("El usuario no está inscripto en la carrera correspondiente a la asignatura"));
     }
 
+    @Test
+      public void registrarPreviaturas_Ok() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", setUpHelper.asignatura4.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(setUpHelper.asignatura2.getIdAsignatura()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body").value("Previaturas registradas exitosamente."));
+    }
+
+    @Test
+    public void registrarPreviaturas_AsignaturaNotFound() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(setUpHelper.asignatura2.getIdAsignatura()))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Asignatura no encontrada."));
+    }
+
+    @Test
+    public void registrarPreviaturas_PreviaAsignaturaNotFound() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", setUpHelper.asignatura4.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(60))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Una o más previas no encontradas."));
+    }
+
+    @Test
+    public void registrarPreviaturas_PreviaturasCirculares() throws Exception {
+        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", 1)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(6))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Existen circularidades en las previaturas seleccionadas."));
+    }
 
 
 }

@@ -438,7 +438,7 @@ public class AsignaturaService {
         List<Asignatura> previasAsignaturas = previasCompletas.stream()
                 .map(asignaturaRepo::findById)
                 .map(optionalAsignatura -> optionalAsignatura.orElse(null))
-                .collect(Collectors.toList());
+                .toList();
 
         if (previasAsignaturas.contains(null)) {
             return ResponseEntity.badRequest().body("Una o más previas no encontradas.");

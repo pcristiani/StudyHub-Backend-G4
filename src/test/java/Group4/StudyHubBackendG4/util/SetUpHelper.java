@@ -62,6 +62,7 @@ public class SetUpHelper {
     public Asignatura asignatura1;
     public Asignatura asignatura2;
     public Asignatura asignatura3;
+    public Asignatura asignatura4;
     public DocenteAsignatura docenteAsignatura1;
     public DocenteAsignatura docenteAsignatura2;
     public DtHorarioDias dtHorarioDias1;
@@ -114,6 +115,7 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignatura2;
     public DtNuevaAsignatura dtNuevaAsignatura3;
     public DtNuevaAsignatura dtNuevaAsignatura4;
+    public DtNuevaAsignatura dtNuevaAsignatura5;
     public DtNuevaAsignatura dtNuevaAsignaturaConflict1;
     public DtNuevaAsignatura dtNuevaAsignaturaConflict2;
     public DtNuevaAsignatura dtNuevaAsignaturaConflict3;
@@ -121,6 +123,8 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignaturaConflict5;
     public DtNuevaAsignatura dtNuevaAsignaturaConflict6;
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias1;
+    public DtNuevaAsignatura dtNuevaAsignaturaConPrevias2;
+    public DtNuevaAsignatura dtNuevaAsignaturaConPreviasCirculares;
 
 
     public void setUp() throws MessagingException, IOException {
@@ -188,6 +192,7 @@ public class SetUpHelper {
         asignatura1 = asignaturaRepo.findById(1).get();
         asignatura2 = asignaturaRepo.findById(2).get();
         asignatura3 = asignaturaRepo.findById(4).get();
+        asignatura4 = asignaturaRepo.findById(5).get();
     }
 
     public void setUpDocenteAsignaturas() {
@@ -255,7 +260,9 @@ public class SetUpHelper {
         dtNuevaAsignatura2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignatura3 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Ingenieria de Software", 12, "Ingenieria de Software", "Informatica", true, true, List.of());
         dtNuevaAsignatura4 = new DtNuevaAsignatura(carrera2.getIdCarrera(), List.of(docente2.getIdDocente()), "Bioestadística", 12, "Bioestadística", "Medicina", true, true, List.of());
+        dtNuevaAsignatura5 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Matematica Discreta", 12, "Matematica Discreta", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConPrevias1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Programación de Aplicaciones", 12, "Descripción de Programación de Aplicaciones", "Informatica", true, true, List.of(1));
+        dtNuevaAsignaturaConPrevias2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Programación 3", 12, "Descripción de Programación 3", "Informatica", true, true, List.of(2));
         dtNuevaAsignaturaConflict1 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(docente2.getIdDocente()), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict2 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
         dtNuevaAsignaturaConflict3 = new DtNuevaAsignatura(carrera1.getIdCarrera(), List.of(60), "Principios de Programación", 12, "Descripción de Principios de Programación", "Informatica", true, true, List.of());
@@ -266,6 +273,8 @@ public class SetUpHelper {
         asignaturaService.altaAsignatura(dtNuevaAsignaturaConPrevias1);
         asignaturaService.altaAsignatura(dtNuevaAsignatura3);
         asignaturaService.altaAsignatura(dtNuevaAsignatura4);
+        asignaturaService.altaAsignatura(dtNuevaAsignatura5);
+        asignaturaService.altaAsignatura(dtNuevaAsignaturaConPrevias2);
     }
 
     public void setUpHorarios() {
