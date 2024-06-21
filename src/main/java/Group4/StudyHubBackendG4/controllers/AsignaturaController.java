@@ -73,6 +73,7 @@ public class AsignaturaController {
     public ResponseEntity<?> getHorarios(@PathVariable Integer idAsignatura) {
         return ResponseEntity.ok(asignaturaService.getHorarios(idAsignatura));
     }
+
     @PostMapping("/api/asignatura/altaAsignatura")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A')")
     public ResponseEntity<?> altaAsignatura(@Valid @RequestBody DtNuevaAsignatura dtNuevaAsignatura) {
@@ -82,7 +83,7 @@ public class AsignaturaController {
     @PostMapping("/api/asignatura/registroHorarios/{idAsignatura}")
     @PreAuthorize("hasRole('ROLE_F') or hasRole('ROLE_A')")
     public ResponseEntity<?> registroHorarios(@PathVariable Integer idAsignatura, @Valid @RequestBody DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura) {
-        return ResponseEntity.ok(asignaturaService.registroHorarios(idAsignatura, dtNuevoHorarioAsignatura));
+        return asignaturaService.registroHorarios(idAsignatura, dtNuevoHorarioAsignatura);
     }
 
     @PostMapping("/api/asignatura/inscripcionAsignatura")
@@ -108,7 +109,7 @@ public class AsignaturaController {
 
     @PostMapping("/api/asignatura/cambiarResultadoCursada/{idCursada}")
     public ResponseEntity<?> cambiarResultadoCursada(@PathVariable Integer idCursada, @RequestParam Integer calificacion) throws MessagingException, IOException {
-        return ResponseEntity.ok(asignaturaService.modificarResultadoCursada(idCursada, calificacion));
+        return asignaturaService.modificarResultadoCursada(idCursada, calificacion);
     }
 
     @GetMapping("/api/asignatura/getPreviasAsignatura/{idAsignatura}")

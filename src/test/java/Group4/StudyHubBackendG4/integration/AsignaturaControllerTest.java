@@ -3,6 +3,7 @@ package Group4.StudyHubBackendG4.integration;
 import Group4.StudyHubBackendG4.util.DatabaseInitializer;
 import Group4.StudyHubBackendG4.util.SetUpHelper;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.io.IOException;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -125,7 +125,7 @@ public class AsignaturaControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignatura3)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body").value("Horarios registrados satisfactoriamente."));
+                .andExpect(content().string("Horarios registrados satisfactoriamente."));
     }
 
     @Test
@@ -134,8 +134,8 @@ public class AsignaturaControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignatura2)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body").value("idAsignatura invalido"));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("idAsignatura invalido"));
     }
 
     @Test
@@ -144,8 +144,8 @@ public class AsignaturaControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidDocente)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body").value("idDocente invalido"));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("idDocente invalido"));
     }
 
     @Test
@@ -154,8 +154,8 @@ public class AsignaturaControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidTimeFormat1)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body").value("Formato de hora inválido. Use HH:mm"));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Formato de hora inválido. Use HH:mm"));
     }
 
     @Test
@@ -164,8 +164,8 @@ public class AsignaturaControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidTimeFormat2)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body").value("horaInicio debe ser menor a horaFin, y los valores deben ser válidos (por ejemplo, 10:30 para 10:30)"));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("horaInicio debe ser menor a horaFin, y los valores deben ser válidos (por ejemplo, 10:30 para 10:30)"));
     }
     @Test
     public void registroHorarios_HorariosSuperpuestos() throws Exception {
@@ -173,8 +173,8 @@ public class AsignaturaControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(setUpHelper.dtNuevoHorarioAsignaturaInvalidTimeFormat3)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body").value("Horarios superpuestos detectados para el dia " + DiaSemana.LUNES));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Horarios superpuestos detectados para el dia " + DiaSemana.LUNES));
     }
 
     @Test
@@ -235,6 +235,130 @@ public class AsignaturaControllerTest {
                         .content(objectMapper.writeValueAsString(List.of(6))))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Existen circularidades en las previaturas seleccionadas."));
+    }
+
+    @Test
+    public void cambiarResultadoCursada_Ok() throws Exception {
+        mockMvc.perform(post("/api/asignatura/cambiarResultadoCursada/{idCursada}", 1)
+                        .param("calificacion", String.valueOf(12))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Resultado de la cursada con ID " + 1 + " cambiado exitosamente a " + ResultadoAsignatura.EXONERADO));
+    }
+
+    @Test
+    public void cambiarResultadoCursada_CursadaNotFound() throws Exception {
+        mockMvc.perform(post("/api/asignatura/cambiarResultadoCursada/{idCursada}", 60)
+                        .param("calificacion", String.valueOf(12))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("No se encontró la cursada."));
+    }
+
+    @Test
+    public void getCursadasPendientes_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/cursadasPendientes")
+                        .param("anio", String.valueOf(2022))
+                        .param("idAsignatura", String.valueOf(1))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].nombreEstudiante").value("Jane"))
+                .andExpect(jsonPath("$[0].apellidoEstudiante").value("Smith"))
+                .andExpect(jsonPath("$[0].mailEstudiante").value("jane.smith@example.com"));
+    }
+
+    @Test
+    public void getHorarios_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getHorarios/{idAsignatura}", 1)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].idHorarioAsignatura").value(1))
+                .andExpect(jsonPath("$[0].idAsignatura").value(1))
+                .andExpect(jsonPath("$[0].anio").value(2022))
+                .andExpect(jsonPath("$[0].dtHorarioDias").isArray())
+                .andExpect(jsonPath("$[0].dtHorarioDias[0].diaSemana").value("LUNES"))
+                .andExpect(jsonPath("$[0].dtHorarioDias[0].horaInicio").value("10:30"))
+                .andExpect(jsonPath("$[0].dtHorarioDias[0].horaFin").value("12:30"));
+    }
+
+    @Test
+    public void getAsignaturasNoAprobadas_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturasNoAprobadas/{idEstudiante}", 2)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].nombre").value("Principios de Programación"));
+    }
+
+    @Test
+    public void getPreviasAsignatura_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getPreviasAsignatura/{idAsignatura}", 2)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].nombre").value("Principios de Programación"));
+    }
+
+    @Test
+    public void getPreviasAsignatura_AsignaturaNotFound() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getPreviasAsignatura/{idAsignatura}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Asignatura no encontrada."));
+    }
+
+    @Test
+    public void getPreviasAsignatura_AsignaturaHasNoPrevias() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getPreviasAsignatura/{idAsignatura}", 1)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("La asignatura no tiene previas."));
+    }
+
+    @Test
+    public void getNoPreviasAsignatura_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getNoPreviasAsignatura/{idAsignatura}", 2)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].nombre").value("Ingenieria de Software"))
+                .andExpect(jsonPath("$[1].nombre").value("Matematica Discreta"))
+                .andExpect(jsonPath("$[2].nombre").value("Programación 3"));
+    }
+
+    @Test
+    public void getNoPreviasAsignatura_AsignaturaNotFound() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getNoPreviasAsignatura/{idAsignatura}", 60)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Asignatura no encontrada."));
+    }
+
+    @Test
+    public void getActa_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getActa/{idHorario}", 1)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estudiantes").isArray())
+                .andExpect(jsonPath("$.estudiantes[0].nombre").value("Jane"))
+                .andExpect(jsonPath("$.estudiantes[0].email").value("jane.smith@example.com"))
+                .andExpect(jsonPath("$.docentes").isArray())
+                .andExpect(jsonPath("$.docentes[0].nombre").value("Ellen Sattler"))
+                .andExpect(jsonPath("$.asignatura").value("Principios de Programación"))
+                .andExpect(jsonPath("$.horarioAsignatura.anio").value(2022));
     }
 
 

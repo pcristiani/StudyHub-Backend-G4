@@ -102,6 +102,7 @@ public class SetUpHelper {
     public DtInscripcionCarrera dtInscripcionCarrera1;
     public DtInscripcionCarrera dtInscripcionCarrera2;
     public DtInscripcionCarrera dtInscripcionCarrera3;
+    public DtInscripcionCarrera dtInscripcionCarrera4;
     public DtInscripcionCarrera dtInscripcionCarreraUserNotFound;
     public DtInscripcionCarrera dtInscripcionCarreraUserNotStudent;
     public DtInscripcionCarrera dtInscripcionCarreraCarreraNotFound;
@@ -230,15 +231,18 @@ public class SetUpHelper {
     }
 
     public void setUpDtInscripcionCarreras() throws MessagingException, IOException {
-        dtInscripcionCarrera1 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante1.getIdUsuario(), true);
+        dtInscripcionCarrera1 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante2.getIdUsuario(), true);
         dtInscripcionCarrera2 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante3.getIdUsuario(), true);
         dtInscripcionCarrera3 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante2.getIdUsuario(), false);
+        dtInscripcionCarrera4 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante1.getIdUsuario(), true);
         dtInscripcionCarreraUserNotFound = new DtInscripcionCarrera(1, 60, false);
         dtInscripcionCarreraUserNotStudent = new DtInscripcionCarrera(1, userCoordinador1.getIdUsuario(), false);
         dtInscripcionCarreraCarreraNotFound = new DtInscripcionCarrera(60, userEstudiante3.getIdUsuario(), false);
         carreraService.inscripcionCarrera(dtInscripcionCarrera2);
         carreraService.inscripcionCarrera(dtInscripcionCarrera3);
+        carreraService.inscripcionCarrera(dtInscripcionCarrera4);
         carreraService.acceptEstudianteCarrera(dtInscripcionCarrera2);
+        carreraService.acceptEstudianteCarrera(dtInscripcionCarrera4);
     }
 
     public void setUpDtPeriodoExamenRequests() {
