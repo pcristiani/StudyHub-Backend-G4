@@ -5,16 +5,14 @@ import Group4.StudyHubBackendG4.persistence.*;
 import Group4.StudyHubBackendG4.repositories.AsignaturaRepo;
 import Group4.StudyHubBackendG4.repositories.CarreraRepo;
 import Group4.StudyHubBackendG4.repositories.PasswordResetTokenRepo;
-import Group4.StudyHubBackendG4.services.AsignaturaService;
-import Group4.StudyHubBackendG4.services.AutenticacionService;
-import Group4.StudyHubBackendG4.services.CarreraService;
-import Group4.StudyHubBackendG4.services.UsuarioService;
+import Group4.StudyHubBackendG4.services.*;
 import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -34,6 +32,9 @@ public class SetUpHelper {
 
     @Autowired
     private CarreraService carreraService;
+
+    @Autowired
+    private ExamenService examenService;
 
     @Autowired
     private CarreraRepo carreraRepo;
@@ -63,6 +64,7 @@ public class SetUpHelper {
     public Asignatura asignatura2;
     public Asignatura asignatura3;
     public Asignatura asignatura4;
+    public Asignatura asignatura5;
     public DocenteAsignatura docenteAsignatura1;
     public DocenteAsignatura docenteAsignatura2;
     public DtHorarioDias dtHorarioDias1;
@@ -74,6 +76,7 @@ public class SetUpHelper {
     public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura1;
     public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura2;
     public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura3;
+    public DtNuevoHorarioAsignatura dtNuevoHorarioAsignatura4;
     public DtNuevoHorarioAsignatura dtNuevoHorarioAsignaturaInvalidDocente;
     public DtNuevoHorarioAsignatura dtNuevoHorarioAsignaturaInvalidTimeFormat1;
     public DtNuevoHorarioAsignatura dtNuevoHorarioAsignaturaInvalidTimeFormat2;
@@ -81,6 +84,7 @@ public class SetUpHelper {
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura1;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura2;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura3;
+    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura4;
     public DtUsuario dtUserModifiedNombreApellidoEmail;
     public DtUsuario dtUserModifiedCedula;
     public DtDocente dtDocente1;
@@ -125,6 +129,15 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignaturaConflict6;
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias1;
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias2;
+    public DtInscripcionExamen dtInscripcionExamen1;
+    public DtInscripcionExamen dtInscripcionExamen2;
+    public DtNuevoExamen dtNuevoExamen1;
+    public DtNuevoExamen dtNuevoExamen2;
+    public DtNuevoExamen dtNuevoExamenaAlreadyExists;
+    public DtNuevoExamen dtNuevoExamenInvalidAsignatura;
+    public DtNuevoExamen dtNuevoExamenInvalidPeriodo;
+    public DtNuevoExamen dtNuevoExamenInvalidDocente;
+    public DtNuevoExamen dtNuevoExamenInvalidInvalidHorario;
 
 
     public void setUp() throws MessagingException, IOException {
@@ -147,6 +160,8 @@ public class SetUpHelper {
         setUpInscripciones();
         setUpDtPeriodoExamenRequests();
         setUpPasswordReset();
+        setUpDtInscripcionExamenes();
+        setUpDtNuevoExamenes();
     }
 
     public void setUpUsers() {
@@ -191,8 +206,9 @@ public class SetUpHelper {
     public void setUpAsignaturas() {
         asignatura1 = asignaturaRepo.findById(1).get();
         asignatura2 = asignaturaRepo.findById(2).get();
-        asignatura3 = asignaturaRepo.findById(4).get();
-        asignatura4 = asignaturaRepo.findById(5).get();
+        asignatura3 = asignaturaRepo.findById(3).get();
+        asignatura4 = asignaturaRepo.findById(4).get();
+        asignatura5 = asignaturaRepo.findById(5).get();
     }
 
     public void setUpDocenteAsignaturas() {
@@ -290,19 +306,24 @@ public class SetUpHelper {
         dtNuevoHorarioAsignatura1 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDias1));
         dtNuevoHorarioAsignatura2 = new DtNuevoHorarioAsignatura(docente2.getIdDocente(), 2022, List.of(dtHorarioDias2));
         dtNuevoHorarioAsignatura3 = new DtNuevoHorarioAsignatura(docente2.getIdDocente(), 2022, List.of(dtHorarioDias3));
+        dtNuevoHorarioAsignatura4 = new DtNuevoHorarioAsignatura(docente2.getIdDocente(), 2023, List.of(dtHorarioDias3));
         dtNuevoHorarioAsignaturaInvalidDocente = new DtNuevoHorarioAsignatura(60, 2022, List.of(dtHorarioDias2));
         dtNuevoHorarioAsignaturaInvalidTimeFormat1 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDiasInvalidTimeFormat1));
         dtNuevoHorarioAsignaturaInvalidTimeFormat2 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDiasInvalidTimeFormat2));
         dtNuevoHorarioAsignaturaInvalidTimeFormat3 = new DtNuevoHorarioAsignatura(docente1.getIdDocente(), 2022, List.of(dtHorarioDiasInvalidTimeFormat3));
         asignaturaService.registroHorarios(asignatura1.getIdAsignatura(), dtNuevoHorarioAsignatura1);
-        asignaturaService.registroHorarios(asignatura3.getIdAsignatura(), dtNuevoHorarioAsignatura2);
+        asignaturaService.registroHorarios(asignatura4.getIdAsignatura(), dtNuevoHorarioAsignatura2);
+        asignaturaService.registroHorarios(asignatura5.getIdAsignatura(), dtNuevoHorarioAsignatura4);
     }
 
-    public void setUpInscripciones() {
+    public void setUpInscripciones() throws MessagingException, IOException {
         dtNuevaInscripcionAsignatura1 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
         dtNuevaInscripcionAsignatura2 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
-        dtNuevaInscripcionAsignatura3 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura3.getIdAsignatura(), 2);
+        dtNuevaInscripcionAsignatura3 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura4.getIdAsignatura(), 2);
+        dtNuevaInscripcionAsignatura4 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura5.getIdAsignatura(), 2);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura1);
+        asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura4);
+        asignaturaService.modificarResultadoCursada(3,4);
     }
 
     public void setUpPasswordReset() {
@@ -310,6 +331,22 @@ public class SetUpHelper {
         dtNewPassword = new DtNewPassword();
         dtNewPassword.setToken(String.valueOf(passwordResetTokenRepo.findAll().get(0)));
         dtNewPassword.setNewPassword("newPass123");
+    }
+
+    private void setUpDtNuevoExamenes() {
+        dtNuevoExamen1 = new DtNuevoExamen(asignatura1.getIdAsignatura(), 1, List.of(docente1.getIdDocente()), LocalDateTime.of(2024, 12, 5, 10, 0));
+        dtNuevoExamen2 = new DtNuevoExamen(asignatura2.getIdAsignatura(), 1, List.of(docente1.getIdDocente()), LocalDateTime.of(2024, 12, 5, 10, 0));
+        dtNuevoExamenaAlreadyExists = new DtNuevoExamen(asignatura2.getIdAsignatura(), 1, List.of(docente1.getIdDocente()), LocalDateTime.of(2024, 12, 5, 10, 0));
+        dtNuevoExamenInvalidAsignatura = new DtNuevoExamen(60, 1, List.of(docente1.getIdDocente()), LocalDateTime.of(2024, 12, 5, 10, 0));
+        dtNuevoExamenInvalidPeriodo = new DtNuevoExamen(asignatura1.getIdAsignatura(), 60, List.of(docente1.getIdDocente()), LocalDateTime.of(2024, 12, 5, 10, 0));
+        dtNuevoExamenInvalidDocente = new DtNuevoExamen(asignatura1.getIdAsignatura(), 1, List.of(60), LocalDateTime.of(2024, 12, 5, 10, 0));
+        dtNuevoExamenInvalidInvalidHorario = new DtNuevoExamen(asignatura1.getIdAsignatura(), 1, List.of(docente1.getIdDocente()), LocalDateTime.of(2024, 11, 5, 10, 0));
+        examenService.registroAsignaturaAPeriodo(dtNuevoExamen2);
+    }
+
+    private void setUpDtInscripcionExamenes() {
+        // dtInscripcionExamen1 = new DtInscripcionExamen();
+        // dtInscripcionExamen2 = new DtInscripcionExamen();
     }
 
 }

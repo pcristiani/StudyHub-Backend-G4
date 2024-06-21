@@ -199,7 +199,7 @@ public class AsignaturaControllerTest {
 
     @Test
       public void registrarPreviaturas_Ok() throws Exception {
-        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", setUpHelper.asignatura4.getIdAsignatura())
+        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", setUpHelper.asignatura5.getIdAsignatura())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(List.of(setUpHelper.asignatura2.getIdAsignatura()))))
@@ -219,7 +219,7 @@ public class AsignaturaControllerTest {
 
     @Test
     public void registrarPreviaturas_PreviaAsignaturaNotFound() throws Exception {
-        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", setUpHelper.asignatura4.getIdAsignatura())
+        mockMvc.perform(post("/api/asignatura/registrarPreviaturas/{idAsignatura}", setUpHelper.asignatura5.getIdAsignatura())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(List.of(60))))
@@ -360,6 +360,5 @@ public class AsignaturaControllerTest {
                 .andExpect(jsonPath("$.asignatura").value("Principios de Programación"))
                 .andExpect(jsonPath("$.horarioAsignatura.anio").value(2022));
     }
-
 
 }
