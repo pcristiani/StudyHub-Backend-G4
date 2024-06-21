@@ -106,4 +106,53 @@ public class ExamenControllerTest {
                 .andExpect(content().string("Ya existe un examen de la asignatura para la fecha indicada."));
     }
 
+    @Test
+    public void inscripcionExamen_Ok() throws Exception {
+        mockMvc.perform(post("/api/examen/inscripcionExamen")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionExamen1)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Se inscribió al examen."));
+    }
+
+    @Test
+    public void inscripcionExamen_EstudianteNotFound() throws Exception {
+        mockMvc.perform(post("/api/examen/inscripcionExamen")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionExamenInvalidEstudiante)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("No existe el estudiante."));
+    }
+
+    @Test
+    public void inscripcionExamen_ExamenNotFound() throws Exception {
+        mockMvc.perform(post("/api/examen/inscripcionExamen")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionExamenInvalidExamen)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("No existe el examen."));
+    }
+
+    @Test
+    public void inscripcionExamen_StudentHasNoCursadaWithResultadoExamen() throws Exception {
+        mockMvc.perform(post("/api/examen/inscripcionExamen")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionExamenInvalidCursadaWithNoExamen)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("El estudiante no tiene una cursada con resultado 'EXAMEN'."));
+    }
+
+    @Test
+    public void inscripcionExamen_AsignaturaAlreadyApproved() throws Exception {
+        mockMvc.perform(post("/api/examen/inscripcionExamen")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionExamenInvalidAlreadyApproved)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("El estudiante ya aprobó la asignatura."));
+    }
 }

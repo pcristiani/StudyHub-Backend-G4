@@ -85,6 +85,7 @@ public class SetUpHelper {
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura2;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura3;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura4;
+    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura5;
     public DtUsuario dtUserModifiedNombreApellidoEmail;
     public DtUsuario dtUserModifiedCedula;
     public DtDocente dtDocente1;
@@ -130,7 +131,10 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias1;
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias2;
     public DtInscripcionExamen dtInscripcionExamen1;
-    public DtInscripcionExamen dtInscripcionExamen2;
+    public DtInscripcionExamen dtInscripcionExamenInvalidEstudiante;
+    public DtInscripcionExamen dtInscripcionExamenInvalidExamen;
+    public DtInscripcionExamen dtInscripcionExamenInvalidCursadaWithNoExamen;
+    public DtInscripcionExamen dtInscripcionExamenInvalidAlreadyApproved;
     public DtNuevoExamen dtNuevoExamen1;
     public DtNuevoExamen dtNuevoExamen2;
     public DtNuevoExamen dtNuevoExamenaAlreadyExists;
@@ -321,9 +325,12 @@ public class SetUpHelper {
         dtNuevaInscripcionAsignatura2 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura1.getIdAsignatura(), 1);
         dtNuevaInscripcionAsignatura3 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura4.getIdAsignatura(), 2);
         dtNuevaInscripcionAsignatura4 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura5.getIdAsignatura(), 2);
+        dtNuevaInscripcionAsignatura5 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura2.getIdAsignatura(), 2);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura1);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura4);
-        asignaturaService.modificarResultadoCursada(3,4);
+        asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura5);
+        asignaturaService.modificarResultadoCursada(3,10);
+        asignaturaService.modificarResultadoCursada(1,4);
     }
 
     public void setUpPasswordReset() {
@@ -345,8 +352,11 @@ public class SetUpHelper {
     }
 
     private void setUpDtInscripcionExamenes() {
-        // dtInscripcionExamen1 = new DtInscripcionExamen();
-        // dtInscripcionExamen2 = new DtInscripcionExamen();
+        dtInscripcionExamen1 = new DtInscripcionExamen(2,1);
+        dtInscripcionExamenInvalidEstudiante = new DtInscripcionExamen(60,1);
+        dtInscripcionExamenInvalidExamen = new DtInscripcionExamen(2,60);
+        dtInscripcionExamenInvalidCursadaWithNoExamen = new DtInscripcionExamen(1,1);
+        dtInscripcionExamenInvalidAlreadyApproved = new DtInscripcionExamen(userEstudiante1.getIdUsuario(),1);
     }
 
 }
