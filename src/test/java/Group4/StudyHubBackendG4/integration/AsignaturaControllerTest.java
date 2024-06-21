@@ -261,7 +261,7 @@ public class AsignaturaControllerTest {
     public void getCursadasPendientes_Ok() throws Exception {
         mockMvc.perform(get("/api/asignatura/cursadasPendientes")
                         .param("anio", String.valueOf(2022))
-                        .param("idAsignatura", String.valueOf(1))
+                        .param("idAsignatura", String.valueOf(5))
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

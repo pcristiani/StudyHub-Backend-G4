@@ -49,6 +49,7 @@ public class SetUpHelper {
     public Usuario userEstudiante1;
     public Usuario userEstudiante2;
     public Usuario userEstudiante3;
+    public Usuario userEstudiante4;
     public Usuario userEstudianteNotValidated;
     public Usuario userCoordinador1;
     public Usuario userCoordinador2;
@@ -86,6 +87,7 @@ public class SetUpHelper {
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura3;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura4;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura5;
+    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura6;
     public DtUsuario dtUserModifiedNombreApellidoEmail;
     public DtUsuario dtUserModifiedCedula;
     public DtDocente dtDocente1;
@@ -131,6 +133,7 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias1;
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias2;
     public DtInscripcionExamen dtInscripcionExamen1;
+    public DtInscripcionExamen dtInscripcionExamen2;
     public DtInscripcionExamen dtInscripcionExamenInvalidEstudiante;
     public DtInscripcionExamen dtInscripcionExamenInvalidExamen;
     public DtInscripcionExamen dtInscripcionExamenInvalidCursadaWithNoExamen;
@@ -173,6 +176,7 @@ public class SetUpHelper {
         userEstudiante1 = testUtils.createUsuario("Jane", "Smith", "jane.smith@example.com", "87654321", "E", "123", true, true);
         userEstudiante2 = testUtils.createUsuario("Bran", "Done", "bran.done@example.com", "123654786", "E", "123", true, true);
         userEstudiante3 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "E", "123", true, true);
+        userEstudiante4 = testUtils.createUsuario("Marcos", "Baldez", "marcos.baldez@example.com", "6543814", "E", "123", true, true);
         userEstudianteNotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
         userCoordinador1 = testUtils.createUsuario("Paul", "Atreides", "paul.atreides@example.com", "987321654", "C", "123", true, true);
         userCoordinador2 = testUtils.createUsuario("Usul", "Muadhib", "usul.muadhib@example.com", "123987452", "C", "123", true, true);
@@ -326,11 +330,14 @@ public class SetUpHelper {
         dtNuevaInscripcionAsignatura3 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura4.getIdAsignatura(), 2);
         dtNuevaInscripcionAsignatura4 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura5.getIdAsignatura(), 2);
         dtNuevaInscripcionAsignatura5 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura2.getIdAsignatura(), 2);
+        dtNuevaInscripcionAsignatura6 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura2.getIdAsignatura(), 2);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura1);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura4);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura5);
+        asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura6);
         asignaturaService.modificarResultadoCursada(3,10);
         asignaturaService.modificarResultadoCursada(1,4);
+        asignaturaService.modificarResultadoCursada(4,4);
     }
 
     public void setUpPasswordReset() {
@@ -352,7 +359,8 @@ public class SetUpHelper {
     }
 
     private void setUpDtInscripcionExamenes() {
-        dtInscripcionExamen1 = new DtInscripcionExamen(2,1);
+        dtInscripcionExamen1 = new DtInscripcionExamen(4,1);
+        dtInscripcionExamen2 = new DtInscripcionExamen(3,1);
         dtInscripcionExamenInvalidEstudiante = new DtInscripcionExamen(60,1);
         dtInscripcionExamenInvalidExamen = new DtInscripcionExamen(2,60);
         dtInscripcionExamenInvalidCursadaWithNoExamen = new DtInscripcionExamen(1,1);

@@ -308,7 +308,7 @@ public class UsuarioControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].calificaciones[0].resultado").value("PENDIENTE"));
+                .andExpect(jsonPath("$[0].calificaciones[0].resultado").value("EXAMEN"));
     }
 
     @Test
@@ -333,7 +333,7 @@ public class UsuarioControllerTest {
 
     @Test
     public void getCalificacionesAsignaturas_CursadaNotFound() throws Exception {
-        mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", setUpHelper.userEstudiante3.getIdUsuario())
+        mockMvc.perform(get("/api/estudiante/getCalificacionesAsignaturas/{idEstudiante}", setUpHelper.userEstudiante4.getIdUsuario())
                         .param("idCarrera", setUpHelper.carrera1.getIdCarrera().toString())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON))
