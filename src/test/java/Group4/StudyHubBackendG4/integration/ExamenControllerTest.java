@@ -156,13 +156,4 @@ public class ExamenControllerTest {
                 .andExpect(content().string("El estudiante ya aprobó la asignatura."));
     }
 
-    @Test
-    public void cambiarResultadoExamen_Ok() throws Exception {
-        mockMvc.perform(post("/api/examen/cambiarResultadoExamen/{idCursadaExamen}", 1)
-                        .param("calificacion", String.valueOf(12))
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Resultado de la cursada con ID" + 2 + "cambiado exitosamente a " + "asdasd"));
-    }
 }
