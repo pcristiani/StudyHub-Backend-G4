@@ -11,5 +11,4 @@ public class DtNuevoHorarioAsignatura {
     private Integer idDocente;
     private Integer anio;
     private List<DtHorarioDias> dtHorarioDias;
-
 }

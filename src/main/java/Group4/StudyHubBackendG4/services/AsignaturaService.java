@@ -469,7 +469,7 @@ public class AsignaturaService {
         return ResponseEntity.ok().body("Previaturas registradas exitosamente.");
     }
 
-    private boolean validarCircularidad(Integer idAsignatura, List<Integer> nuevasPrevias) {
+    public boolean validarCircularidad(Integer idAsignatura, List<Integer> nuevasPrevias) {
         Set<Integer> visitado = new HashSet<>();
         Set<Integer> stack = new HashSet<>();
 
@@ -537,7 +537,7 @@ public class AsignaturaService {
         notificarResultadoCursadaPorMail(usuario, nuevoResultado, cursada.getAsignatura().getNombre(), calificacion);
         pushService.sendPushNotification(usuario.getIdUsuario(), "Se ha registrado un resultado de tus cursadas! ", "StudyHub");
 
-        return ResponseEntity.ok().body("Resultado de la cursada con ID " + idCursada + " cambiado exitosamente a " + nuevoResultado);
+        return ResponseEntity.ok().body("Resultado de la cursada cambiado exitosamente a " + nuevoResultado);
     }
 
     private List<DtAsignatura> convertToDtAsignatura (List<Asignatura> asignaturas) {
