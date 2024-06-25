@@ -29,8 +29,6 @@ public class DataLoadController {
 
     @PostMapping("/loadData")
     public ResponseEntity<?> loadData() throws MessagingException, IOException {
-        Faker faker = new Faker();
-
         List<DtUsuario> usuarioList = usuarioService.getUsuarios();
         if(!usuarioList.isEmpty()) {
             return ResponseEntity.badRequest().body("Ya hay datos en la base de datos");
@@ -58,12 +56,7 @@ public class DataLoadController {
         dataLoadService.registerExamenes();
 
         //Inscribir estudiantes a carreras
-
-        //Validar inscripciones a carrera
-
-        //Inscribir estudiantes a asignaturas
-
-        //Calificar
+        dataLoadService.inscribirEstudiantes();
 
         return ResponseEntity.ok().body("Datos cargados exitosamente");
     }

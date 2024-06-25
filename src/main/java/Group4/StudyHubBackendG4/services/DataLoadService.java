@@ -41,6 +41,8 @@ public class DataLoadService {
     @Autowired
     private DocenteHorarioAsignaturaRepo docenteHorarioAsignaturaRepo;
     @Autowired
+    private InscripcionCarreraRepo inscripcionCarreraRepo;
+    @Autowired
     private ExamenRepo examenRepo;
     @Autowired
     private DocenteExamenRepo docenteExamenRepo;
@@ -79,7 +81,7 @@ public class DataLoadService {
         }
 
         // Cargar usuarios estudiante
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 100; i++) {
             register(generateRandomUser("E", "4"));
         }
     }
@@ -174,11 +176,32 @@ public class DataLoadService {
         }
     }
 
+    public void inscribirEstudiantes() {
+        List<Usuario> estudiantes = usuarioRepo.findByRol("E");
+        List<Carrera> carreras = carreraRepo.findAll();
+
+        for (Usuario estudiante : estudiantes) {
+            List<Carrera> carrerasSeleccionadas = seleccionarCarrerasAleatorias(carreras);
+            for (Carrera carrera : carrerasSeleccionadas) {
+                DtInscripcionCarrera dtInscripcionCarrera = new DtInscripcionCarrera();
+                dtInscripcionCarrera.setIdEstudiante(estudiante.getIdUsuario());
+                dtInscripcionCarrera.setIdCarrera(carrera.getIdCarrera());
+                dtInscripcionCarrera.setValidado(ThreadLocalRandom.current().nextBoolean());
+                inscripcionCarrera(dtInscripcionCarrera);
+            }
+        }
+    }
+
 
     /* -----------------------------------------------------------------------------------------------*/
     /* -----------------------------------------------------------------------------------------------*/
     /* -----------------------------------------------------------------------------------------------*/
 
+    private List<Carrera> seleccionarCarrerasAleatorias(List<Carrera> carreras) {
+        int numCarreras = ThreadLocalRandom.current().nextInt(1, 3);
+        Collections.shuffle(carreras);
+        return carreras.subList(0, Math.min(numCarreras, carreras.size()));
+    }
 
     private List<Docente> seleccionarDocentesAleatorios(List<Docente> docentes) {
         int numDocentes = ThreadLocalRandom.current().nextInt(1, 4); // Seleccionar entre 1 y 3 docentes
@@ -308,9 +331,12 @@ public class DataLoadService {
         return new DtNuevaAsignatura(carrera.getIdCarrera(), idDocentes, nombre, creditos, descripcion, departamento, tieneExamen, activa, previas);
     }
 
+    private String limitarTexto(String texto, int longitudMaxima) {
+        return texto.length() > longitudMaxima ? texto.substring(0, longitudMaxima) : texto;
+    }
     private DtNuevaCarrera generateRandomCarrera(List<Usuario> coordinadores, String nombre) {
-        String descripcion = faker.lorem().sentence();
-        String requisitos = faker.lorem().paragraph();
+        String descripcion = limitarTexto(faker.lorem().sentence(), 250);
+        String requisitos = limitarTexto(faker.lorem().paragraph(), 250);
         int duracion = ThreadLocalRandom.current().nextInt(1, 7); // Duración entre 1 y 6 años
         int idCoordinador = coordinadores.get(ThreadLocalRandom.current().nextInt(coordinadores.size())).getIdUsuario();
 
@@ -632,7 +658,7 @@ public class DataLoadService {
         docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
     }
 
-    public void altaExamen(DtNuevoExamen nuevoExamen) {
+    private void altaExamen(DtNuevoExamen nuevoExamen) {
         //Validar que existe asignatura
         Asignatura asignatura = asignaturaRepo.findById(nuevoExamen.getIdAsignatura()).orElse(null);
         if (asignatura == null) {
@@ -680,4 +706,47 @@ public class DataLoadService {
             docenteExamenRepo.save(docenteExamen);
         }
     }
+    private void inscripcionCarrera(DtInscripcionCarrera dtInscripcionCarrera) {
+        String message = this.validateInscripcion(dtInscripcionCarrera);
+        if(message != null){
+            System.out.println(message);
+            return;
+        }
+
+        Usuario user = usuarioRepo.findById(dtInscripcionCarrera.getIdEstudiante()).orElse(null);
+        Carrera carrera = carreraRepo.findById(dtInscripcionCarrera.getIdCarrera()).orElse(null);
+
+        // Verificar si el estudiante ya tiene una inscripción activa y no validada a esta carrera
+        InscripcionCarrera existingInscripcion = inscripcionCarreraRepo
+                .findByUsuarioAndCarreraAndActiva(user, carrera, true).orElse(null);
+
+        if (existingInscripcion != null) {
+            System.out.println("El estudiante ya tiene una inscripción activa.");
+            return;
+        }
+
+        InscripcionCarrera inscripcionCarrera = new InscripcionCarrera();
+        inscripcionCarrera.setCarrera(carrera);
+        inscripcionCarrera.setUsuario(user);
+        inscripcionCarrera.setActiva(true);
+        inscripcionCarrera.setValidada(dtInscripcionCarrera.getValidado());
+        inscripcionCarreraRepo.save(inscripcionCarrera);
+    }
+
+    private String validateInscripcion(DtInscripcionCarrera dtInscripcionCarrera) {
+        Usuario user = usuarioRepo.findById(dtInscripcionCarrera.getIdEstudiante()).orElse(null);
+        Carrera carrera = carreraRepo.findById(dtInscripcionCarrera.getIdCarrera()).orElse(null);
+
+        if (user == null) {
+            return "El usuario no fue encontrado.";
+        }
+        if (!user.getRol().equals("E")) {
+            return "El usuario no es un estudiante.";
+        }
+        if (carrera == null) {
+            return "La carrera no fue encontrada.";
+        }
+        return null;
+    }
+
 }
