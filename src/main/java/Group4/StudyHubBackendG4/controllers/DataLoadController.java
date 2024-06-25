@@ -55,6 +55,7 @@ public class DataLoadController {
         dataLoadService.registerHorarios();
 
         //Crear examenes
+        dataLoadService.registerExamenes();
 
         //Inscribir estudiantes a carreras
 

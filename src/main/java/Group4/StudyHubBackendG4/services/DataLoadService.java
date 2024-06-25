@@ -41,6 +41,10 @@ public class DataLoadService {
     @Autowired
     private DocenteHorarioAsignaturaRepo docenteHorarioAsignaturaRepo;
     @Autowired
+    private ExamenRepo examenRepo;
+    @Autowired
+    private DocenteExamenRepo docenteExamenRepo;
+    @Autowired
     private AsignaturaService asignaturaService;
     @Autowired
     private CarreraService carreraService;
@@ -145,11 +149,54 @@ public class DataLoadService {
         }
     }
 
+    public void registerExamenes() {
+        List<Carrera> carreras = carreraRepo.findAll();
+        for (Carrera carrera : carreras) {
+            List<Asignatura> asignaturas = asignaturaRepo.findByCarreraAndTieneExamen(carrera, true);
+            List<PeriodoExamen> periodos = periodoExamenRepo.findByCarrera(carrera);
+            for (Asignatura asignatura : asignaturas) {
+                List<Docente> docentes = docenteAsignaturaRepo.findDocentesByAsignaturaId(asignatura.getIdAsignatura());
+                for (PeriodoExamen periodo : periodos) {
+                    LocalDateTime fechaHoraExamen = generateRandomFechaHora(periodo);
+                    List<Docente> docentesSeleccionados = seleccionarDocentesAleatorios(docentes);
+                    List<Integer> idsDocentes = new ArrayList<>();
+                    for (Docente docente : docentesSeleccionados) {
+                        idsDocentes.add(docente.getIdDocente());
+                    }
+                    DtNuevoExamen nuevoExamen = new DtNuevoExamen();
+                    nuevoExamen.setIdAsignatura(asignatura.getIdAsignatura());
+                    nuevoExamen.setIdPeriodo(periodo.getIdPeriodoExamen());
+                    nuevoExamen.setIdsDocentes(idsDocentes);
+                    nuevoExamen.setFechaHora(fechaHoraExamen);
+                    altaExamen(nuevoExamen);
+                }
+            }
+        }
+    }
+
 
     /* -----------------------------------------------------------------------------------------------*/
     /* -----------------------------------------------------------------------------------------------*/
     /* -----------------------------------------------------------------------------------------------*/
 
+
+    private List<Docente> seleccionarDocentesAleatorios(List<Docente> docentes) {
+        int numDocentes = ThreadLocalRandom.current().nextInt(1, 4); // Seleccionar entre 1 y 3 docentes
+        Collections.shuffle(docentes);
+        return docentes.subList(0, Math.min(numDocentes, docentes.size()));
+    }
+
+    private LocalDateTime generateRandomFechaHora(PeriodoExamen periodo) {
+        LocalDate inicio = periodo.getFechaInicio();
+        LocalDate fin = periodo.getFechaFin();
+        long startEpochDay = inicio.toEpochDay();
+        long endEpochDay = fin.toEpochDay();
+        long randomDay = ThreadLocalRandom.current().nextLong(startEpochDay, endEpochDay + 1);
+        LocalDate randomDate = LocalDate.ofEpochDay(randomDay);
+        int hour = ThreadLocalRandom.current().nextInt(8, 18); // Horario entre 8:00 y 17:59
+        int minute = ThreadLocalRandom.current().nextInt(0, 2) * 30; // Minutos pueden ser 0 o 30
+        return randomDate.atTime(hour, minute);
+    }
     private List<DtNuevoHorarioAsignatura> generateHorarios(List<Docente> docentes) {
         List<DtNuevoHorarioAsignatura> horarios = new ArrayList<>();
         int[] anios = {2023, 2024};
@@ -583,5 +630,54 @@ public class DataLoadService {
         docenteHorarioAsignatura.setDocente(docente);
         docenteHorarioAsignatura.setHorarioAsignatura(horarioAsignatura);
         docenteHorarioAsignaturaRepo.save(docenteHorarioAsignatura);
+    }
+
+    public void altaExamen(DtNuevoExamen nuevoExamen) {
+        //Validar que existe asignatura
+        Asignatura asignatura = asignaturaRepo.findById(nuevoExamen.getIdAsignatura()).orElse(null);
+        if (asignatura == null) {
+            System.out.println("No existe la asignatura");
+            return;
+        }
+        //Validar que existe el periodo
+        PeriodoExamen periodoExamen = periodoExamenRepo.findById(nuevoExamen.getIdPeriodo()).orElse(null);
+        if (periodoExamen == null) {
+            System.out.println("No existe el periodo de examen");
+            return;
+        }
+        //Validar que existan los docentes
+        List<Integer> idsDocentes = nuevoExamen.getIdsDocentes();
+        List<Docente> docentes = new ArrayList<>();
+        for (Integer id : idsDocentes) {
+            Docente docente = docenteRepo.findById(id).orElse(null);
+            if (docente == null) {
+                System.out.println("No existe el docente con id: " + id);
+                return;
+            }
+            docentes.add(docente);
+        }
+        LocalDateTime fechaHoraExamen = nuevoExamen.getFechaHora();
+        LocalDate inicioPeriodo = periodoExamen.getFechaInicio();
+        LocalDate finPeriodo = periodoExamen.getFechaFin();
+        if (fechaHoraExamen.isBefore(inicioPeriodo.atStartOfDay()) || fechaHoraExamen.isAfter(finPeriodo.atStartOfDay())) {
+            System.out.println("La fecha indicada no esta dentro del periodo de examen.");
+            return;
+        }
+        if(examenRepo.existsByAsignaturaAndFechaHora(asignatura,fechaHoraExamen)){
+            System.out.println("Ya existe un examen de la asignatura para la fecha indicada.");
+            return;
+        }
+        Examen examen = new Examen();
+        examen.setAsignatura(asignatura);
+        examen.setPeriodoExamen(periodoExamen);
+        examen.setFechaHora(fechaHoraExamen);
+        examenRepo.save(examen);
+
+        for(Docente d: docentes){
+            DocenteExamen docenteExamen = new DocenteExamen();
+            docenteExamen.setIdExamen(examen);
+            docenteExamen.setDocente(d);
+            docenteExamenRepo.save(docenteExamen);
+        }
     }
 }
