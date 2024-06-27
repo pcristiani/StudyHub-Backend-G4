@@ -50,6 +50,7 @@ public class SetUpHelper {
     public Usuario userEstudiante2;
     public Usuario userEstudiante3;
     public Usuario userEstudiante4;
+    public Usuario userEstudiante5;
     public Usuario userEstudianteNotValidated;
     public Usuario userCoordinador1;
     public Usuario userCoordinador2;
@@ -180,6 +181,7 @@ public class SetUpHelper {
         userEstudiante2 = testUtils.createUsuario("Bran", "Done", "bran.done@example.com", "123654786", "E", "123", true, true);
         userEstudiante3 = testUtils.createUsuario("Betty", "Brown", "betty.brown@example.com", "789654123", "E", "123", true, true);
         userEstudiante4 = testUtils.createUsuario("Marcos", "Baldez", "marcos.baldez@example.com", "6543814", "E", "123", true, true);
+        userEstudiante5 = testUtils.createUsuario("Lenny", "Kravitz", "leny.kravitz@example.com", "12396345", "E", "123", true, true);
         userEstudianteNotValidated = testUtils.createUsuario("Samba", "Rodriguez", "samba.rodriguez@example.com", "65465465", "E", "123", false, false);
         userCoordinador1 = testUtils.createUsuario("Paul", "Atreides", "paul.atreides@example.com", "987321654", "C", "123", true, true);
         userCoordinador2 = testUtils.createUsuario("Usul", "Muadhib", "usul.muadhib@example.com", "123987452", "C", "123", true, true);
@@ -263,6 +265,7 @@ public class SetUpHelper {
         dtInscripcionCarrera3 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante2.getIdUsuario(), false);
         dtInscripcionCarrera4 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante1.getIdUsuario(), true);
         dtInscripcionCarrera5 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante4.getIdUsuario(), true);
+        dtInscripcionCarrera5 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante5.getIdUsuario(), true);
         dtInscripcionCarreraUserNotFound = new DtInscripcionCarrera(1, 60, false);
         dtInscripcionCarreraUserNotStudent = new DtInscripcionCarrera(1, userCoordinador1.getIdUsuario(), false);
         dtInscripcionCarreraCarreraNotFound = new DtInscripcionCarrera(60, userEstudiante3.getIdUsuario(), false);

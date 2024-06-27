@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -271,5 +272,38 @@ public class CarreraControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nombre").value("Medicina"));
+    }
+
+    @Test
+    public void getCarreras_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getCarreras")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body[0].nombre").value("Ingeniería Informática"));
+    }
+
+    @Test
+    public void getCarreraById_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getCarreraById/{idCarrera}", setUpHelper.carrera2.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("nombre").value("Medicina"))
+                .andExpect(jsonPath("duracion").value("6"));
+    }
+
+    @Test
+    public void getPreviaturasGrafo_Ok() throws Exception {
+        mockMvc.perform(get("/api/carrera/getPreviaturasGrafo/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("\"1\" [label=\"Principios de Programación\"]")))
+                .andExpect(content().string(
+                        containsString("\"2\" [label=\"Programación de Aplicaciones\"]")))
+                .andExpect(content().string(
+                        containsString("\"1\" -> \"2\"")));
     }
 }

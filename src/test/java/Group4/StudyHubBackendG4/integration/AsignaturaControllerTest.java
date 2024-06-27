@@ -361,4 +361,79 @@ public class AsignaturaControllerTest {
                 .andExpect(jsonPath("$.horarioAsignatura.anio").value(2022));
     }
 
+    @Test
+    public void getAsignaturas_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturas")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].nombre").value("Principios de Programación"));
+    }
+
+    @Test
+    public void getAsignaturaById_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturaById/{idAsignatura}", setUpHelper.asignatura2.getIdAsignatura())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("nombre").value("Programación de Aplicaciones"))
+                .andExpect(jsonPath("departamento").value("Informatica"))
+                .andExpect(jsonPath("creditos").value("12"));
+    }
+
+    @Test
+    public void getAsignaturasDeCarrera_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturasDeCarrera/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body[0].nombre").value("Principios de Programación"))
+                .andExpect(jsonPath("$.body[1].nombre").value("Programación de Aplicaciones"))
+                .andExpect(jsonPath("$.body[2].nombre").value("Ingenieria de Software"))
+                .andExpect(jsonPath("$.body[3].nombre").value("Matematica Discreta"))
+                .andExpect(jsonPath("$.body[4].nombre").value("Programación 3"));
+    }
+
+    @Test
+    public void getAsignaturasDeEstudiante_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturasDeEstudiante/{idUsuario}", setUpHelper.userEstudiante1.getIdUsuario())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Principios de Programación"))
+                .andExpect(jsonPath("$[1].nombre").value("Matematica Discreta"))
+                .andExpect(jsonPath("$[2].nombre").value("Programación de Aplicaciones"));
+    }
+
+    @Test
+    public void getAsignaturasDeCarreraConExamen_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturasDeCarreraConExamen/{idCarrera}", setUpHelper.carrera1.getIdCarrera())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body[0].nombre").value("Principios de Programación"))
+                .andExpect(jsonPath("$.body[1].nombre").value("Programación de Aplicaciones"))
+                .andExpect(jsonPath("$.body[2].nombre").value("Ingenieria de Software"));
+    }
+
+    @Test
+    public void getAsignaturasAprobadas_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturasAprobadas/{idEstudiante}", setUpHelper.userEstudiante1.getIdUsuario())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Programación de Aplicaciones"));
+    }
+
+    @Test
+    public void getAsignaturasConExamenPendiente_Ok() throws Exception {
+        mockMvc.perform(get("/api/asignatura/getAsignaturasConExamenPendiente/{idEstudiante}", setUpHelper.userEstudiante1.getIdUsuario())
+                        .param("idCarrera", String.valueOf(1))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("Principios de Programación"));
+    }
+
 }
