@@ -244,7 +244,7 @@ public class AsignaturaControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Resultado de la cursada con ID " + 1 + " cambiado exitosamente a " + ResultadoAsignatura.EXONERADO));
+                .andExpect(content().string("Resultado de la cursada cambiado exitosamente a " + ResultadoAsignatura.EXONERADO));
     }
 
     @Test

@@ -88,6 +88,7 @@ public class SetUpHelper {
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura4;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura5;
     public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura6;
+    public DtNuevaInscripcionAsignatura dtNuevaInscripcionAsignatura7;
     public DtUsuario dtUserModifiedNombreApellidoEmail;
     public DtUsuario dtUserModifiedCedula;
     public DtDocente dtDocente1;
@@ -110,6 +111,7 @@ public class SetUpHelper {
     public DtInscripcionCarrera dtInscripcionCarrera2;
     public DtInscripcionCarrera dtInscripcionCarrera3;
     public DtInscripcionCarrera dtInscripcionCarrera4;
+    public DtInscripcionCarrera dtInscripcionCarrera5;
     public DtInscripcionCarrera dtInscripcionCarreraUserNotFound;
     public DtInscripcionCarrera dtInscripcionCarreraUserNotStudent;
     public DtInscripcionCarrera dtInscripcionCarreraCarreraNotFound;
@@ -134,6 +136,7 @@ public class SetUpHelper {
     public DtNuevaAsignatura dtNuevaAsignaturaConPrevias2;
     public DtInscripcionExamen dtInscripcionExamen1;
     public DtInscripcionExamen dtInscripcionExamen2;
+    public DtInscripcionExamen dtInscripcionExamen3;
     public DtInscripcionExamen dtInscripcionExamenInvalidEstudiante;
     public DtInscripcionExamen dtInscripcionExamenInvalidExamen;
     public DtInscripcionExamen dtInscripcionExamenInvalidCursadaWithNoExamen;
@@ -167,8 +170,8 @@ public class SetUpHelper {
         setUpInscripciones();
         setUpDtPeriodoExamenRequests();
         setUpPasswordReset();
-        setUpDtInscripcionExamenes();
         setUpDtNuevoExamenes();
+        setUpDtInscripcionExamenes();
     }
 
     public void setUpUsers() {
@@ -259,14 +262,17 @@ public class SetUpHelper {
         dtInscripcionCarrera2 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante3.getIdUsuario(), true);
         dtInscripcionCarrera3 = new DtInscripcionCarrera(carrera2.getIdCarrera(), userEstudiante2.getIdUsuario(), false);
         dtInscripcionCarrera4 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante1.getIdUsuario(), true);
+        dtInscripcionCarrera5 = new DtInscripcionCarrera(carrera1.getIdCarrera(), userEstudiante4.getIdUsuario(), true);
         dtInscripcionCarreraUserNotFound = new DtInscripcionCarrera(1, 60, false);
         dtInscripcionCarreraUserNotStudent = new DtInscripcionCarrera(1, userCoordinador1.getIdUsuario(), false);
         dtInscripcionCarreraCarreraNotFound = new DtInscripcionCarrera(60, userEstudiante3.getIdUsuario(), false);
         carreraService.inscripcionCarrera(dtInscripcionCarrera2);
         carreraService.inscripcionCarrera(dtInscripcionCarrera3);
         carreraService.inscripcionCarrera(dtInscripcionCarrera4);
+        carreraService.inscripcionCarrera(dtInscripcionCarrera5);
         carreraService.acceptEstudianteCarrera(dtInscripcionCarrera2);
         carreraService.acceptEstudianteCarrera(dtInscripcionCarrera4);
+        carreraService.acceptEstudianteCarrera(dtInscripcionCarrera5);
     }
 
     public void setUpDtPeriodoExamenRequests() {
@@ -331,13 +337,16 @@ public class SetUpHelper {
         dtNuevaInscripcionAsignatura4 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura5.getIdAsignatura(), 2);
         dtNuevaInscripcionAsignatura5 = new DtNuevaInscripcionAsignatura(userEstudiante1.getIdUsuario(), asignatura2.getIdAsignatura(), 2);
         dtNuevaInscripcionAsignatura6 = new DtNuevaInscripcionAsignatura(userEstudiante3.getIdUsuario(), asignatura2.getIdAsignatura(), 2);
+        dtNuevaInscripcionAsignatura7 = new DtNuevaInscripcionAsignatura(userEstudiante4.getIdUsuario(), asignatura2.getIdAsignatura(), 2);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura1);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura4);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura5);
         asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura6);
+        asignaturaService.inscripcionAsignatura(dtNuevaInscripcionAsignatura7);
         asignaturaService.modificarResultadoCursada(3,10);
         asignaturaService.modificarResultadoCursada(1,4);
         asignaturaService.modificarResultadoCursada(4,4);
+        asignaturaService.modificarResultadoCursada(5,4);
     }
 
     public void setUpPasswordReset() {
@@ -361,10 +370,12 @@ public class SetUpHelper {
     private void setUpDtInscripcionExamenes() {
         dtInscripcionExamen1 = new DtInscripcionExamen(4,1);
         dtInscripcionExamen2 = new DtInscripcionExamen(3,1);
+        dtInscripcionExamen3 = new DtInscripcionExamen(userEstudiante4.getIdUsuario(),1);
         dtInscripcionExamenInvalidEstudiante = new DtInscripcionExamen(60,1);
         dtInscripcionExamenInvalidExamen = new DtInscripcionExamen(2,60);
         dtInscripcionExamenInvalidCursadaWithNoExamen = new DtInscripcionExamen(1,1);
         dtInscripcionExamenInvalidAlreadyApproved = new DtInscripcionExamen(userEstudiante1.getIdUsuario(),1);
+        examenService.inscripcionExamen(dtInscripcionExamen3);
     }
 
 }

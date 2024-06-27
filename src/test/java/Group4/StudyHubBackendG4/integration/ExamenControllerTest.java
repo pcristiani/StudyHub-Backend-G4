@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 
+import static Group4.StudyHubBackendG4.utils.enums.ResultadoExamen.APROBADO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -154,6 +155,16 @@ public class ExamenControllerTest {
                         .content(objectMapper.writeValueAsString(setUpHelper.dtInscripcionExamenInvalidAlreadyApproved)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("El estudiante ya aprobó la asignatura."));
+    }
+
+    @Test
+    public void cambiarResultadoExamen_Ok() throws Exception {
+        mockMvc.perform(post("/api/examen/cambiarResultadoExamen/{idCursadaExamen}", 1)
+                        .param("calificacion", String.valueOf(10))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + setUpHelper.token1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Resultado de la cursada con ID "+ 1 +" cambiado exitosamente a "+ APROBADO));
     }
 
 }
