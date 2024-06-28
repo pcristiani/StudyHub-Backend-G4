@@ -19,6 +19,7 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class ExamenController {
+
     @Autowired
     private ExamenService examenService;
 
@@ -51,7 +52,7 @@ public class ExamenController {
 
     @PostMapping("/api/examen/cambiarResultadoExamen/{idCursadaExamen}")
     public ResponseEntity<?> cambiarResultadoExamen(@PathVariable Integer idCursadaExamen, @RequestParam Integer calificacion) throws MessagingException, IOException {
-        return ResponseEntity.ok(examenService.modificarResultadoExamen(idCursadaExamen, calificacion));
+        return examenService.modificarResultadoExamen(idCursadaExamen, calificacion);
     }
 
     @GetMapping("/api/examen/getCursadasExamen/{idExamen}")

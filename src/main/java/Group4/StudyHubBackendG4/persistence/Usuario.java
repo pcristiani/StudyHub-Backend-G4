@@ -41,6 +41,20 @@ public class Usuario {
                 return usuario;
         }
 
+        public Usuario DataLoadUserFromDtNewUser(DtNuevoUsuario dtNuevoUsuario) {
+                Usuario usuario = new Usuario();
+                usuario.setEmail(dtNuevoUsuario.getEmail());
+                usuario.setNombre(dtNuevoUsuario.getNombre());
+                usuario.setApellido(dtNuevoUsuario.getApellido());
+                usuario.setFechaNacimiento(dtNuevoUsuario.getFechaNacimiento());
+                usuario.setRol(dtNuevoUsuario.getRol());
+                usuario.setCedula(dtNuevoUsuario.getCedula());
+                usuario.setActivo(true);
+                usuario.setValidado(true);
+                usuario.setPassword(PasswordService.getInstance().hashPassword(dtNuevoUsuario.getPassword()));
+                return usuario;
+        }
+
         public void encryptPassword(){
                 this.password = PasswordService.getInstance().hashPassword(this.password);
         }

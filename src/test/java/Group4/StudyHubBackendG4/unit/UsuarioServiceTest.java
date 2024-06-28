@@ -4,13 +4,12 @@ import Group4.StudyHubBackendG4.datatypes.DtDocente;
 import Group4.StudyHubBackendG4.datatypes.DtNuevoUsuario;
 import Group4.StudyHubBackendG4.datatypes.DtUsuario;
 import Group4.StudyHubBackendG4.persistence.Docente;
+import Group4.StudyHubBackendG4.persistence.PasswordResetToken;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.persistence.UsuarioTR;
-import Group4.StudyHubBackendG4.repositories.DocenteAsignaturaRepo;
-import Group4.StudyHubBackendG4.repositories.DocenteRepo;
-import Group4.StudyHubBackendG4.repositories.UsuarioRepo;
-import Group4.StudyHubBackendG4.repositories.UsuarioTrRepo;
+import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.services.ActividadService;
+import Group4.StudyHubBackendG4.services.EmailService;
 import Group4.StudyHubBackendG4.services.UsuarioService;
 import Group4.StudyHubBackendG4.utils.JwtUtil;
 import Group4.StudyHubBackendG4.utils.converters.DocenteConverter;
@@ -48,10 +47,16 @@ public class UsuarioServiceTest {
     private UsuarioTrRepo usuarioTrRepo;
 
     @Mock
+    private PasswordResetTokenRepo tokenRepo;
+
+    @Mock
     private UsuarioConverter usuarioConverter;
 
     @Mock
     private DocenteConverter docenteConverter;
+
+    @Mock
+    private EmailService emailService;
 
     @Mock
     private ActividadService actividadService;
@@ -311,8 +316,18 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testRecuperarPasswordSuccess() {
+    public void testRecuperarPasswordThrowsException() throws IOException {
+        // When
+        when(usuarioRepo.existsByEmail(user1.getEmail())).thenReturn(true);
+        when(usuarioRepo.findByEmail(user1.getEmail())).thenReturn(user1);
+        when(emailService.getHtmlContent(any())).thenThrow(new IOException());
+        when(tokenRepo.save(any())).thenReturn(new PasswordResetToken());
 
+        // Act
+        ResponseEntity<?> response = usuarioService.recuperarPasswordEmail(user1.getEmail());
 
+        // Assertions
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Error reading email template.", response.getBody());
     }
 }

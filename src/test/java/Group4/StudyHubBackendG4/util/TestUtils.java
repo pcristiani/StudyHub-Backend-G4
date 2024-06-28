@@ -7,10 +7,13 @@ import Group4.StudyHubBackendG4.repositories.*;
 import Group4.StudyHubBackendG4.services.ActividadService;
 import Group4.StudyHubBackendG4.services.AutenticacionService;
 import Group4.StudyHubBackendG4.services.PasswordService;
+import Group4.StudyHubBackendG4.utils.enums.DiaSemana;
+import Group4.StudyHubBackendG4.utils.enums.ResultadoAsignatura;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class TestUtils {
@@ -29,6 +32,18 @@ public class TestUtils {
 
     @Autowired
     private DocenteAsignaturaRepo docenteAsignaturaRepo;
+
+    @Autowired
+    private EstudianteCursadaRepo estudianteCursadaRepo;
+
+    @Autowired
+    private CursadaRepo cursadaRepo;
+
+    @Autowired
+    private HorarioDiasRepo horarioDiasRepo;
+
+    @Autowired
+    private HorarioAsignaturaRepo horarioAsignaturaRepo;
 
     @Autowired
     private ActividadService actividadService;
@@ -95,27 +110,6 @@ public class TestUtils {
         return docenteAsignaturaRepo.save(docenteAsignatura);
     }
 
-    public Asignatura createAsignatura(Carrera carrera, String nombre, Integer creditos, String descripcion, String departamento, Boolean tieneExamen, Boolean activa ) {
-        Asignatura asignatura = new Asignatura();
-        asignatura.setCarrera(carrera);
-        asignatura.setNombre(nombre);
-        asignatura.setCreditos(creditos);
-        asignatura.setDescripcion(descripcion);
-        asignatura.setDepartamento(departamento);
-        asignatura.setTieneExamen(tieneExamen);
-        asignatura.setActiva(activa);
-        return asignaturaRepo.save(asignatura);
-    }
-
-    public Carrera createCarrera(String nombre, String descripcion, String requisitos, Integer duracion, Boolean activa) {
-        Carrera carrera = new Carrera();
-        carrera.setNombre(nombre);
-        carrera.setDescripcion(descripcion);
-        carrera.setRequisitos(requisitos);
-        carrera.setDuracion(duracion);
-        carrera.setActiva(activa);
-        return carreraRepo.save(carrera);
-    }
 
     public void createActividad(Usuario user){
         Actividad actividad = new Actividad();
