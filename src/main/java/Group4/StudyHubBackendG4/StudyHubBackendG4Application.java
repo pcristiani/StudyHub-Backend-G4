@@ -22,7 +22,7 @@ public class StudyHubBackendG4Application {
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(StudyHubBackendG4Application.class, args);
 		initializeFirebase();
-		abrirNavegadorConRuntime("http://localhost:8080/swagger-ui/index.html");
+		abrirNavegadorConRuntime("https://studyhub-backend-production.up.railway.app/swagger-ui/index.html");
 	}
 
 	@Bean

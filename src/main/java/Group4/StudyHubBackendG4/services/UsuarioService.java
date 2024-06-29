@@ -265,7 +265,7 @@ public class UsuarioService {
         resetToken.setUsuario(usuario);
         PasswordResetToken token = tokenRepo.save(resetToken);
         if (token != null) {
-            String endpointUrl = "http://localhost:3000/resetPassword";         //Todo: fix para deploys!
+            String endpointUrl = "https://frontstudyhub.vercel.app/resetPassword";
             return endpointUrl + "/?token=" + resetToken.getToken();
         }
         return "";

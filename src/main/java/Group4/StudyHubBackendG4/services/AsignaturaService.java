@@ -526,7 +526,17 @@ public class AsignaturaService {
             return ResponseEntity.badRequest().body("No se encontró la cursada.");
         }
 
-        ResultadoAsignatura nuevoResultado = ResultadoAsignatura.doyResultadoPorCalificacion(calificacion);
+        ResultadoAsignatura nuevoResultado;
+
+        if (cursada.getAsignatura().getTieneExamen()) {
+            nuevoResultado = ResultadoAsignatura.doyResultadoPorCalificacion(calificacion);
+        } else {
+            if (calificacion >= 6) {
+                nuevoResultado = ResultadoAsignatura.EXONERADO;
+            } else {
+                nuevoResultado = ResultadoAsignatura.RECURSA;
+            }
+        }
 
         cursada.setResultado(nuevoResultado);
         cursada.setCalificacion(calificacion);
