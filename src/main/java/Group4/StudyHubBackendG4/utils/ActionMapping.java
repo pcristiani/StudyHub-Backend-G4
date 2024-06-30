@@ -28,6 +28,8 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/docente/getDocentesByAsignaturaId/\\d+"), "");
         actionMap.put(Pattern.compile("DELETE /api/usuario/bajaUsuario/\\d+"), "Baja de Usuario");
         actionMap.put(Pattern.compile("DELETE /api/docente/bajaDocente/\\d+"), "Baja de Docente");
+        actionMap.put(Pattern.compile("POST /api/usuario/registerMobileToken/\\d+"), "");
+
 
         // Carrera Controller
         actionMap.put(Pattern.compile("PUT /api/carrera/modificarCarrera/\\d+"), "Modificar Carrera");
