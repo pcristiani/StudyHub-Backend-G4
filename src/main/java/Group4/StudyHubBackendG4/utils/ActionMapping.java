@@ -45,9 +45,9 @@ public class ActionMapping {
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripto/\\d+"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasInscripcionesPendientes"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasConPeriodo"), "");
-        actionMap.put(Pattern.compile("GET /api/carrera/getPreviaturasGrafo"), "");
+        actionMap.put(Pattern.compile("GET /getPreviaturasGrafo"), "");
         actionMap.put(Pattern.compile("GET /api/carrera/getCarrerasCoordinador/\\d+"), "");
-        actionMap.put(Pattern.compile("GET /api/carrera/getPreviaturasGrafo/\\d+"), "");
+        actionMap.put(Pattern.compile("GET /getPreviaturasGrafo/\\d+"), "");
 
 
         // Autenticación Controller
