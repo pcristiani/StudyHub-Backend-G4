@@ -69,7 +69,7 @@ public class CarreraController {
         return ResponseEntity.ok().body(carreraService.getPeriodosDeCarrera(idCarrera));
     }
 
-    @GetMapping("/api/carrera/getPreviaturasGrafo/{idCarrera}")
+    @GetMapping("/getPreviaturasGrafo/{idCarrera}")
     public ResponseEntity<?> getPreviaturasGrafo(@PathVariable Integer idCarrera) {
         return ResponseEntity.ok().body(carreraService.getPreviaturasGrafo(idCarrera));
     }
