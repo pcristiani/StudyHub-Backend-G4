@@ -21,6 +21,11 @@ public class CarreraController {
     @Autowired
     private CarreraService carreraService;
 
+    @GetMapping("/getCarrerasPublic")
+    public ResponseEntity<?> getCarrerasPublic() {
+        return ResponseEntity.ok().body(carreraService.getCarreras());
+    }
+
     @GetMapping("/api/carrera/getCarreras")
     @PreAuthorize("hasRole('ROLE_C') or hasRole('ROLE_A') or hasRole('ROLE_F') or hasRole('ROLE_E')")
     public ResponseEntity<?> getCarreras() {
