@@ -4,6 +4,8 @@ import Group4.StudyHubBackendG4.datatypes.*;
 import Group4.StudyHubBackendG4.persistence.Usuario;
 import Group4.StudyHubBackendG4.services.*;
 import com.github.javafaker.Faker;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST})
+@Tag(name = "Datos", description = "Endpoint para la carga de Datos")
 public class DataLoadController {
 
     @Autowired
@@ -28,6 +31,7 @@ public class DataLoadController {
     private UsuarioService usuarioService;
 
     @PostMapping("/loadData")
+    @Operation(summary = "Impacta datos de prueba en la base")
     public ResponseEntity<?> loadData() throws MessagingException, IOException {
         List<DtUsuario> usuarioList = usuarioService.getUsuarios();
         if(!usuarioList.isEmpty()) {
