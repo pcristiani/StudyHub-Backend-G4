@@ -10,10 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 
 @SpringBootApplication(exclude={SecurityAutoConfiguration.class})
@@ -47,14 +45,17 @@ public class StudyHubBackendG4Application {
 	}
 
 	private static void initializeFirebase() throws IOException {
-		InputStream serviceAccountKey = StudyHubBackendG4Application.class.getClassLoader().getResourceAsStream("serviceAccountKey.json");
-		if (serviceAccountKey == null) {
-			throw new IOException("Service account key file not found");
+		String serviceAccountKeyContent = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+		if (serviceAccountKeyContent == null) {
+			throw new IOException("Environment variable GOOGLE_APPLICATION_CREDENTIALS not found");
 		}
-		FirebaseOptions options = new FirebaseOptions.Builder()
-				.setCredentials(GoogleCredentials.fromStream(serviceAccountKey))
-				.build();
-		FirebaseApp.initializeApp(options);
+
+		try (InputStream serviceAccountKey = new ByteArrayInputStream(serviceAccountKeyContent.getBytes(StandardCharsets.UTF_8))) {
+			FirebaseOptions options = new FirebaseOptions.Builder()
+					.setCredentials(GoogleCredentials.fromStream(serviceAccountKey))
+					.build();
+			FirebaseApp.initializeApp(options);
+		}
 	}
 }
 
