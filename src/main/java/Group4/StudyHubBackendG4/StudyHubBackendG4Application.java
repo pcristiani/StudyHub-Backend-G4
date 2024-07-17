@@ -46,8 +46,10 @@ public class StudyHubBackendG4Application {
 
 	private static void initializeFirebase() throws IOException {
 		String serviceAccountKeyContent = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+
 		if (serviceAccountKeyContent == null) {
-			throw new IOException("Environment variable GOOGLE_APPLICATION_CREDENTIALS not found");
+			System.err.println("No se ha encontrado la variable de entorno GOOGLE_APPLICATION_CREDENTIALS");
+			return;
 		}
 
 		try (InputStream serviceAccountKey = new ByteArrayInputStream(serviceAccountKeyContent.getBytes(StandardCharsets.UTF_8))) {
