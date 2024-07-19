@@ -249,7 +249,7 @@ public class CarreraService {
                 .findByUsuarioAndCarreraAndActiva(user, carrera, true).orElse(null);
 
         if (existingInscripcion != null) {
-            return ResponseEntity.badRequest().body("El estudiante ya tiene una inscripción activa.");
+            return ResponseEntity.badRequest().body("Ya tienes una inscripcion activa a esta carrera.");
         }
 
         InscripcionCarrera inscripcionCarrera = new InscripcionCarrera();
