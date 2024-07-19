@@ -325,7 +325,7 @@ public class AsignaturaService {
                 .toList();
 
         if (!inscripcionPendiente.isEmpty()) {
-            return "Tiene una inscripción pendiente.";
+            return "Tienes una inscripción pendiente.";
         }
 
         // Realizar validación de previas
@@ -344,7 +344,7 @@ public class AsignaturaService {
                 });
 
         if (!previasAprobadas) {
-            return "No se han aprobado todas las asignaturas previas requeridas.";
+            return "No aprobaste todas las asignaturas previas requeridas.";
         }
         return null;
     }

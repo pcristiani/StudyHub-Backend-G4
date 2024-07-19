@@ -175,7 +175,7 @@ public class ExamenService {
         List<Asignatura> asignaturasAprobadas = estudianteCursadaRepo.findAprobadasByEstudiante(estudiante, ResultadoAsignatura.EXONERADO);
         boolean isAsignaturaAprobada = asignaturasAprobadas.contains(asignatura);
         if(isAsignaturaAprobada){
-            return ResponseEntity.badRequest().body("El estudiante ya aprobó la asignatura.");
+            return ResponseEntity.badRequest().body("Ya aprobaste la asignatura.");
         }
 
         List<EstudianteCursada> estudianteCursadas = estudianteCursadaRepo.findByEstudianteAndAsignatura(estudiante, asignatura);
@@ -195,11 +195,11 @@ public class ExamenService {
         if(cursadaExamen != null) {
             switch (cursadaExamen.getResultado()) {
                 case APROBADO:
-                    return ResponseEntity.badRequest().body("El estudiante ya aprobó el examen.");
+                    return ResponseEntity.badRequest().body("Ya aprobaste el examen.");
                 case REPROBADO:
-                    return ResponseEntity.badRequest().body("El estudiante reprobó el examen.");
+                    return ResponseEntity.badRequest().body("Reprobaste este examen.");
                 case PENDIENTE:
-                    return ResponseEntity.badRequest().body("El estudiante ya tiene un examen pendiente.");
+                    return ResponseEntity.badRequest().body("Ya tienes un examen pendiente.");
             }
         }
         CursadaExamen inscripcionExamen = new CursadaExamen();
