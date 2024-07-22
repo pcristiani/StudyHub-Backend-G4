@@ -357,11 +357,18 @@ public class UsuarioService {
         if (user != null) {
             user.setValidado(aceptado);
             usuarioRepo.save(user);
-            //ENVIAR MAIL AL ESTUDIANTE
-            String htmlContent = emailService.getHtmlContent("htmlContent/notifyAcceptedUser.html");
-            htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
-            emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario ", htmlContent);
-            return ResponseEntity.ok().body("Usuario aceptado con exito");
+
+            if (aceptado) {
+                String htmlContent = emailService.getHtmlContent("htmlContent/notifyAcceptedUser.html");
+                htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
+                emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de alta de nuevo usuario ", htmlContent);
+                return ResponseEntity.ok().body("Usuario aceptado con exito");
+            }else{
+                String htmlContent = emailService.getHtmlContent("htmlContent/notifyNotAcceptedUser.html");
+                htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
+                emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de rechazo para nuevo usuario ", htmlContent);
+                return ResponseEntity.ok().body("Usuario rechazado con exito");
+            }
         } else {
             return ResponseEntity.badRequest().body("Usuario no existe en el sistema.");
         }
