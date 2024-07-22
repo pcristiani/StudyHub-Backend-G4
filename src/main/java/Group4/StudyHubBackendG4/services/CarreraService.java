@@ -278,14 +278,28 @@ public class CarreraService {
             return ResponseEntity.badRequest().body("El estudiante no tiene una inscripción pendiente de validación.");
         }
 
-        inscripcionCarrera.setValidada(true);
+        Boolean validado = dtInscripcionCarrera.getValidado();
+
+        inscripcionCarrera.setValidada(validado);
         inscripcionCarreraRepo.save(inscripcionCarrera);
 
         assert user != null;
         assert carrera != null;
-        this.notificarValidacionCarreraPorMail(user, carrera.getNombre());
 
-        return ResponseEntity.ok().body("Se aceptó la inscripcion del estudiante a la carrera.");
+        if (validado) {
+            this.notificarValidacionCarreraPorMail(user, carrera.getNombre());
+            return ResponseEntity.ok().body("Se aceptó la inscripcion del estudiante a la carrera.");
+        } else {
+            this.notificarNoValidacionCarreraPorMail(user, carrera.getNombre());
+            return ResponseEntity.ok().body("Se rechazó la inscripcion del estudiante a la carrera.");
+        }
+    }
+
+    private void notificarNoValidacionCarreraPorMail(Usuario user, String carrera) throws IOException, MessagingException {
+        String htmlContent = emailService.getHtmlContent("htmlContent/notifyNotAcceptedCarrera.html");
+        htmlContent = htmlContent.replace("$carrera", carrera);
+        htmlContent = htmlContent.replace("$nombreCompleto", user.getNombre() + ' ' + user.getApellido());
+        emailService.sendEmail(user.getEmail(), "StudyHub - Notificacion de rechazo a carrera", htmlContent);
     }
 
     public String validateInscripcion(DtInscripcionCarrera dtInscripcionCarrera) {
