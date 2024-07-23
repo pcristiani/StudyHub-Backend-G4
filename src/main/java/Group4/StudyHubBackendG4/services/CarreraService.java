@@ -281,6 +281,7 @@ public class CarreraService {
         Boolean validado = dtInscripcionCarrera.getValidado();
 
         inscripcionCarrera.setValidada(validado);
+        inscripcionCarrera.setActiva(validado);
         inscripcionCarreraRepo.save(inscripcionCarrera);
 
         assert user != null;

@@ -356,6 +356,7 @@ public class UsuarioService {
         Usuario user = usuarioRepo.findById(id).orElse(null);
         if (user != null) {
             user.setValidado(aceptado);
+            user.setActivo(aceptado);
             usuarioRepo.save(user);
 
             if (aceptado) {
