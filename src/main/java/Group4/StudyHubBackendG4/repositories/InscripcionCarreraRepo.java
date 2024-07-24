@@ -20,7 +20,7 @@ public interface InscripcionCarreraRepo extends JpaRepository<InscripcionCarrera
     Optional<InscripcionCarrera> findByUsuarioAndCarreraAndActiva(Usuario usuario, Carrera carrera, boolean activa);
     @Query("SELECT ic FROM InscripcionCarrera ic WHERE ic.validada = false")
     Collection<InscripcionCarrera> findInscripcionesPendientes();
-    @Query("SELECT ic FROM InscripcionCarrera ic WHERE ic.validada = false AND ic.carrera = :carrera" )
+    @Query("SELECT ic FROM InscripcionCarrera ic WHERE ic.validada = false AND ic.activa <> false AND ic.carrera = :carrera" )
     Collection<InscripcionCarrera> findInscriptosPendientes(@Param("carrera") Carrera carrera);
     @Query("SELECT ic FROM InscripcionCarrera ic WHERE ic.usuario = :user AND ic.validada = true" )
     Collection<InscripcionCarrera> findCarrerasInscripto(@Param("user") Usuario user);
